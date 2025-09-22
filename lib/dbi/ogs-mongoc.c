@@ -171,6 +171,9 @@ int ogs_dbi_init(const char *db_uri)
         self.collection.subscriber = mongoc_client_get_collection(
             ogs_mongoc()->client, ogs_mongoc()->name, "subscribers");
         ogs_assert(self.collection.subscriber);
+        self.collection.session = mongoc_client_get_collection(
+            ogs_mongoc()->client, ogs_mongoc()->name, "sessions");
+        ogs_assert(self.collection.session);
     }
 
     return OGS_OK;
@@ -180,6 +183,9 @@ void ogs_dbi_final(void)
 {
     if (self.collection.subscriber) {
         mongoc_collection_destroy(self.collection.subscriber);
+    }
+    if (self.collection.session) {
+        mongoc_collection_destroy(self.collection.session);
     }
 
 #if MONGOC_CHECK_VERSION(1, 9, 0)
