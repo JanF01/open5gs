@@ -594,7 +594,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
 
     char buf[OGS_ADDRSTRLEN];
     const char *ipv4 = sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf) : "";
-    ogs_dbi_session_upsert(smf_ue->supi, ipv4, NULL, sess->session.name);
+    ogs_dbi_session_insert(smf_ue->supi, sess->session.name, ipv4, NULL);
     
     /* Set UPF N3 DL Outer-Header-Creation */
     if (sess->remote_dl_ip.ipv4 || sess->remote_dl_ip.ipv6) {
@@ -783,7 +783,7 @@ bool smf_npcf_smpolicycontrol_handle_terminate_notify(
 
     smf_trigger_session_release(
             sess, NULL, OGS_PFCP_DELETE_TRIGGER_PCF_INITIATED);
-    ogs_dbi_session_delete(smf_ue->supi);
+    ogs_dbi_session_delete(smf_ue->supi, sess->session.name);
     
     return true;
 }
