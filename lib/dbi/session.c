@@ -40,12 +40,20 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
         "active", BCON_BOOL(true),
         "ts", BCON_DATE_TIME((int64_t)time(NULL) * 1000)
     );
+    
+    if (!doc) {
+        ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]", supi, dnn);
+        ogs_free(supi_type);
+        ogs_free(supi_id);
+        return OGS_ERROR;
+    }
 
-    bson_error_t error;
-    int rv = OGS_OK;
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
-        ogs_error("Mongo insert failed: %s", error.message);
+        ogs_error("MongoDB insert failed for SUPI[%s], DNN[%s]: %s", supi, dnn, error.message);
         rv = OGS_ERROR;
+    } else {
+        ogs_info("MongoDB insert succeeded for SUPI[%s], DNN[%s], IPv4[%s], IPv6[%s]", 
+                 supi, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
     }
 
     bson_destroy(doc);
