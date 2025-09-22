@@ -613,11 +613,6 @@ bool smf_npcf_smpolicycontrol_handle_create(
         return false;
     }
 
-    if (!up2cp_pdr->flow) {
-        ogs_error("up2cp_pdr->flow is NULL! Allocate flow array before use.");
-        return false;
-    }
-
     /* Set UE-to-CP Flow-Description and Outer-Header-Creation */
     up2cp_pdr->flow[up2cp_pdr->num_of_flow].fd = 1;
     up2cp_pdr->flow[up2cp_pdr->num_of_flow].description =
