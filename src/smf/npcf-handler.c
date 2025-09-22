@@ -603,6 +603,8 @@ bool smf_npcf_smpolicycontrol_handle_create(
         dl_far->apply_action = OGS_PFCP_APPLY_ACTION_FORW;
     }
 
+    ogs_info("ALRIGHT");
+
     if (!up2cp_pdr) {
         ogs_error("up2cp_pdr is NULL! Cannot set flow description.");
         return false;
