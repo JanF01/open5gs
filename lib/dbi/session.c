@@ -22,39 +22,33 @@
 int ogs_dbi_session_insert(const char *supi, const char *dnn,
                            const char *ipv4, const char *ipv6)
 {
-    int rv = OGS_OK;
-    bson_t *doc = NULL;
-    bson_error_t error;
+    if (!supi || !dnn) return OGS_ERROR;
 
-    char *supi_type = NULL;
-    char *supi_id = NULL;
+    char *supi_type = ogs_id_get_type(supi);
+    char *supi_id   = ogs_id_get_value(supi);
+    if (!supi_type || !supi_id) {
+        ogs_free(supi_type);
+        ogs_free(supi_id);
+        return OGS_ERROR;
+    }
 
-    ogs_assert(supi);
-    ogs_assert(dnn);
-
-    supi_type = ogs_id_get_type(supi);
-    ogs_assert(supi_type);
-    supi_id = ogs_id_get_value(supi);
-    ogs_assert(supi_id);
-
-    /* Build a new session document */
-    doc = BCON_NEW(
+    bson_t *doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
-        "dnn",      BCON_UTF8(dnn),
-        "ipv4",     BCON_UTF8(ipv4 ? ipv4 : ""),
-        "ipv6",     BCON_UTF8(ipv6 ? ipv6 : ""),
-        "active",   BCON_BOOL(true),
-        "ts",       BCON_DATE_TIME((int64_t)time(NULL) * 1000)
+        "dnn", BCON_UTF8(dnn),
+        "ipv4", BCON_UTF8(ipv4 ? ipv4 : ""),
+        "ipv6", BCON_UTF8(ipv6 ? ipv6 : ""),
+        "active", BCON_BOOL(true),
+        "ts", BCON_DATE_TIME((int64_t)time(NULL) * 1000)
     );
 
-    if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session,
-                                      doc, NULL, NULL, &error)) {
-        ogs_error("mongoc_collection_insert_one() failure: %s", error.message);
+    bson_error_t error;
+    int rv = OGS_OK;
+    if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
+        ogs_error("Mongo insert failed: %s", error.message);
         rv = OGS_ERROR;
     }
 
-    if (doc) bson_destroy(doc);
-
+    bson_destroy(doc);
     ogs_free(supi_type);
     ogs_free(supi_id);
 
