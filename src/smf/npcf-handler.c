@@ -706,13 +706,11 @@ bool smf_npcf_smpolicycontrol_handle_create(
     cp2up_pdr->precedence = OGS_PFCP_CP2UP_PDR_PRECEDENCE;
     up2cp_pdr->precedence = OGS_PFCP_UP2CP_PDR_PRECEDENCE;
 
-    smf_pfcp_node_t *pfcp_node_ptr = sess->pfcp_node;  // keep type for member access
-    void *addr_list_ptr = pfcp_node_ptr ? pfcp_node_ptr->addr_list : NULL;
-    void *gtpu_res_list_ptr = pfcp_node_ptr ? pfcp_node_ptr->gtpu_resource_list : NULL;
-
-    ogs_info("[%s:%d] PFCP node=%p, pfcp_node->addr_list=%p, pfcp_node->gtpu_resource_list=%p",
-             smf_ue->supi, sess->psi,
-             pfcp_node_ptr, addr_list_ptr, gtpu_res_list_ptr);
+    ogs_info("UE SUPI[%s] DNN[%s] IPv4[%s] IPv6[%s] PFCP node=%p",
+         smf_ue->supi, sess->session.name,
+         sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf1) : "",
+         sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "",
+         sess->pfcp_node);
     
     ogs_assert(OGS_OK ==
             smf_5gc_pfcp_send_session_establishment_request(sess, stream, 0));
