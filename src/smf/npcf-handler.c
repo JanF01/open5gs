@@ -278,7 +278,8 @@ bool smf_npcf_smpolicycontrol_handle_create(
     int rv;
     char buf1[OGS_ADDRSTRLEN];
     char buf2[OGS_ADDRSTRLEN];
-
+    char buf3[OGS_ADDRSTRLEN];
+    
     smf_ue_t *smf_ue = NULL;
     smf_bearer_t *qos_flow = NULL;
     ogs_pfcp_pdr_t *dl_pdr = NULL;
@@ -592,9 +593,10 @@ bool smf_npcf_smpolicycontrol_handle_create(
         sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf1) : "",
         sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "");
 
-    char buf[OGS_ADDRSTRLEN];
-    const char *ipv4 = sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf) : "";
-    ogs_dbi_session_insert(smf_ue->supi, sess->session.name, ipv4, NULL);
+    const char *ipv4 = sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf3) : "";
+    char *ipv4_copy = ogs_strdup(tmp_ipv4);
+    ogs_dbi_session_insert(smf_ue->supi, sess->session.name, ipv4_copy, NULL);
+    ogs_free(ipv4_copy);
     
     /* Set UPF N3 DL Outer-Header-Creation */
     if (sess->remote_dl_ip.ipv4 || sess->remote_dl_ip.ipv6) {
