@@ -47,7 +47,7 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
         "ts",       BCON_DATE_TIME((int64_t)time(NULL) * 1000)
     );
 
-    if (!mongoc_collection_insert_one(ogs_mongoc()->collection.sessions,
+    if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session,
                                       doc, NULL, NULL, &error)) {
         ogs_error("mongoc_collection_insert_one() failure: %s", error.message);
         rv = OGS_ERROR;
@@ -83,7 +83,7 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
         "dnn", BCON_UTF8(dnn)
     );
 
-    if (!mongoc_collection_delete_one(ogs_mongoc()->collection.sessions,
+    if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
                                       query, NULL, NULL, &error)) {
         ogs_error("mongoc_collection_delete_one() failure: %s", error.message);
         rv = OGS_ERROR;
