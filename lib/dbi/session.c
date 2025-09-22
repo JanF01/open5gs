@@ -22,25 +22,41 @@
 int ogs_dbi_session_insert(const char *supi, const char *dnn,
                            const char *ipv4, const char *ipv6)
 {
-    if (!supi || !dnn) return OGS_ERROR;
+    int rv = OGS_OK;
+    bson_t *doc = NULL;
+    bson_error_t error;
 
-    char *supi_type = ogs_id_get_type(supi);
-    char *supi_id   = ogs_id_get_value(supi);
-    if (!supi_type || !supi_id) {
-        ogs_free(supi_type);
-        ogs_free(supi_id);
+    char *supi_type = NULL;
+    char *supi_id = NULL;
+
+    if (!supi || !dnn) {
+        ogs_error("ogs_dbi_session_insert() called with NULL supi or dnn: supi=%p, dnn=%p", supi, dnn);
         return OGS_ERROR;
     }
 
-    bson_t *doc = BCON_NEW(
+    supi_type = ogs_id_get_type(supi);
+    if (!supi_type) {
+        ogs_error("Failed to get SUPI type for supi: %s", supi);
+        return OGS_ERROR;
+    }
+
+    supi_id = ogs_id_get_value(supi);
+    if (!supi_id) {
+        ogs_error("Failed to get SUPI value for supi: %s", supi);
+        ogs_free(supi_type);
+        return OGS_ERROR;
+    }
+
+    // Prepare BSON document
+    doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
-        "dnn", BCON_UTF8(dnn),
-        "ipv4", BCON_UTF8(ipv4 ? ipv4 : ""),
-        "ipv6", BCON_UTF8(ipv6 ? ipv6 : ""),
-        "active", BCON_BOOL(true),
-        "ts", BCON_DATE_TIME((int64_t)time(NULL) * 1000)
+        "dnn",      BCON_UTF8(dnn),
+        "ipv4",     BCON_UTF8(ipv4 ? ipv4 : ""),
+        "ipv6",     BCON_UTF8(ipv6 ? ipv6 : ""),
+        "active",   BCON_BOOL(true),
+        "ts",       BCON_DATE_TIME((int64_t)time(NULL) * 1000)
     );
-    
+
     if (!doc) {
         ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]", supi, dnn);
         ogs_free(supi_type);
