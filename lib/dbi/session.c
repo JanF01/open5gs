@@ -19,6 +19,83 @@
 
 #include "ogs-dbi.h"
 
+int ogs_dbi_session_insert(const char *supi, const char *dnn,
+                           const char *ipv4, const char *ipv6)
+{
+    int rv = OGS_OK;
+    bson_t *doc = NULL;
+    bson_error_t error;
+
+    char *supi_type = NULL;
+    char *supi_id = NULL;
+
+    ogs_assert(supi);
+    ogs_assert(dnn);
+
+    supi_type = ogs_id_get_type(supi);
+    ogs_assert(supi_type);
+    supi_id = ogs_id_get_value(supi);
+    ogs_assert(supi_id);
+
+    /* Build a new session document */
+    doc = BCON_NEW(
+        supi_type, BCON_UTF8(supi_id),
+        "dnn",      BCON_UTF8(dnn),
+        "ipv4",     BCON_UTF8(ipv4 ? ipv4 : ""),
+        "ipv6",     BCON_UTF8(ipv6 ? ipv6 : ""),
+        "active",   BCON_BOOL(true),
+        "ts",       BCON_DATE_TIME((int64_t)time(NULL) * 1000)
+    );
+
+    if (!mongoc_collection_insert_one(ogs_mongoc()->collection.sessions,
+                                      doc, NULL, NULL, &error)) {
+        ogs_error("mongoc_collection_insert_one() failure: %s", error.message);
+        rv = OGS_ERROR;
+    }
+
+    if (doc) bson_destroy(doc);
+
+    ogs_free(supi_type);
+    ogs_free(supi_id);
+
+    return rv;
+}
+
+int ogs_dbi_session_delete(const char *supi, const char *dnn)
+{
+    int rv = OGS_OK;
+    bson_t *query = NULL;
+    bson_error_t error;
+
+    char *supi_type = NULL;
+    char *supi_id = NULL;
+
+    ogs_assert(supi);
+    ogs_assert(dnn);
+
+    supi_type = ogs_id_get_type(supi);
+    ogs_assert(supi_type);
+    supi_id = ogs_id_get_value(supi);
+    ogs_assert(supi_id);
+    
+    query = BCON_NEW(
+        supi_type, BCON_UTF8(supi_id),
+        "dnn", BCON_UTF8(dnn)
+    );
+
+    if (!mongoc_collection_delete_one(ogs_mongoc()->collection.sessions,
+                                      query, NULL, NULL, &error)) {
+        ogs_error("mongoc_collection_delete_one() failure: %s", error.message);
+        rv = OGS_ERROR;
+    }
+
+    if (query) bson_destroy(query);
+    ogs_free(supi_type);
+    ogs_free(supi_id);
+
+    return rv;
+}
+
 int ogs_dbi_session_data(
         const char *supi, const ogs_s_nssai_t *s_nssai, const char *dnn,
         ogs_session_data_t *session_data)
