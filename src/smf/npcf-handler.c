@@ -603,6 +603,21 @@ bool smf_npcf_smpolicycontrol_handle_create(
         dl_far->apply_action = OGS_PFCP_APPLY_ACTION_FORW;
     }
 
+    if (!up2cp_pdr) {
+        ogs_error("up2cp_pdr is NULL! Cannot set flow description.");
+        return false;
+    }
+
+    if (!up2cp_far) {
+        ogs_error("up2cp_far is NULL! Cannot set outer-header-creation.");
+        return false;
+    }
+
+    if (!up2cp_pdr->flow) {
+        ogs_error("up2cp_pdr->flow is NULL! Allocate flow array before use.");
+        return false;
+    }
+
     /* Set UE-to-CP Flow-Description and Outer-Header-Creation */
     up2cp_pdr->flow[up2cp_pdr->num_of_flow].fd = 1;
     up2cp_pdr->flow[up2cp_pdr->num_of_flow].description =
@@ -616,6 +631,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
             &up2cp_far->outer_header_creation_len));
     up2cp_far->outer_header_creation.teid = sess->index;
 
+    ogs_info("ALRIGHT");
     /* Set UPF-N3 TEID & ADDR to the Default UL PDR */
     ogs_assert(sess->pfcp_node);
     if (sess->pfcp_node->up_function_features.ftup) {
