@@ -23,13 +23,13 @@ int ogs_dbi_session_insert(const char *supi,
                            const char *ipv4,
                            const char *ipv6)
 {
-    ogs_error("IT GETS HERE");
+    fprintf(stderr,"IT GETS HERE");
     int rv = OGS_OK;
     bson_t *doc = NULL;
     bson_error_t error;
     char *supi_type = NULL;
     char *supi_id = NULL;
-    ogs_error("IT GETS HERE 2");
+    fprintf(stderr,"IT GETS HERE 2");
     if (!supi || !*supi) {
         fprintf(stderr, "SUPI is NULL or empty\n");
         return OGS_ERROR;
@@ -38,7 +38,7 @@ int ogs_dbi_session_insert(const char *supi,
     supi_type = ogs_id_get_type(supi);
     supi_id   = ogs_id_get_value(supi);
 
-    ogs_error("IT GETS HERE 3");
+    fprintf(stderr,"IT GETS HERE 3");
     if (!supi_type || !*supi_type || !supi_id || !*supi_id) {
         fprintf(stderr, "Invalid SUPI: supi_type='%s', supi_id='%s'\n",
                 supi_type ? supi_type : "(null)",
@@ -49,7 +49,7 @@ int ogs_dbi_session_insert(const char *supi,
 
     const char *safe_ipv4 = ipv4 ? ipv4 : "";
     const char *safe_ipv6 = ipv6 ? ipv6 : "";
-    ogs_error("IT GETS HERE 4");
+    fprintf(stderr,"IT GETS HERE 4");
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
         "ipv4",    BCON_UTF8(safe_ipv4),
@@ -61,7 +61,7 @@ int ogs_dbi_session_insert(const char *supi,
         rv = OGS_ERROR;
         goto out;
     }
-    ogs_error("IT GETS HERE 5");
+    fprintf(stderr,"IT GETS HERE 5");
     /* Debug dump without using ogs_info */
     char *json = bson_as_canonical_extended_json(doc, NULL);
     fprintf(stderr, "[DEBUG] Inserting document: %s\n", json);
@@ -73,7 +73,7 @@ int ogs_dbi_session_insert(const char *supi,
         rv = OGS_ERROR;
     }
 
-    ogs_error("IT GETS HERE 6");
+    fprintf(stderr, "IT GETS HERE 6");
 out:
     if (doc) bson_destroy(doc);
     ogs_free(supi_type);
