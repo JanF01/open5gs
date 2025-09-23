@@ -19,8 +19,9 @@
 
 #include "ogs-dbi.h"
 
-int ogs_dbi_session_insert(const char *supi, const char *dnn,
-                           const char *ipv4, const char *ipv6)
+int ogs_dbi_session_insert(const char *supi,
+                           const char *ipv4,
+                           const char *ipv6)
 {
     int rv = OGS_OK;
     bson_t *doc = NULL;
@@ -29,7 +30,6 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
     char *supi_id = NULL;
 
     ogs_assert(supi);
-    ogs_assert(dnn);
 
     supi_type = ogs_id_get_type(supi);
     if (!supi_type) {
@@ -45,30 +45,28 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
         goto out;
     }
 
+    /* Make sure ipv4/ipv6 are non-NULL */
+    const char *safe_ipv4 = ipv4 ? ipv4 : "";
+    const char *safe_ipv6 = ipv6 ? ipv6 : "";
 
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
-        "dnn",      BCON_UTF8(dnn ? dnn : ""),
-        "ipv4",     BCON_UTF8(ipv4 ? ipv4 : ""),
-        "ipv6",     BCON_UTF8(ipv6 ? ipv6 : ""),
-        "active",   BCON_BOOL(true),
-        "ts",       BCON_DATE_TIME((int64_t)time(NULL) * 1000)
+        "ipv4",    BCON_UTF8(safe_ipv4),
+        "ipv6",    BCON_UTF8(safe_ipv6)
     );
 
     if (!doc) {
-        ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]",
-                  supi_id, dnn ? dnn : "");
+        ogs_error("Failed to create BSON document for SUPI[%s]", supi_id);
         rv = OGS_ERROR;
         goto out;
     }
 
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
-        ogs_error("MongoDB insert failed for SUPI[%s], DNN[%s]: %s",
-                  supi_id, dnn ? dnn : "", error.message ? error.message : "(unknown)");
+        ogs_error("MongoDB insert failed for SUPI[%s]: %s",
+                  supi_id, error.message ? error.message : "(unknown)");
         rv = OGS_ERROR;
         goto out;
     }
-
 
 out:
     if (doc) bson_destroy(doc);
