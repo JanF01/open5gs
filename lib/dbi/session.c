@@ -29,23 +29,22 @@ int ogs_dbi_session_insert(const char *supi,
     char *supi_type = NULL;
     char *supi_id = NULL;
 
-    ogs_assert(supi);
+    if (!supi || !*supi) {
+        fprintf(stderr, "SUPI is NULL or empty\n");
+        return OGS_ERROR;
+    }
 
     supi_type = ogs_id_get_type(supi);
-    if (!supi_type) {
-        ogs_error("Failed to get SUPI type for supi: %s", supi ? supi : "(null)");
+    supi_id   = ogs_id_get_value(supi);
+
+    if (!supi_type || !*supi_type || !supi_id || !*supi_id) {
+        fprintf(stderr, "Invalid SUPI: supi_type='%s', supi_id='%s'\n",
+                supi_type ? supi_type : "(null)",
+                supi_id ? supi_id : "(null)");
         rv = OGS_ERROR;
         goto out;
     }
 
-    supi_id = ogs_id_get_value(supi);
-    if (!supi_id) {
-        ogs_error("Failed to get SUPI value for supi: %s", supi ? supi : "(null)");
-        rv = OGS_ERROR;
-        goto out;
-    }
-
-    /* Make sure ipv4/ipv6 are non-NULL */
     const char *safe_ipv4 = ipv4 ? ipv4 : "";
     const char *safe_ipv6 = ipv6 ? ipv6 : "";
 
@@ -56,16 +55,20 @@ int ogs_dbi_session_insert(const char *supi,
     );
 
     if (!doc) {
-        ogs_error("Failed to create BSON document for SUPI[%s]", supi_id);
+        fprintf(stderr, "Failed to create BSON document for SUPI[%s]\n", supi_id);
         rv = OGS_ERROR;
         goto out;
     }
 
+    /* Debug dump without using ogs_info */
+    char *json = bson_as_canonical_extended_json(doc, NULL);
+    fprintf(stderr, "[DEBUG] Inserting document: %s\n", json);
+    bson_free(json);
+
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
-        ogs_error("MongoDB insert failed for SUPI[%s]: %s",
-                  supi_id, error.message ? error.message : "(unknown)");
+        fprintf(stderr, "MongoDB insert failed for SUPI[%s]: %s\n",
+                supi_id, error.message ? error.message : "(unknown)");
         rv = OGS_ERROR;
-        goto out;
     }
 
 out:
