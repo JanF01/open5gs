@@ -28,9 +28,8 @@
 extern "C" {
 #endif
 
-int ogs_dbi_session_insert(const char *supi, const char *dnn,
-                           const char *ipv4, const char *ipv6);
-int ogs_dbi_session_delete(const char *supi, const char *dnn);
+int ogs_dbi_session_insert(const char *supi, const char *ipv4, const char *ipv6);
+int ogs_dbi_session_delete(const char *supi);
 int ogs_dbi_session_data(
         const char *supi, const ogs_s_nssai_t *s_nssai, const char *dnn,
         ogs_session_data_t *session_data);
