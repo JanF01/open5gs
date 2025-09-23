@@ -595,6 +595,18 @@ bool smf_npcf_smpolicycontrol_handle_create(
         ;
     
     ogs_dbi_session_insert(smf_ue->supi, sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf3) : "", sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "");
+
+    int rv_insert = ogs_dbi_session_insert(
+        smf_ue->supi,
+        sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf3) : "",
+        sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : ""
+        );
+    
+    if (rv_insert != OGS_OK) {
+        ogs_error("Failed to insert session for SUPI[%s]", smf_ue->supi);
+        /* Decide how to handle the error: return, abort, retry, etc. */
+        return false;
+    }
     
     /* Set UPF N3 DL Outer-Header-Creation */
     if (sess->remote_dl_ip.ipv4 || sess->remote_dl_ip.ipv6) {
