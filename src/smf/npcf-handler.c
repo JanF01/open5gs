@@ -591,12 +591,10 @@ bool smf_npcf_smpolicycontrol_handle_create(
     ogs_info("UE SUPI[%s] DNN[%s] IPv4[%s] IPv6[%s]",
         smf_ue->supi, sess->session.name,
         sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf1) : "",
-        sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "");
-
-    const char *tmp_ipv4 = sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf3) : "";
-    char *ipv4_copy = ogs_strdup(tmp_ipv4);
-    ogs_dbi_session_insert(smf_ue->supi, sess->session.name, ipv4_copy, NULL);
-    ogs_free(ipv4_copy);
+        sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "")
+        ;
+    
+    ogs_dbi_session_insert(smf_ue->supi, sess->session.name, sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, buf3) : "", sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, buf2) : "");
     
     /* Set UPF N3 DL Outer-Header-Creation */
     if (sess->remote_dl_ip.ipv4 || sess->remote_dl_ip.ipv6) {
