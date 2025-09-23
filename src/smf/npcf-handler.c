@@ -288,6 +288,8 @@ bool smf_npcf_smpolicycontrol_handle_create(
     ogs_pfcp_far_t *dl_far = NULL;
     ogs_pfcp_far_t *up2cp_far = NULL;
     ogs_pfcp_qer_t *qer = NULL;
+    ogs_pfcp_pdr_t *app_pdr = NULL;
+    ogs_pfcp_far_t *app_far = NULL;
 
     OpenAPI_sm_policy_decision_t *SmPolicyDecision = NULL;
     OpenAPI_lnode_t *node = NULL;
@@ -518,13 +520,45 @@ bool smf_npcf_smpolicycontrol_handle_create(
     ogs_assert(cp2up_pdr);
     up2cp_pdr = sess->up2cp_pdr;
     ogs_assert(up2cp_pdr);
+    app_pdr = ogs_calloc(1, sizeof(ogs_pfcp_pdr_t));
+    ogs_assert(app_pdr);
+
 
     /* Setup FAR */
     dl_far = qos_flow->dl_far;
     ogs_assert(dl_far);
     up2cp_far = sess->up2cp_far;
     ogs_assert(up2cp_far);
+    app_far = ogs_calloc(1, sizeof(ogs_pfcp_far_t));
+    ogs_assert(app_far);
 
+    app_pdr->pdr_id = 100; // Use a unique PDR ID that won't conflict with others
+    app_pdr->precedence = 250; // Set a high precedence to ensure this rule is matched first
+    app_pdr->src_if = OGS_PFCP_SRC_IF_ACCESS; // Traffic comes from the UE
+    
+    // Define the packet filter to match your server's IP and port
+    app_pdr->pdi.f_teid.ipv4 = 1;
+    app_pdr->pdi.f_teid.teid = sess->local_ul_teid; // Match UE's tunnel endpoint ID
+    
+    // The destination IP of your server
+    app_pdr->pdi.ipv4_addr_dest.addr = inet_addr("10.45.0.1"); 
+    app_pdr->pdi.ipv4_addr_dest.len = 4;
+    
+    // The destination port of your server
+    app_pdr->pdi.l4_port_dest.port = 9500;
+    app_pdr->pdi.l4_port_dest.len = 2;
+    
+    // Set the FAR ID to link this PDR to your new FAR
+    app_pdr->far_id = app_far->far_id;
+
+    app_far->far_id = app_pdr->pdr_id;
+    app_far->apply_action = OGS_PFCP_APPLY_ACTION_FORW; // Forward the packet
+
+    // Forward the packet to the external N6 interface
+    app_far->destination_interface = OGS_PFCP_DEST_IF_CORE; 
+
+    ogs_list_add(&sess->pfcp.pdr_list, app_pdr);
+    ogs_list_add(&sess->pfcp.far_list, app_far);
     /* Set UE IP Address to the Default DL PDR */
     ogs_assert(OGS_OK ==
         ogs_pfcp_paa_to_ue_ip_addr(&sess->paa,
