@@ -527,7 +527,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
     ogs_assert(dl_far);
     up2cp_far = sess->up2cp_far;
     ogs_assert(up2cp_far);
-    * BEGIN CUSTOM RULE IMPLEMENTATION */
+    /* BEGIN CUSTOM RULE IMPLEMENTATION */
     app_pdr = ogs_calloc(1, sizeof(ogs_pfcp_pdr_t));
     app_far = ogs_calloc(1, sizeof(ogs_pfcp_far_t));
 
