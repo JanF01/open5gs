@@ -25,29 +25,29 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
     int rv = OGS_OK;
     bson_t *doc = NULL;
     bson_error_t error;
-
     char *supi_type = NULL;
     char *supi_id = NULL;
 
-    if (!supi || !dnn) {
-        ogs_error("ogs_dbi_session_insert() called with NULL supi or dnn: supi=%p, dnn=%p", supi, dnn);
-        return OGS_ERROR;
-    }
+    ogs_assert(supi);
+    ogs_assert(dnn);
 
     supi_type = ogs_id_get_type(supi);
     if (!supi_type) {
         ogs_error("Failed to get SUPI type for supi: %s", supi);
-        return OGS_ERROR;
+        rv = OGS_ERROR;
+        goto out;
     }
 
     supi_id = ogs_id_get_value(supi);
     if (!supi_id) {
         ogs_error("Failed to get SUPI value for supi: %s", supi);
-        ogs_free(supi_type);
-        return OGS_ERROR;
+        rv = OGS_ERROR;
+        goto out;
     }
 
-    // Prepare BSON document
+    ogs_info("Insert session: supi_type=%s, supi_id=%s, dnn=%s, ipv4=%s, ipv6=%s",
+             supi_type, supi_id, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
+
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
         "dnn",      BCON_UTF8(dnn),
@@ -59,20 +59,21 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
 
     if (!doc) {
         ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]", supi, dnn);
-        ogs_free(supi_type);
-        ogs_free(supi_id);
-        return OGS_ERROR;
+        rv = OGS_ERROR;
+        goto out;
     }
 
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
         ogs_error("MongoDB insert failed for SUPI[%s], DNN[%s]: %s", supi, dnn, error.message);
         rv = OGS_ERROR;
-    } else {
-        ogs_info("MongoDB insert succeeded for SUPI[%s], DNN[%s], IPv4[%s], IPv6[%s]", 
-                 supi, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
+        goto out;
     }
 
-    bson_destroy(doc);
+    ogs_info("MongoDB insert succeeded for SUPI[%s], DNN[%s], IPv4[%s], IPv6[%s]",
+             supi, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
+
+out:
+    if (doc) bson_destroy(doc);
     ogs_free(supi_type);
     ogs_free(supi_id);
 
@@ -91,29 +92,50 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
     ogs_assert(supi);
     ogs_assert(dnn);
 
+    /* Get SUPI type and ID */
     supi_type = ogs_id_get_type(supi);
-    ogs_assert(supi_type);
+    if (!supi_type) {
+        ogs_error("Failed to get SUPI type for supi: %s", supi);
+        rv = OGS_ERROR;
+        goto out;
+    }
+
     supi_id = ogs_id_get_value(supi);
-    ogs_assert(supi_id);
-    
+    if (!supi_id) {
+        ogs_error("Failed to get SUPI value for supi: %s", supi);
+        rv = OGS_ERROR;
+        goto out;
+    }
+
+    /* Build query document */
     query = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
         "dnn", BCON_UTF8(dnn)
     );
-
-    if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
-                                      query, NULL, NULL, &error)) {
-        ogs_error("mongoc_collection_delete_one() failure: %s", error.message);
+    if (!query) {
+        ogs_error("Failed to create BSON query for SUPI[%s], DNN[%s]", supi, dnn);
         rv = OGS_ERROR;
+        goto out;
     }
 
+    /* Perform deletion */
+    if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
+                                      query, NULL, NULL, &error)) {
+        ogs_error("MongoDB deletion failed for SUPI[%s], DNN[%s]: %s",
+                  supi, dnn, error.message);
+        rv = OGS_ERROR;
+        goto out;
+    } else {
+        ogs_info("MongoDB deletion succeeded for SUPI[%s], DNN[%s]", supi, dnn);
+    }
+
+out:
     if (query) bson_destroy(query);
-    ogs_free(supi_type);
-    ogs_free(supi_id);
+    if (supi_type) ogs_free(supi_type);
+    if (supi_id) ogs_free(supi_id);
 
     return rv;
 }
-
 int ogs_dbi_session_data(
         const char *supi, const ogs_s_nssai_t *s_nssai, const char *dnn,
         ogs_session_data_t *session_data)
