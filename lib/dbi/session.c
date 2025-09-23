@@ -107,14 +107,14 @@ int ogs_dbi_session_delete(const char *supi)
         supi_type, BCON_UTF8(supi_id)
     );
     if (!query) {
-        ogs_error("Failed to create BSON query for SUPI[%s], DNN[%s]", supi, dnn);
+        ogs_error("Failed to create BSON query for SUPI[%s]", supi);
         rv = OGS_ERROR;
         goto out;
     }
 
     /* Perform deletion */
     if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
-                                      query, NULL, NULL, &error)) {
+                                      query, NULL, &error)) {
         ogs_error("MongoDB deletion failed for SUPI[%s]",
                   supi, error.message);
         rv = OGS_ERROR;
