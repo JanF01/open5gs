@@ -76,7 +76,7 @@ out:
     return rv;
 }
 
-int ogs_dbi_session_delete(const char *supi, const char *dnn)
+int ogs_dbi_session_delete(const char *supi)
 {
     int rv = OGS_OK;
     bson_t *query = NULL;
@@ -86,7 +86,6 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
     char *supi_id = NULL;
 
     ogs_assert(supi);
-    ogs_assert(dnn);
 
     /* Get SUPI type and ID */
     supi_type = ogs_id_get_type(supi);
@@ -105,8 +104,7 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
 
     /* Build query document */
     query = BCON_NEW(
-        supi_type, BCON_UTF8(supi_id),
-        "dnn", BCON_UTF8(dnn)
+        supi_type, BCON_UTF8(supi_id)
     );
     if (!query) {
         ogs_error("Failed to create BSON query for SUPI[%s], DNN[%s]", supi, dnn);
@@ -117,8 +115,8 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
     /* Perform deletion */
     if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
                                       query, NULL, NULL, &error)) {
-        ogs_error("MongoDB deletion failed for SUPI[%s], DNN[%s]: %s",
-                  supi, dnn, error.message);
+        ogs_error("MongoDB deletion failed for SUPI[%s]",
+                  supi, error.message);
         rv = OGS_ERROR;
         goto out;
     } 
