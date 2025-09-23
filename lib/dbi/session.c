@@ -114,8 +114,8 @@ int ogs_dbi_session_delete(const char *supi)
 
     /* Perform deletion */
     if (!mongoc_collection_delete_one(ogs_mongoc()->collection.session,
-                                      query, NULL, &error)) {
-        ogs_error("MongoDB deletion failed for SUPI[%s]",
+                                      query, NULL, NULL, &error)) {
+        ogs_error("MongoDB deletion failed for SUPI[%s]: %s",
                   supi, error.message);
         rv = OGS_ERROR;
         goto out;
