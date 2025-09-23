@@ -288,8 +288,6 @@ bool smf_npcf_smpolicycontrol_handle_create(
     ogs_pfcp_far_t *dl_far = NULL;
     ogs_pfcp_far_t *up2cp_far = NULL;
     ogs_pfcp_qer_t *qer = NULL;
-    ogs_pfcp_pdr_t *app_pdr = NULL;
-    ogs_pfcp_far_t *app_far = NULL;
 
     OpenAPI_sm_policy_decision_t *SmPolicyDecision = NULL;
     OpenAPI_lnode_t *node = NULL;
@@ -528,38 +526,6 @@ bool smf_npcf_smpolicycontrol_handle_create(
     up2cp_far = sess->up2cp_far;
     ogs_assert(up2cp_far);
 
-    app_pdr = ogs_calloc(1, sizeof(ogs_pfcp_pdr_t));
-    app_far = ogs_calloc(1, sizeof(ogs_pfcp_far_t));
-
-    if (!app_pdr || !app_far) {
-        ogs_error("Failed to allocate memory for app_pdr or app_far");
-        ogs_free(app_pdr);
-        ogs_free(app_far);
-        // Continue with default rules or return false, depending on the desired behavior
-        // For this example, we'll continue.
-    } else {
-        /* Configure the new PDR */
-        app_pdr->id.type = OGS_PFCP_IE_PDR_ID;
-        app_pdr->id.pdr_id = 100;
-        app_pdr->precedence.precedence = 250;
-        app_pdr->src_if.interface_value = OGS_PFCP_INTERFACE_ACCESS;
-        
-        app_pdr->flow[app_pdr->num_of_flow].flags = 0;
-        app_pdr->flow[app_pdr->num_of_flow].description =
-            ogs_strdup("permit out ip from any to 10.45.0.1/32 9500");
-        app_pdr->num_of_flow++;
-        /* Link the PDR to the FAR */
-        app_pdr->far = app_far;
-        /* Configure the new FAR */
-        app_far->id.type = OGS_PFCP_IE_FAR_ID;
-        app_far->id.far_id = app_pdr->id.pdr_id;
-        app_far->apply_action.forw = 1;
-        app_far->dst_if.interface_value = OGS_PFCP_INTERFACE_CORE;
-        /* Add the new PDR and FAR to the session's rule lists */
-        ogs_list_add(&sess->pfcp.pdr_list, &app_pdr->obj.lnode);
-        ogs_list_add(&sess->pfcp.far_list, &app_far->lnode);
-    }
-    /* END CUSTOM RULE IMPLEMENTATION */
     /* Set UE IP Address to the Default DL PDR */
     ogs_assert(OGS_OK ==
         ogs_pfcp_paa_to_ue_ip_addr(&sess->paa,
