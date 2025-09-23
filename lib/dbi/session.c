@@ -33,24 +33,24 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
 
     supi_type = ogs_id_get_type(supi);
     if (!supi_type) {
-        ogs_error("Failed to get SUPI type for supi: %s", supi);
+        ogs_error("Failed to get SUPI type for supi: %s", supi ? supi : "(null)");
         rv = OGS_ERROR;
         goto out;
     }
 
     supi_id = ogs_id_get_value(supi);
     if (!supi_id) {
-        ogs_error("Failed to get SUPI value for supi: %s", supi);
+        ogs_error("Failed to get SUPI value for supi: %s", supi ? supi : "(null)");
         rv = OGS_ERROR;
         goto out;
     }
 
     ogs_info("Insert session: supi_type=%s, supi_id=%s, dnn=%s, ipv4=%s, ipv6=%s",
-             supi_type, supi_id, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
+             supi_type, supi_id, dnn ? dnn : "", ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
 
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
-        "dnn",      BCON_UTF8(dnn),
+        "dnn",      BCON_UTF8(dnn ? dnn : ""),
         "ipv4",     BCON_UTF8(ipv4 ? ipv4 : ""),
         "ipv6",     BCON_UTF8(ipv6 ? ipv6 : ""),
         "active",   BCON_BOOL(true),
@@ -58,19 +58,21 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
     );
 
     if (!doc) {
-        ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]", supi, dnn);
+        ogs_error("Failed to create BSON document for SUPI[%s], DNN[%s]",
+                  supi_id, dnn ? dnn : "");
         rv = OGS_ERROR;
         goto out;
     }
 
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
-        ogs_error("MongoDB insert failed for SUPI[%s], DNN[%s]: %s", supi, dnn, error.message);
+        ogs_error("MongoDB insert failed for SUPI[%s], DNN[%s]: %s",
+                  supi_id, dnn ? dnn : "", error.message ? error.message : "(unknown)");
         rv = OGS_ERROR;
         goto out;
     }
 
     ogs_info("MongoDB insert succeeded for SUPI[%s], DNN[%s], IPv4[%s], IPv6[%s]",
-             supi, dnn, ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
+             supi_id, dnn ? dnn : "", ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
 
 out:
     if (doc) bson_destroy(doc);
