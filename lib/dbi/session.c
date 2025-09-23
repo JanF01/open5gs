@@ -45,8 +45,6 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
         goto out;
     }
 
-    ogs_info("Insert session: supi_type=%s, supi_id=%s, dnn=%s, ipv4=%s, ipv6=%s",
-             supi_type, supi_id, dnn ? dnn : "", ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
 
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
@@ -71,8 +69,6 @@ int ogs_dbi_session_insert(const char *supi, const char *dnn,
         goto out;
     }
 
-    ogs_info("MongoDB insert succeeded for SUPI[%s], DNN[%s], IPv4[%s], IPv6[%s]",
-             supi_id, dnn ? dnn : "", ipv4 ? ipv4 : "", ipv6 ? ipv6 : "");
 
 out:
     if (doc) bson_destroy(doc);
@@ -127,9 +123,7 @@ int ogs_dbi_session_delete(const char *supi, const char *dnn)
                   supi, dnn, error.message);
         rv = OGS_ERROR;
         goto out;
-    } else {
-        ogs_info("MongoDB deletion succeeded for SUPI[%s], DNN[%s]", supi, dnn);
-    }
+    } 
 
 out:
     if (query) bson_destroy(query);
