@@ -278,6 +278,7 @@ bool smf_npcf_smpolicycontrol_handle_create(
     int rv;
     char buf1[OGS_ADDRSTRLEN];
     char buf2[OGS_ADDRSTRLEN];
+    char buf3[OGS_ADDRSTRLEN];
     
     smf_ue_t *smf_ue = NULL;
     smf_bearer_t *qos_flow = NULL;
