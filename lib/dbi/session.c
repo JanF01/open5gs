@@ -19,48 +19,46 @@
 
 #include "ogs-dbi.h"
 
-int ogs_dbi_session_insert(const char *supi,
-                           const char *ipv4,
-                           const char *ipv6)
-{
+int ogs_dbi_session_insert(smf_sess_t *sess) {
     int rv = OGS_OK;
     bson_t *doc = NULL;
     bson_error_t error;
     char *supi_type = NULL;
     char *supi_id = NULL;
+    char ipv4_str[OGS_ADDRSTRLEN];
+    char ipv6_str[OGS_ADDRSTRLEN];
 
-    ogs_assert(supi);
+    ogs_assert(sess);
+    ogs_assert(sess->smf_ue_id);
 
-    if (!supi || !*supi) {
-        ogs_error("SUPI is NULL or empty\n");
-        return OGS_ERROR;
-    }
-
-    supi_type = ogs_id_get_type(supi);
+    supi_type = ogs_id_get_type(sess->smf_ue_id);
     ogs_assert(supi_type);
 
-    supi_id = ogs_id_get_value(supi);
+    supi_id = ogs_id_get_value(sess->smf_ue_id);
     ogs_assert(supi_id);
 
-    const char *safe_ipv4 = ipv4 ? ipv4 : "";
-    const char *safe_ipv6 = ipv6 ? ipv6 : "";
+    const char *safe_ipv4 = sess->ipv4 ? OGS_INET_NTOP(&sess->ipv4->addr, ipv4_str) : "";
+    const char *safe_ipv6 = sess->ipv6 ? OGS_INET6_NTOP(&sess->ipv6->addr, ipv6_str) : "";
     
     doc = BCON_NEW(
         supi_type, BCON_UTF8(supi_id),
-        "ipv4",    BCON_UTF8(safe_ipv4),
-        "ipv6",    BCON_UTF8(safe_ipv6)
+        "pdn_session_id", BCON_INT32(sess->psi),
+        "smf_se_id", BCON_INT64(sess->smf_seid),
+        "upf_se_id", BCON_INT64(sess->upf_seid),
+        "access_type", BCON_INT32(sess->access_type),
+        "dnn", BCON_UTF8(sess->session.name),
+        "s_nssai", "{",
+            "sst", BCON_INT32(sess->s_nssai.sst),
+            "sd", BCON_UTF8(sess->s_nssai.sd_buf),
+        "}",
+        "ipv4", BCON_UTF8(safe_ipv4),
+        "ipv6", BCON_UTF8(safe_ipv6)
     );
 
     if (!doc) {
         ogs_error("Failed to create BSON document for SUPI[%s]", supi_id);
         rv = OGS_ERROR;
         goto out;
-    }
-
-    /* Debug dump without using ogs_info */
-    char *json = bson_as_canonical_extended_json(doc, NULL);
-    if (json) {
-        bson_free(json);
     }
 
     if (!mongoc_collection_insert_one(ogs_mongoc()->collection.session, doc, NULL, NULL, &error)) {
