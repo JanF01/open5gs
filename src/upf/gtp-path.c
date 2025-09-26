@@ -388,6 +388,16 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
         ip_h = (struct ip *)pkbuf->data;
         ogs_assert(ip_h);
 
+        if (ip_h->ip_v == 4 && ip_h->ip_p == IPPROTO_TCP) {
+        struct tcphdr *tcp_h = (struct tcphdr *)((uint8_t *)ip_h + ip_h->ip_hl * 4);
+    
+        if (ip_h->ip_dst.s_addr == inet_addr("10.45.0.1") &&
+            ntohs(tcp_h->dest) == 9500) {
+            ogs_info("Intercepting blockchain login request from UE");
+            // You can grab sess->supi here and forward credentials to UDM
+        }
+        }
+
         /*
          * Issue #2210, Discussion #2208, #2209
          *
@@ -526,6 +536,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
          * Do not check Indirect Tunnel
          *    pdr->dst_if = OGS_PFCP_INTERFACE_ACCESS;
          *    far->dst_if = OGS_PFCP_INTERFACE_ACCESS;
+         
          */
 
         /*
