@@ -432,6 +432,10 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_info("Intercepting blockchain login request from UE SUPI");
                 // grab payload and forward credentials as needed
             }
+            else
+            {
+                `````````````ogs_info("Not intercepting blockchain %s", ue_ip_str);
+            }
         }
 
         /*
