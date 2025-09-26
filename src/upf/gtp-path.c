@@ -409,7 +409,6 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
         uint16_t eth_type = 0;
         struct ip *ip_h = NULL;
         uint32_t *src_addr = NULL;
-        uint32_t *dst_addr = NULL;
         ogs_pfcp_object_t *pfcp_object = NULL;
         ogs_pfcp_sess_t *pfcp_sess = NULL;
         ogs_pfcp_pdr_t *pdr = NULL;
