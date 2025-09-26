@@ -425,7 +425,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
         {
 
             char ue_ip_str[INET_ADDRSTRLEN]; /* 16 bytes for IPv4 */
-            OGS_INET_NTOP(&sess->ipv4->addr, ue_ip_str);
+            OGS_INET_NTOP(ip_h->ip_dst.s_addr, ue_ip_str);
 
             if (strcmp(ue_ip_str, "10.45.0.1"))
             {
