@@ -421,22 +421,6 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
         ip_h = (struct ip *)pkbuf->data;
         ogs_assert(ip_h);
 
-        if (ip_h->ip_v == 4)
-        {
-            char ue_ip_str[INET_ADDRSTRLEN]; /* 16 bytes for IPv4 */
-            OGS_INET_NTOP(&ip_h->ip_dst.s_addr, ue_ip_str);
-
-            if (strcmp(ue_ip_str, "10.45.0.1"))
-            {
-                ogs_info("Intercepting blockchain login request from UE SUPI");
-                // grab payload and forward credentials as needed
-            }
-            else
-            {
-                ogs_info("Not intercepting blockchain %s", ue_ip_str);
-            }
-        }
-
         /*
          * Issue #2210, Discussion #2208, #2209
          *
@@ -801,6 +785,22 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, proxy_mac_addr, ETHER_ADDR_LEN);
                 ogs_pkbuf_push(pkbuf, ETHER_ADDR_LEN);
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
+            }
+
+            if (ip_h->ip_v == 4 && ip_h->ip_p == IPPROTO_TCP)
+            {
+                char ue_ip_str[INET_ADDRSTRLEN]; /* 16 bytes for IPv4 */
+                OGS_INET_NTOP(&ip_h->ip_dst.s_addr, ue_ip_str);
+
+                if (strcmp(ue_ip_str, "10.45.0.1") == 0)
+                {
+
+                    ogs_info("Intercepting blockchain login request from UE SUPI");
+                }
+                else
+                {
+                    ogs_info("Not intercepting blockchain %s", ue_ip_str);
+                }
             }
 
             /* TODO: if destined to another UE, hairpin back out. */
