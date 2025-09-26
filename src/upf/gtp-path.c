@@ -434,7 +434,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
             }
             else
             {
-                `````````````ogs_info("Not intercepting blockchain %s", ue_ip_str);
+                ogs_info("Not intercepting blockchain %s", ue_ip_str);
             }
         }
 
