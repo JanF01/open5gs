@@ -788,15 +788,17 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
             }
 
-    
-              if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain)) {
+            if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
+            {
                 ogs_info("Intercepting blockchain login request from UE SUPI");
                 ogs_info("Login: %s, Password: %s",
-                        blockchain.login, blockchain.password);
+                         blockchain.login, blockchain.password);
 
                 /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-            } else {
-                ogs_info("Not intercepting blockchain %s", ue_ip_str);
+            }
+            else
+            {
+                ogs_info("Not intercepting blockchain");
             }
 
             /* TODO: if destined to another UE, hairpin back out. */
