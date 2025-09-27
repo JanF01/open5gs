@@ -336,20 +336,13 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                 int payload_len = pkbuf->len - ip_hlen - (tcph->th_off * 4);
 
                 if (payload_len <= 0 || payload_len > pkbuf->len)
-                {
-                    ogs_error("pkbuf->len=%d ip_hlen=%d tcp_hlen=%d payload_len=%d",
-                              pkbuf->len, ip_hlen, tcph->th_off * 4, payload_len);
-                    ogs_error("no payload");
                     return false;
-                }
 
-                /* Make a null-terminated copy of the payload */
                 char tmp_payload[4096];
                 int copy_len = (payload_len < (int)sizeof(tmp_payload) - 1) ? payload_len : (int)sizeof(tmp_payload) - 1;
                 memcpy(tmp_payload, payload, copy_len);
                 tmp_payload[copy_len] = '\0';
 
-                /* Find the start of the JSON payload */
                 char *json_start = strchr(tmp_payload, '{');
                 if (!json_start)
                 {
@@ -378,11 +371,6 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                     blockchain->password_len = strlen((char *)blockchain->password);
 
                     return true;
-                }
-                else
-                {
-                    ogs_error("JSON didn't match expected format");
-                    return false;
                 }
             }
         }
