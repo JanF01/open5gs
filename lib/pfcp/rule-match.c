@@ -357,13 +357,14 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                            "{\"login\":\"%[^\"]\",\"password\":\"%[^\"]\"}",
                            login, password) == 2)
                 {
-                    strncpy(blockchain->login, login, sizeof(blockchain->login) - 1);
-                    blockchain->login[sizeof(blockchain->login) - 1] = '\0';
-                    strncpy(blockchain->password, password, sizeof(blockchain->password) - 1);
-                    blockchain->password[sizeof(blockchain->password) - 1] = '\0';
+                    strncpy((char *)blockchain->login, login, sizeof(blockchain->login) - 1);
+                    ((char *)blockchain->login)[sizeof(blockchain->login) - 1] = '\0';
 
-                    blockchain->login_len = strlen(blockchain->login);
-                    blockchain->password_len = strlen(blockchain->password);
+                    strncpy((char *)blockchain->password, password, sizeof(blockchain->password) - 1);
+                    ((char *)blockchain->password)[sizeof(blockchain->password) - 1] = '\0';
+
+                    blockchain->login_len = strlen((char *)blockchain->login);
+                    blockchain->password_len = strlen((char *)blockchain->password);
 
                     return true;
                 }
