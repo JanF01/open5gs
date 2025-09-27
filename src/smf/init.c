@@ -23,10 +23,8 @@
 #include "pfcp-path.h"
 #include "sbi-path.h"
 #include "metrics.h"
-#include "ogs-metrics.h"          /* for ogs_metrics_register_connected_ues */
-#include "connected_ues.h"        /* declare smf_dump_connected_ues() */
-#include "smf_custom_api.h"       /* Keep for now, will be removed later */
-#include "smf_sbi_custom_handler.h" /* New custom SBI handler */
+#include "ogs-metrics.h"   /* for ogs_metrics_register_connected_ues */
+#include "connected_ues.h" /* declare smf_dump_connected_ues() */
 
 static ogs_thread_t *thread;
 static void smf_main(void *data);
@@ -39,7 +37,8 @@ int smf_initialize(void)
 
 #define APP_NAME "smf"
     rv = ogs_app_parse_local_conf(APP_NAME);
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     smf_metrics_init();
 
@@ -49,61 +48,64 @@ int smf_initialize(void)
 
     smf_context_init();
 
-    rv = smf_custom_api_init(); /* Keep for now, will be removed later */
-    if (rv != OGS_OK) return rv;
-
-    rv = smf_sbi_custom_init(); /* Initialize new custom SBI handler */
-    if (rv != OGS_OK) return rv;
-
     rv = ogs_gtp_xact_init();
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_pfcp_xact_init();
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_log_config_domain(
-            ogs_app()->logger.domain, ogs_app()->logger.level);
-    if (rv != OGS_OK) return rv;
+        ogs_app()->logger.domain, ogs_app()->logger.level);
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_gtp_context_parse_config(APP_NAME, "upf");
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_pfcp_context_parse_config(APP_NAME, "upf");
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_sbi_context_parse_config(APP_NAME, "nrf", "scp");
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_metrics_context_parse_config(APP_NAME);
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = smf_context_parse_config();
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     rv = ogs_pfcp_ue_pool_generate();
-    if (rv != OGS_OK) return rv;
+    if (rv != OGS_OK)
+        return rv;
 
     ogs_metrics_context_open(ogs_metrics_self());
 
     rv = smf_fd_init();
-    if (rv != 0) return OGS_ERROR;
+    if (rv != 0)
+        return OGS_ERROR;
 
     rv = smf_gtp_open();
-    if (rv != 0) return OGS_ERROR;
+    if (rv != 0)
+        return OGS_ERROR;
 
     rv = smf_pfcp_open();
-    if (rv != 0) return OGS_ERROR;
+    if (rv != 0)
+        return OGS_ERROR;
 
     rv = smf_sbi_open();
-    if (rv != 0) return OGS_ERROR;
-
-    rv = smf_custom_api_run(); /* Keep for now, will be removed later */
-    if (rv != OGS_OK) return OGS_ERROR;
-
-    /* The custom SBI service runs as part of the main SBI server, no separate thread needed here */
+    if (rv != 0)
+        return OGS_ERROR;
 
     thread = ogs_thread_create(smf_main, NULL);
-    if (!thread) return OGS_ERROR;
+    if (!thread)
+        return OGS_ERROR;
 
     ogs_metrics_register_connected_ues(smf_dump_connected_ues);
 
@@ -138,15 +140,13 @@ static void event_termination(void)
 
 void smf_terminate(void)
 {
-    if (!initialized) return;
+    if (!initialized)
+        return;
 
     /* Daemon terminating */
     event_termination();
     ogs_thread_destroy(thread);
     ogs_timer_delete(t_termination_holding);
-
-    smf_custom_api_terminate(); /* Keep for now, will be removed later */
-    smf_sbi_custom_final();     /* Finalize new custom SBI handler */
 
     smf_gtp_close();
     smf_pfcp_close();
@@ -175,9 +175,10 @@ static void smf_main(void *data)
 
     ogs_fsm_init(&smf_sm, smf_state_initial, smf_state_final, 0);
 
-    for ( ;; ) {
+    for (;;)
+    {
         ogs_pollset_poll(ogs_app()->pollset,
-                ogs_timer_mgr_next(ogs_app()->timer_mgr));
+                         ogs_timer_mgr_next(ogs_app()->timer_mgr));
 
         /*
          * After ogs_pollset_poll(), ogs_timer_mgr_expire() must be called.
@@ -192,10 +193,11 @@ static void smf_main(void *data)
          */
         ogs_timer_mgr_expire(ogs_app()->timer_mgr);
 
-        for ( ;; ) {
+        for (;;)
+        {
             smf_event_t *e = NULL;
 
-            rv = ogs_queue_trypop(ogs_app()->queue, (void**)&e);
+            rv = ogs_queue_trypop(ogs_app()->queue, (void **)&e);
             ogs_assert(rv != OGS_ERROR);
 
             if (rv == OGS_DONE)
