@@ -1280,7 +1280,7 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
     uint8_t type, ogs_pfcp_ue_ip_addr_t *ue_ip_address)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
-    ogs_pfcp_blockchain_login_request_t *req = NULL;
+    ogs_pfcp_blockchain_credentials_request_t *req = NULL;
     ogs_pkbuf_t *pkbuf = NULL;
 
     ogs_debug("PFCP Blockchain Login Request");
