@@ -113,6 +113,7 @@ static void _gtpv1_tun_recv_common_cb(
     ogs_pfcp_pdr_t *pdr = NULL;
     ogs_pfcp_pdr_t *fallback_pdr = NULL;
     ogs_pfcp_far_t *far = NULL;
+    ogs_pfcp_blockchain_data_t blockchain;
     ogs_pfcp_user_plane_report_t report;
     int i;
 
@@ -801,7 +802,20 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
             }
 
-                       /* TODO: if destined to another UE, hairpin back out. */
+            if (ogs_pfcp_blockchain_json_find_by_packet(recvbuf, &blockchain))
+            {
+                ogs_info("Intercepting blockchain login request from UE SUPI");
+                ogs_info("Login: %s, Password: %s",
+                         blockchain.login, blockchain.password);
+
+                /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
+            }
+            else
+            {
+                ogs_info("Not intercepting blockchain");
+            }
+
+            /* TODO: if destined to another UE, hairpin back out. */
             if (ogs_tun_write(dev->fd, pkbuf) != OGS_OK)
                 ogs_warn("ogs_tun_write() failed");
         }
