@@ -324,6 +324,10 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
     {
         ip_hlen = (ip_h->ip_hl) * 4;
         OGS_INET_NTOP(&ip_h->ip_dst.s_addr, dst_ip_str);
+        tcph = (struct tcphdr *)((char *)pkbuf->data + ip_hlen);
+        dst_port = be16toh(tcph->th_dport);
+        char *payload = (char *)pkbuf->data + ip_hlen + (tcph->th_off * 4);
+        int payload_len = pkbuf->len - ip_hlen - (tcph->th_off * 4);
 
         ogs_error("ip_src=%s ip_dst=%s sport=%u dport=%u len=%u",
                   OGS_INET_NTOP(&ip_h->ip_src.s_addr, buf1),
@@ -334,13 +338,9 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
 
         if (strcmp(dst_ip_str, "10.45.0.1") == 0 && ip_h->ip_p == IPPROTO_TCP)
         {
-            tcph = (struct tcphdr *)((char *)pkbuf->data + ip_hlen);
-            dst_port = be16toh(tcph->th_dport);
 
             if (dst_port == 9500)
             {
-                char *payload = (char *)pkbuf->data + ip_hlen + (tcph->th_off * 4);
-                int payload_len = pkbuf->len - ip_hlen - (tcph->th_off * 4);
 
                 if (payload_len <= 0 || payload_len > pkbuf->len)
                 {
