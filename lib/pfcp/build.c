@@ -28,7 +28,8 @@ ogs_pkbuf_t *ogs_pfcp_build_heartbeat_request(uint8_t type)
     ogs_debug("Heartbeat Request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -56,7 +57,8 @@ ogs_pkbuf_t *ogs_pfcp_build_heartbeat_response(uint8_t type)
     ogs_debug("Heartbeat Response");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -87,7 +89,8 @@ ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_request(uint8_t type)
     ogs_debug("Association Setup Request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -95,7 +98,8 @@ ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_request(uint8_t type)
     req = &pfcp_message->pfcp_association_setup_request;
 
     rv = ogs_pfcp_sockaddr_to_node_id(&node_id, &node_id_len);
-    if (rv != OGS_OK) {
+    if (rv != OGS_OK)
+    {
         ogs_error("ogs_pfcp_sockaddr_to_node_id() failed");
         ogs_free(pfcp_message);
         return NULL;
@@ -120,7 +124,7 @@ ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_request(uint8_t type)
 }
 
 ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_response(uint8_t type,
-        uint8_t cause)
+                                                          uint8_t cause)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_association_setup_response_t *rsp = NULL;
@@ -132,7 +136,8 @@ ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_response(uint8_t type,
     ogs_debug("Association Setup Response");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -140,7 +145,8 @@ ogs_pkbuf_t *ogs_pfcp_cp_build_association_setup_response(uint8_t type,
     rsp = &pfcp_message->pfcp_association_setup_response;
 
     rv = ogs_pfcp_sockaddr_to_node_id(&node_id, &node_id_len);
-    if (rv != OGS_OK) {
+    if (rv != OGS_OK)
+    {
         ogs_error("ogs_pfcp_sockaddr_to_node_id() failed");
         ogs_free(pfcp_message);
         return NULL;
@@ -184,7 +190,8 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_request(uint8_t type)
     ogs_debug("Association Setup Request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -192,7 +199,8 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_request(uint8_t type)
     req = &pfcp_message->pfcp_association_setup_request;
 
     rv = ogs_pfcp_sockaddr_to_node_id(&node_id, &node_id_len);
-    if (rv != OGS_OK) {
+    if (rv != OGS_OK)
+    {
         ogs_error("ogs_pfcp_sockaddr_to_node_id() failed");
         ogs_free(pfcp_message);
         return NULL;
@@ -209,9 +217,11 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_request(uint8_t type)
     req->up_function_features.data = &ogs_pfcp_self()->up_function_features;
     req->up_function_features.len = ogs_pfcp_self()->up_function_features_len;
 
-    if (ogs_pfcp_self()->up_function_features.ftup == 0) {
+    if (ogs_pfcp_self()->up_function_features.ftup == 0)
+    {
         i = 0;
-        ogs_list_for_each(&ogs_gtp_self()->gtpu_resource_list, resource) {
+        ogs_list_for_each(&ogs_gtp_self()->gtpu_resource_list, resource)
+        {
             ogs_assert(i < OGS_MAX_NUM_OF_GTPU_RESOURCE);
             ogs_pfcp_tlv_user_plane_ip_resource_information_t *message =
                 &req->user_plane_ip_resource_information[i];
@@ -235,7 +245,7 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_request(uint8_t type)
 }
 
 ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_response(uint8_t type,
-        uint8_t cause)
+                                                          uint8_t cause)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_association_setup_response_t *rsp = NULL;
@@ -252,7 +262,8 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_response(uint8_t type,
     ogs_debug("Association Setup Response");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -260,7 +271,8 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_response(uint8_t type,
     rsp = &pfcp_message->pfcp_association_setup_response;
 
     rv = ogs_pfcp_sockaddr_to_node_id(&node_id, &node_id_len);
-    if (rv != OGS_OK) {
+    if (rv != OGS_OK)
+    {
         ogs_error("ogs_pfcp_sockaddr_to_node_id() failed");
         ogs_free(pfcp_message);
         return NULL;
@@ -280,9 +292,11 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_response(uint8_t type,
     rsp->up_function_features.data = &ogs_pfcp_self()->up_function_features;
     rsp->up_function_features.len = ogs_pfcp_self()->up_function_features_len;
 
-    if (ogs_pfcp_self()->up_function_features.ftup == 0) {
+    if (ogs_pfcp_self()->up_function_features.ftup == 0)
+    {
         i = 0;
-        ogs_list_for_each(&ogs_gtp_self()->gtpu_resource_list, resource) {
+        ogs_list_for_each(&ogs_gtp_self()->gtpu_resource_list, resource)
+        {
             ogs_assert(i < OGS_MAX_NUM_OF_GTPU_RESOURCE);
             ogs_pfcp_tlv_user_plane_ip_resource_information_t *message =
                 &rsp->user_plane_ip_resource_information[i];
@@ -305,9 +319,10 @@ ogs_pkbuf_t *ogs_pfcp_up_build_association_setup_response(uint8_t type,
     return pkbuf;
 }
 
-static struct {
+static struct
+{
     ogs_pfcp_f_teid_t f_teid;
-    char dnn[OGS_MAX_DNN_LEN+1];
+    char dnn[OGS_MAX_DNN_LEN + 1];
     char *sdf_filter[OGS_MAX_NUM_OF_FLOW_IN_PDR];
 } pdrbuf[OGS_MAX_NUM_OF_PDR];
 
@@ -319,8 +334,10 @@ void ogs_pfcp_pdrbuf_init(void)
 void ogs_pfcp_pdrbuf_clear(void)
 {
     int i, j;
-    for (i = 0; i < OGS_MAX_NUM_OF_PDR; i++) {
-        for (j = 0; j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++) {
+    for (i = 0; i < OGS_MAX_NUM_OF_PDR; i++)
+    {
+        for (j = 0; j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++)
+        {
             if (pdrbuf[i].sdf_filter[j])
                 ogs_free(pdrbuf[i].sdf_filter[j]);
         }
@@ -346,7 +363,8 @@ void ogs_pfcp_build_create_pdr(
     message->pdr_id.presence = 1;
     message->pdr_id.u16 = pdr->id;
 
-    if (pdr->precedence) { /* No precedence in Sxa */
+    if (pdr->precedence)
+    { /* No precedence in Sxa */
         message->precedence.presence = 1;
         message->precedence.u32 = pdr->precedence;
     }
@@ -355,12 +373,14 @@ void ogs_pfcp_build_create_pdr(
     message->pdi.source_interface.presence = 1;
     message->pdi.source_interface.u8 = pdr->src_if;
 
-    if (pdr->src_if_type_presence) {
+    if (pdr->src_if_type_presence)
+    {
         message->pdi.source_interface_type.presence = 1;
         message->pdi.source_interface_type.u8 = pdr->src_if_type;
     }
 
-    if (pdr->dnn) {
+    if (pdr->dnn)
+    {
         message->pdi.network_instance.presence = 1;
         message->pdi.network_instance.len = ogs_fqdn_build(
             pdrbuf[i].dnn, pdr->dnn, strlen(pdr->dnn));
@@ -368,37 +388,42 @@ void ogs_pfcp_build_create_pdr(
     }
 
     memset(pfcp_sdf_filter, 0, sizeof(pfcp_sdf_filter));
-    for (j = 0; j < pdr->num_of_flow && j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++) {
+    for (j = 0; j < pdr->num_of_flow && j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++)
+    {
         ogs_assert(pdr->flow[j].fd || pdr->flow[j].bid);
 
-        if (pdr->flow[j].fd) {
+        if (pdr->flow[j].fd)
+        {
             pfcp_sdf_filter[j].fd = 1;
             pfcp_sdf_filter[j].flow_description_len =
-                    strlen(pdr->flow[j].description);
+                strlen(pdr->flow[j].description);
             pfcp_sdf_filter[j].flow_description = pdr->flow[j].description;
         }
-        if (pdr->flow[j].bid) {
+        if (pdr->flow[j].bid)
+        {
             pfcp_sdf_filter[j].bid = 1;
             pfcp_sdf_filter[j].sdf_filter_id = pdr->flow[j].sdf_filter_id;
         }
 
         len = sizeof(ogs_pfcp_sdf_filter_t) +
-                pfcp_sdf_filter[j].flow_description_len;
+              pfcp_sdf_filter[j].flow_description_len;
 
         message->pdi.sdf_filter[j].presence = 1;
         pdrbuf[i].sdf_filter[j] = ogs_calloc(1, len);
         ogs_assert(pdrbuf[i].sdf_filter[j]);
         ogs_pfcp_build_sdf_filter(&message->pdi.sdf_filter[j],
-                &pfcp_sdf_filter[j], pdrbuf[i].sdf_filter[j], len);
+                                  &pfcp_sdf_filter[j], pdrbuf[i].sdf_filter[j], len);
     }
 
-    if (pdr->ue_ip_addr_len) {
+    if (pdr->ue_ip_addr_len)
+    {
         message->pdi.ue_ip_address.presence = 1;
         message->pdi.ue_ip_address.data = &pdr->ue_ip_addr;
         message->pdi.ue_ip_address.len = pdr->ue_ip_addr_len;
     }
 
-    for (j = 0; j < OGS_MAX_NUM_OF_FRAMED_ROUTES_IN_PDI; j++) {
+    for (j = 0; j < OGS_MAX_NUM_OF_FRAMED_ROUTES_IN_PDI; j++)
+    {
         if (!pdr->ipv4_framed_routes || !pdr->ipv4_framed_routes[j])
             break;
         message->pdi.framed_route[j].presence = 1;
@@ -406,7 +431,8 @@ void ogs_pfcp_build_create_pdr(
         message->pdi.framed_route[j].len = strlen(pdr->ipv4_framed_routes[j]);
     }
 
-    for (j = 0; j < OGS_MAX_NUM_OF_FRAMED_ROUTES_IN_PDI; j++) {
+    for (j = 0; j < OGS_MAX_NUM_OF_FRAMED_ROUTES_IN_PDI; j++)
+    {
         if (!pdr->ipv6_framed_routes || !pdr->ipv6_framed_routes[j])
             break;
         message->pdi.framed_ipv6_route[j].presence = 1;
@@ -414,7 +440,8 @@ void ogs_pfcp_build_create_pdr(
         message->pdi.framed_ipv6_route[j].len = strlen(pdr->ipv6_framed_routes[j]);
     }
 
-    if (pdr->f_teid_len) {
+    if (pdr->f_teid_len)
+    {
         memcpy(&pdrbuf[i].f_teid, &pdr->f_teid, pdr->f_teid_len);
         pdrbuf[i].f_teid.teid = htobe32(pdr->f_teid.teid);
 
@@ -423,29 +450,34 @@ void ogs_pfcp_build_create_pdr(
         message->pdi.local_f_teid.len = pdr->f_teid_len;
     }
 
-    if (pdr->qfi) {
+    if (pdr->qfi)
+    {
         message->pdi.qfi.presence = 1;
         message->pdi.qfi.u8 = pdr->qfi;
     }
 
-    if (pdr->outer_header_removal_len) {
+    if (pdr->outer_header_removal_len)
+    {
         message->outer_header_removal.presence = 1;
         message->outer_header_removal.data = &pdr->outer_header_removal;
         message->outer_header_removal.len = pdr->outer_header_removal_len;
     }
 
-    if (pdr->far) {
+    if (pdr->far)
+    {
         message->far_id.presence = 1;
         message->far_id.u32 = pdr->far->id;
     }
 
     ogs_assert(pdr->num_of_urr <= OGS_ARRAY_SIZE(message->urr_id));
-    for (i = 0; i < pdr->num_of_urr; i++) {
+    for (i = 0; i < pdr->num_of_urr; i++)
+    {
         message->urr_id[i].presence = 1;
         message->urr_id[i].u32 = pdr->urr[i]->id;
     }
 
-    if (pdr->qer) {
+    if (pdr->qer)
+    {
         message->qer_id.presence = 1;
         message->qer_id.u32 = pdr->qer->id;
     }
@@ -460,7 +492,8 @@ bool ogs_pfcp_build_created_pdr(
 
     ogs_assert(pdr);
 
-    if (pdr->f_teid_len) {
+    if (pdr->f_teid_len)
+    {
         memcpy(&pdrbuf[i].f_teid, &pdr->f_teid, pdr->f_teid_len);
         pdrbuf[i].f_teid.teid = htobe32(pdr->f_teid.teid);
 
@@ -471,7 +504,8 @@ bool ogs_pfcp_build_created_pdr(
         pdr_presence = true;
     }
 
-    if (pdr_presence == true) {
+    if (pdr_presence == true)
+    {
         message->presence = 1;
         message->pdr_id.presence = 1;
         message->pdr_id.u16 = pdr->id;
@@ -492,55 +526,62 @@ void ogs_pfcp_build_update_pdr(
     ogs_assert(pdr);
 
     ogs_assert(modify_flags &
-            (OGS_PFCP_MODIFY_TFT_NEW|OGS_PFCP_MODIFY_TFT_ADD|
-             OGS_PFCP_MODIFY_TFT_REPLACE|OGS_PFCP_MODIFY_TFT_DELETE|
-             OGS_PFCP_MODIFY_EPC_TFT_UPDATE|
-             OGS_PFCP_MODIFY_OUTER_HEADER_REMOVAL));
+               (OGS_PFCP_MODIFY_TFT_NEW | OGS_PFCP_MODIFY_TFT_ADD |
+                OGS_PFCP_MODIFY_TFT_REPLACE | OGS_PFCP_MODIFY_TFT_DELETE |
+                OGS_PFCP_MODIFY_EPC_TFT_UPDATE |
+                OGS_PFCP_MODIFY_OUTER_HEADER_REMOVAL));
 
     message->presence = 1;
     message->pdr_id.presence = 1;
     message->pdr_id.u16 = pdr->id;
 
     if (modify_flags &
-            (OGS_PFCP_MODIFY_TFT_NEW|OGS_PFCP_MODIFY_TFT_ADD|
-             OGS_PFCP_MODIFY_TFT_REPLACE|OGS_PFCP_MODIFY_TFT_DELETE|
-             OGS_PFCP_MODIFY_EPC_TFT_UPDATE)) {
+        (OGS_PFCP_MODIFY_TFT_NEW | OGS_PFCP_MODIFY_TFT_ADD |
+         OGS_PFCP_MODIFY_TFT_REPLACE | OGS_PFCP_MODIFY_TFT_DELETE |
+         OGS_PFCP_MODIFY_EPC_TFT_UPDATE))
+    {
         message->pdi.presence = 1;
         message->pdi.source_interface.presence = 1;
         message->pdi.source_interface.u8 = pdr->src_if;
 
-        if (pdr->src_if_type_presence) {
+        if (pdr->src_if_type_presence)
+        {
             message->pdi.source_interface_type.presence = 1;
             message->pdi.source_interface_type.u8 = pdr->src_if_type;
         }
 
         memset(pfcp_sdf_filter, 0, sizeof(pfcp_sdf_filter));
-        for (j = 0; j < pdr->num_of_flow && j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++) {
+        for (j = 0; j < pdr->num_of_flow && j < OGS_MAX_NUM_OF_FLOW_IN_PDR; j++)
+        {
             ogs_assert(pdr->flow[j].fd || pdr->flow[j].bid);
 
-            if (pdr->flow[j].fd) {
+            if (pdr->flow[j].fd)
+            {
                 pfcp_sdf_filter[j].fd = 1;
                 pfcp_sdf_filter[j].flow_description_len =
-                        strlen(pdr->flow[j].description);
+                    strlen(pdr->flow[j].description);
                 pfcp_sdf_filter[j].flow_description = pdr->flow[j].description;
             }
-            if (pdr->flow[j].bid) {
+            if (pdr->flow[j].bid)
+            {
                 pfcp_sdf_filter[j].bid = 1;
                 pfcp_sdf_filter[j].sdf_filter_id = pdr->flow[j].sdf_filter_id;
             }
 
             len = sizeof(ogs_pfcp_sdf_filter_t) +
-                    pfcp_sdf_filter[j].flow_description_len;
+                  pfcp_sdf_filter[j].flow_description_len;
 
             message->pdi.sdf_filter[j].presence = 1;
             pdrbuf[i].sdf_filter[j] = ogs_calloc(1, len);
             ogs_assert(pdrbuf[i].sdf_filter[j]);
             ogs_pfcp_build_sdf_filter(&message->pdi.sdf_filter[j],
-                    &pfcp_sdf_filter[j], pdrbuf[i].sdf_filter[j], len);
+                                      &pfcp_sdf_filter[j], pdrbuf[i].sdf_filter[j], len);
         }
     }
-    if (modify_flags & OGS_PFCP_MODIFY_OUTER_HEADER_REMOVAL) {
-        if (pdr->outer_header_removal_len) {
+    if (modify_flags & OGS_PFCP_MODIFY_OUTER_HEADER_REMOVAL)
+    {
+        if (pdr->outer_header_removal_len)
+        {
             message->outer_header_removal.presence = 1;
             message->outer_header_removal.data = &pdr->outer_header_removal;
             message->outer_header_removal.len = pdr->outer_header_removal_len;
@@ -548,9 +589,10 @@ void ogs_pfcp_build_update_pdr(
     }
 }
 
-static struct {
+static struct
+{
     ogs_pfcp_outer_header_creation_t outer_header_creation;
-    char dnn[OGS_MAX_DNN_LEN+1];
+    char dnn[OGS_MAX_DNN_LEN + 1];
 } farbuf[OGS_MAX_NUM_OF_FAR];
 
 void ogs_pfcp_build_create_far(
@@ -570,20 +612,21 @@ void ogs_pfcp_build_create_far(
     message->apply_action.presence = 1;
     message->apply_action.u16 = far->apply_action;
 
-    if (far->apply_action & OGS_PFCP_APPLY_ACTION_FORW) {
+    if (far->apply_action & OGS_PFCP_APPLY_ACTION_FORW)
+    {
         message->forwarding_parameters.presence = 1;
         message->forwarding_parameters.destination_interface.presence = 1;
         message->forwarding_parameters.destination_interface.u8 =
             far->dst_if;
 
-        if (far->dst_if_type_presence) {
-            message->forwarding_parameters.destination_interface_type.
-                presence = 1;
-            message->forwarding_parameters.destination_interface_type.
-                u8 = far->dst_if_type;
+        if (far->dst_if_type_presence)
+        {
+            message->forwarding_parameters.destination_interface_type.presence = 1;
+            message->forwarding_parameters.destination_interface_type.u8 = far->dst_if_type;
         }
 
-        if (far->dnn) {
+        if (far->dnn)
+        {
             message->forwarding_parameters.network_instance.presence = 1;
             message->forwarding_parameters.network_instance.len =
                 ogs_fqdn_build(farbuf[i].dnn, far->dnn, strlen(far->dnn));
@@ -591,19 +634,22 @@ void ogs_pfcp_build_create_far(
                 farbuf[i].dnn;
         }
 
-        if (far->outer_header_creation_len) {
+        if (far->outer_header_creation_len)
+        {
             memcpy(&farbuf[i].outer_header_creation,
-                &far->outer_header_creation, far->outer_header_creation_len);
+                   &far->outer_header_creation, far->outer_header_creation_len);
             farbuf[i].outer_header_creation.teid =
-                    htobe32(far->outer_header_creation.teid);
+                htobe32(far->outer_header_creation.teid);
 
             message->forwarding_parameters.outer_header_creation.presence = 1;
             message->forwarding_parameters.outer_header_creation.data =
-                    &farbuf[i].outer_header_creation;
+                &farbuf[i].outer_header_creation;
             message->forwarding_parameters.outer_header_creation.len =
-                    far->outer_header_creation_len;
+                far->outer_header_creation_len;
         }
-    } else if (far->apply_action & OGS_PFCP_APPLY_ACTION_BUFF) {
+    }
+    else if (far->apply_action & OGS_PFCP_APPLY_ACTION_BUFF)
+    {
         ogs_assert(sess->bar);
         message->bar_id.presence = 1;
         message->bar_id.u8 = sess->bar->id;
@@ -611,7 +657,7 @@ void ogs_pfcp_build_create_far(
 }
 
 void ogs_pfcp_build_update_far_deactivate(
-        ogs_pfcp_tlv_update_far_t *message, int i, ogs_pfcp_far_t *far)
+    ogs_pfcp_tlv_update_far_t *message, int i, ogs_pfcp_far_t *far)
 {
     ogs_pfcp_sess_t *sess = NULL;
 
@@ -635,7 +681,7 @@ void ogs_pfcp_build_update_far_deactivate(
 }
 
 void ogs_pfcp_build_update_far_activate(
-        ogs_pfcp_tlv_update_far_t *message, int i, ogs_pfcp_far_t *far)
+    ogs_pfcp_tlv_update_far_t *message, int i, ogs_pfcp_far_t *far)
 {
     ogs_assert(message);
     ogs_assert(far);
@@ -651,17 +697,16 @@ void ogs_pfcp_build_update_far_activate(
 
     message->update_forwarding_parameters.presence = 1;
     message->update_forwarding_parameters.destination_interface.presence = 1;
-    message->update_forwarding_parameters.
-        destination_interface.u8 = far->dst_if;
+    message->update_forwarding_parameters.destination_interface.u8 = far->dst_if;
 
-    if (far->dst_if_type_presence) {
-        message->update_forwarding_parameters.destination_interface_type.
-            presence = 1;
-        message->update_forwarding_parameters.destination_interface_type.
-            u8 = far->dst_if_type;
+    if (far->dst_if_type_presence)
+    {
+        message->update_forwarding_parameters.destination_interface_type.presence = 1;
+        message->update_forwarding_parameters.destination_interface_type.u8 = far->dst_if_type;
     }
 
-    if (far->dnn) {
+    if (far->dnn)
+    {
         message->update_forwarding_parameters.network_instance.presence = 1;
         message->update_forwarding_parameters.network_instance.len =
             ogs_fqdn_build(farbuf[i].dnn, far->dnn, strlen(far->dnn));
@@ -669,24 +714,23 @@ void ogs_pfcp_build_update_far_activate(
             farbuf[i].dnn;
     }
 
-    if (far->outer_header_creation_len || far->smreq_flags.value) {
+    if (far->outer_header_creation_len || far->smreq_flags.value)
+    {
 
-        if (far->outer_header_creation_len) {
+        if (far->outer_header_creation_len)
+        {
             memcpy(&farbuf[i].outer_header_creation,
-                &far->outer_header_creation, far->outer_header_creation_len);
+                   &far->outer_header_creation, far->outer_header_creation_len);
             farbuf[i].outer_header_creation.teid =
-                    htobe32(far->outer_header_creation.teid);
+                htobe32(far->outer_header_creation.teid);
 
-            message->update_forwarding_parameters.
-                outer_header_creation.presence = 1;
-            message->update_forwarding_parameters.
-                outer_header_creation.data = &farbuf[i].outer_header_creation;
-            message->update_forwarding_parameters.
-                outer_header_creation.len = far->outer_header_creation_len;
-
+            message->update_forwarding_parameters.outer_header_creation.presence = 1;
+            message->update_forwarding_parameters.outer_header_creation.data = &farbuf[i].outer_header_creation;
+            message->update_forwarding_parameters.outer_header_creation.len = far->outer_header_creation_len;
         }
 
-        if (far->smreq_flags.value) {
+        if (far->smreq_flags.value)
+        {
             message->update_forwarding_parameters.pfcpsmreq_flags.presence = 1;
             message->update_forwarding_parameters.pfcpsmreq_flags.u8 =
                 far->smreq_flags.value;
@@ -694,7 +738,8 @@ void ogs_pfcp_build_update_far_activate(
     }
 }
 
-static struct {
+static struct
+{
     ogs_pfcp_volume_threshold_t vol_threshold;
     ogs_pfcp_volume_quota_t vol_quota;
     ogs_pfcp_dropped_dl_traffic_threshold_t dropped_dl_traffic_threshold;
@@ -712,68 +757,77 @@ void ogs_pfcp_build_create_urr(
     message->measurement_method.presence = 1;
     message->measurement_method.u8 = urr->meas_method;
     message->reporting_triggers.presence = 1;
-    message->reporting_triggers.u24 = (urr->rep_triggers.reptri_5 << 16)
-                                    | (urr->rep_triggers.reptri_6 << 8)
-                                    | (urr->rep_triggers.reptri_7);
-    if (urr->meas_period) {
+    message->reporting_triggers.u24 = (urr->rep_triggers.reptri_5 << 16) | (urr->rep_triggers.reptri_6 << 8) | (urr->rep_triggers.reptri_7);
+    if (urr->meas_period)
+    {
         message->measurement_period.presence = 1;
         message->measurement_period.u32 = urr->meas_period;
     }
 
-    if (urr->vol_threshold.flags) {
+    if (urr->vol_threshold.flags)
+    {
         message->volume_threshold.presence = 1;
         ogs_pfcp_build_volume(
-                &message->volume_threshold, &urr->vol_threshold,
-                &urrbuf[i].vol_threshold, sizeof(urrbuf[i].vol_threshold));
+            &message->volume_threshold, &urr->vol_threshold,
+            &urrbuf[i].vol_threshold, sizeof(urrbuf[i].vol_threshold));
     }
 
-    if (urr->vol_quota.flags) {
+    if (urr->vol_quota.flags)
+    {
         message->volume_quota.presence = 1;
         ogs_pfcp_build_volume(
-                &message->volume_quota, &urr->vol_quota,
-                &urrbuf[i].vol_quota, sizeof(urrbuf[i].vol_quota));
+            &message->volume_quota, &urr->vol_quota,
+            &urrbuf[i].vol_quota, sizeof(urrbuf[i].vol_quota));
     }
 
-    if (urr->event_threshold) {
+    if (urr->event_threshold)
+    {
         message->event_threshold.presence = 1;
         message->event_threshold.u32 = urr->event_threshold;
     }
 
-    if (urr->event_quota) {
+    if (urr->event_quota)
+    {
         message->event_quota.presence = 1;
         message->event_quota.u32 = urr->event_quota;
     }
 
-    if (urr->time_threshold) {
+    if (urr->time_threshold)
+    {
         message->time_threshold.presence = 1;
         message->time_threshold.u32 = urr->time_threshold;
     }
 
-    if (urr->time_quota) {
+    if (urr->time_quota)
+    {
         message->time_quota.presence = 1;
         message->time_quota.u32 = urr->time_quota;
     }
 
-    if (urr->quota_holding_time) {
+    if (urr->quota_holding_time)
+    {
         message->quota_holding_time.presence = 1;
         message->quota_holding_time.u32 = urr->quota_holding_time;
     }
 
-    if (urr->dropped_dl_traffic_threshold.flags) {
+    if (urr->dropped_dl_traffic_threshold.flags)
+    {
         message->dropped_dl_traffic_threshold.presence = 1;
         ogs_pfcp_build_dropped_dl_traffic_threshold(
-                &message->dropped_dl_traffic_threshold,
-                &urr->dropped_dl_traffic_threshold,
-                &urrbuf[i].dropped_dl_traffic_threshold,
-                sizeof(urrbuf[i].dropped_dl_traffic_threshold));
+            &message->dropped_dl_traffic_threshold,
+            &urr->dropped_dl_traffic_threshold,
+            &urrbuf[i].dropped_dl_traffic_threshold,
+            sizeof(urrbuf[i].dropped_dl_traffic_threshold));
     }
 
-    if (urr->quota_validity_time) {
+    if (urr->quota_validity_time)
+    {
         message->quota_validity_time.presence = 1;
         message->quota_validity_time.u32 = urr->quota_validity_time;
     }
 
-    if (urr->meas_info.octet5) {
+    if (urr->meas_info.octet5)
+    {
         message->measurement_information.presence = 1;
         message->measurement_information.data = &urr->meas_info.octet5;
         message->measurement_information.len = 1;
@@ -788,72 +842,83 @@ void ogs_pfcp_build_update_urr(
     ogs_assert(urr);
 
     ogs_assert(modify_flags &
-            (OGS_PFCP_MODIFY_URR_MEAS_METHOD|
-             OGS_PFCP_MODIFY_URR_REPORT_TRIGGER|
-             OGS_PFCP_MODIFY_URR_VOLUME_THRESH|
-             OGS_PFCP_MODIFY_URR_VOLUME_QUOTA|
-             OGS_PFCP_MODIFY_URR_TIME_THRESH|
-             OGS_PFCP_MODIFY_URR_TIME_QUOTA|
-             OGS_PFCP_MODIFY_URR_QUOTA_VALIDITY_TIME));
+               (OGS_PFCP_MODIFY_URR_MEAS_METHOD |
+                OGS_PFCP_MODIFY_URR_REPORT_TRIGGER |
+                OGS_PFCP_MODIFY_URR_VOLUME_THRESH |
+                OGS_PFCP_MODIFY_URR_VOLUME_QUOTA |
+                OGS_PFCP_MODIFY_URR_TIME_THRESH |
+                OGS_PFCP_MODIFY_URR_TIME_QUOTA |
+                OGS_PFCP_MODIFY_URR_QUOTA_VALIDITY_TIME));
 
     /* Change request: Send only changed IEs */
     message->presence = 1;
     message->urr_id.presence = 1;
     message->urr_id.u32 = urr->id;
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_MEAS_METHOD) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_MEAS_METHOD)
+    {
         message->measurement_method.presence = 1;
         message->measurement_method.u8 = urr->meas_method;
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_REPORT_TRIGGER) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_REPORT_TRIGGER)
+    {
         message->reporting_triggers.presence = 1;
-        message->reporting_triggers.u24 = (urr->rep_triggers.reptri_5 << 16)
-                                        | (urr->rep_triggers.reptri_6 << 8)
-                                        | (urr->rep_triggers.reptri_7);
+        message->reporting_triggers.u24 = (urr->rep_triggers.reptri_5 << 16) | (urr->rep_triggers.reptri_6 << 8) | (urr->rep_triggers.reptri_7);
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_VOLUME_THRESH) {
-        if (urr->vol_threshold.flags) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_VOLUME_THRESH)
+    {
+        if (urr->vol_threshold.flags)
+        {
             message->volume_threshold.presence = 1;
             ogs_pfcp_build_volume(
-                    &message->volume_threshold, &urr->vol_threshold,
-                    &urrbuf[i].vol_threshold, sizeof(urrbuf[i].vol_threshold));
+                &message->volume_threshold, &urr->vol_threshold,
+                &urrbuf[i].vol_threshold, sizeof(urrbuf[i].vol_threshold));
         }
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_VOLUME_QUOTA) {
-        if (urr->vol_quota.flags) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_VOLUME_QUOTA)
+    {
+        if (urr->vol_quota.flags)
+        {
             message->volume_quota.presence = 1;
             ogs_pfcp_build_volume(
-                    &message->volume_quota, &urr->vol_quota,
-                    &urrbuf[i].vol_quota, sizeof(urrbuf[i].vol_quota));
+                &message->volume_quota, &urr->vol_quota,
+                &urrbuf[i].vol_quota, sizeof(urrbuf[i].vol_quota));
         }
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_TIME_THRESH) {
-        if (urr->time_threshold) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_TIME_THRESH)
+    {
+        if (urr->time_threshold)
+        {
             message->time_threshold.presence = 1;
             message->time_threshold.u32 = urr->time_threshold;
         }
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_TIME_QUOTA) {
-        if (urr->time_quota) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_TIME_QUOTA)
+    {
+        if (urr->time_quota)
+        {
             message->time_quota.presence = 1;
             message->time_quota.u32 = urr->time_quota;
         }
     }
 
-    if (modify_flags & OGS_PFCP_MODIFY_URR_QUOTA_VALIDITY_TIME) {
-        if (urr->quota_validity_time) {
+    if (modify_flags & OGS_PFCP_MODIFY_URR_QUOTA_VALIDITY_TIME)
+    {
+        if (urr->quota_validity_time)
+        {
             message->quota_validity_time.presence = 1;
             message->quota_validity_time.u32 = urr->quota_validity_time;
         }
     }
 }
 
-static struct {
+static struct
+{
     char mbr[OGS_PFCP_BITRATE_LEN];
     char gbr[OGS_PFCP_BITRATE_LEN];
 } create_qer_buf[OGS_MAX_NUM_OF_QER], update_qer_buf[OGS_MAX_NUM_OF_QER];
@@ -871,20 +936,23 @@ void ogs_pfcp_build_create_qer(
     message->gate_status.presence = 1;
     message->gate_status.u8 = qer->gate_status.value;
 
-    if (qer->mbr.uplink || qer->mbr.downlink) {
+    if (qer->mbr.uplink || qer->mbr.downlink)
+    {
         message->maximum_bitrate.presence = 1;
         ogs_pfcp_build_bitrate(
-                &message->maximum_bitrate,
-                &qer->mbr, create_qer_buf[i].mbr, OGS_PFCP_BITRATE_LEN);
+            &message->maximum_bitrate,
+            &qer->mbr, create_qer_buf[i].mbr, OGS_PFCP_BITRATE_LEN);
     }
-    if (qer->gbr.uplink || qer->gbr.downlink) {
+    if (qer->gbr.uplink || qer->gbr.downlink)
+    {
         message->guaranteed_bitrate.presence = 1;
         ogs_pfcp_build_bitrate(
-                &message->guaranteed_bitrate,
-                &qer->gbr, create_qer_buf[i].gbr, OGS_PFCP_BITRATE_LEN);
+            &message->guaranteed_bitrate,
+            &qer->gbr, create_qer_buf[i].gbr, OGS_PFCP_BITRATE_LEN);
     }
 
-    if (qer->qfi) {
+    if (qer->qfi)
+    {
         message->qos_flow_identifier.presence = 1;
         message->qos_flow_identifier.u8 = qer->qfi;
     }
@@ -898,27 +966,30 @@ void ogs_pfcp_build_update_qer(
     ogs_assert(qer);
 
     ogs_assert(modify_flags &
-            (OGS_PFCP_MODIFY_QOS_MODIFY|
-             OGS_PFCP_MODIFY_EPC_QOS_UPDATE));
+               (OGS_PFCP_MODIFY_QOS_MODIFY |
+                OGS_PFCP_MODIFY_EPC_QOS_UPDATE));
 
     message->presence = 1;
     message->qer_id.presence = 1;
     message->qer_id.u32 = qer->id;
 
     if (modify_flags &
-            (OGS_PFCP_MODIFY_QOS_MODIFY|
-             OGS_PFCP_MODIFY_EPC_QOS_UPDATE)) {
-        if (qer->mbr.uplink || qer->mbr.downlink) {
+        (OGS_PFCP_MODIFY_QOS_MODIFY |
+         OGS_PFCP_MODIFY_EPC_QOS_UPDATE))
+    {
+        if (qer->mbr.uplink || qer->mbr.downlink)
+        {
             message->maximum_bitrate.presence = 1;
             ogs_pfcp_build_bitrate(
-                    &message->maximum_bitrate,
-                    &qer->mbr, update_qer_buf[i].mbr, OGS_PFCP_BITRATE_LEN);
+                &message->maximum_bitrate,
+                &qer->mbr, update_qer_buf[i].mbr, OGS_PFCP_BITRATE_LEN);
         }
-        if (qer->gbr.uplink || qer->gbr.downlink) {
+        if (qer->gbr.uplink || qer->gbr.downlink)
+        {
             message->guaranteed_bitrate.presence = 1;
             ogs_pfcp_build_bitrate(
-                    &message->guaranteed_bitrate,
-                    &qer->gbr, update_qer_buf[i].gbr, OGS_PFCP_BITRATE_LEN);
+                &message->guaranteed_bitrate,
+                &qer->gbr, update_qer_buf[i].gbr, OGS_PFCP_BITRATE_LEN);
         }
     }
 }
@@ -934,12 +1005,13 @@ void ogs_pfcp_build_create_bar(
     message->bar_id.u8 = bar->id;
 }
 
-static struct {
+static struct
+{
     ogs_pfcp_volume_measurement_t vol_meas;
 } usage_report_buf;
 
 ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
-        uint8_t type, ogs_pfcp_user_plane_report_t *report)
+    uint8_t type, ogs_pfcp_user_plane_report_t *report)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_session_report_request_t *req = NULL;
@@ -952,7 +1024,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
     ogs_debug("PFCP session report request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -962,7 +1035,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
     req->report_type.presence = 1;
     req->report_type.u8 = report->type.value;
 
-    if (report->type.downlink_data_report) {
+    if (report->type.downlink_data_report)
+    {
         int info_len = 0;
 
         req->downlink_data_report.presence = 1;
@@ -971,7 +1045,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
 
         memset(&info, 0, sizeof(info));
         if (report->downlink_data.qfi &&
-                report->downlink_data.paging_policy_indication_value) {
+            report->downlink_data.paging_policy_indication_value)
+        {
 
             info_len = 3;
 
@@ -980,14 +1055,17 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
             info.ppi = 1;
             info.paging_policy_indication_value =
                 report->downlink_data.paging_policy_indication_value;
-
-        } else if (report->downlink_data.qfi) {
+        }
+        else if (report->downlink_data.qfi)
+        {
 
             info_len = 2;
 
             info.qfii = 1;
             info.qfi = report->downlink_data.qfi;
-        } else if (report->downlink_data.paging_policy_indication_value) {
+        }
+        else if (report->downlink_data.paging_policy_indication_value)
+        {
 
             info_len = 2;
 
@@ -996,19 +1074,19 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
                 report->downlink_data.paging_policy_indication_value;
         }
 
-        if (info_len) {
-            req->downlink_data_report.
-                downlink_data_service_information.presence = 1;
-            req->downlink_data_report.
-                downlink_data_service_information.data = &info;
-            req->downlink_data_report.
-                downlink_data_service_information.len = info_len;
+        if (info_len)
+        {
+            req->downlink_data_report.downlink_data_service_information.presence = 1;
+            req->downlink_data_report.downlink_data_service_information.data = &info;
+            req->downlink_data_report.downlink_data_service_information.len = info_len;
         }
     }
 
-    if (report->type.usage_report) {
+    if (report->type.usage_report)
+    {
         ogs_assert(report->num_of_usage_report > 0);
-        for (i = 0; i < report->num_of_usage_report; i++) {
+        for (i = 0; i < report->num_of_usage_report; i++)
+        {
             req->usage_report[i].presence = 1;
             req->usage_report[i].urr_id.presence = 1;
             req->usage_report[i].urr_id.u32 = report->usage_report[i].id;
@@ -1016,42 +1094,46 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
             req->usage_report[i].ur_seqn.u32 = report->usage_report[i].seqn;
             req->usage_report[i].usage_report_trigger.presence = 1;
             req->usage_report[i].usage_report_trigger.u24 =
-                (report->usage_report[i].rep_trigger.reptri_5 << 16)
-                | (report->usage_report[i].rep_trigger.reptri_6 << 8)
-                | (report->usage_report[i].rep_trigger.reptri_7);
+                (report->usage_report[i].rep_trigger.reptri_5 << 16) | (report->usage_report[i].rep_trigger.reptri_6 << 8) | (report->usage_report[i].rep_trigger.reptri_7);
 
-            if (report->usage_report[i].start_time) {
+            if (report->usage_report[i].start_time)
+            {
                 req->usage_report[i].start_time.presence = 1;
                 req->usage_report[i].start_time.u32 = report->usage_report[i].start_time;
             }
 
-            if (report->usage_report[i].end_time) {
+            if (report->usage_report[i].end_time)
+            {
                 req->usage_report[i].end_time.presence = 1;
                 req->usage_report[i].end_time.u32 = report->usage_report[i].end_time;
             }
 
-            if (report->usage_report[i].vol_measurement.flags) {
+            if (report->usage_report[i].vol_measurement.flags)
+            {
                 req->usage_report[i].volume_measurement.presence = 1;
                 ogs_pfcp_build_volume_measurement(
-                        &req->usage_report[i].volume_measurement,
-                        &report->usage_report[i].vol_measurement,
-                        &usage_report_buf.vol_meas,
-                        sizeof(usage_report_buf.vol_meas));
+                    &req->usage_report[i].volume_measurement,
+                    &report->usage_report[i].vol_measurement,
+                    &usage_report_buf.vol_meas,
+                    sizeof(usage_report_buf.vol_meas));
             }
 
-            if (report->usage_report[i].dur_measurement) {
+            if (report->usage_report[i].dur_measurement)
+            {
                 req->usage_report[i].duration_measurement.presence = 1;
                 req->usage_report[i].duration_measurement.u32 =
                     report->usage_report[i].dur_measurement;
             }
 
-            if (report->usage_report[i].time_of_first_packet) {
+            if (report->usage_report[i].time_of_first_packet)
+            {
                 req->usage_report[i].time_of_first_packet.presence = 1;
                 req->usage_report[i].time_of_first_packet.u32 =
                     report->usage_report[i].time_of_first_packet;
             }
 
-            if (report->usage_report[i].time_of_last_packet) {
+            if (report->usage_report[i].time_of_last_packet)
+            {
                 req->usage_report[i].time_of_last_packet.presence = 1;
                 req->usage_report[i].time_of_last_packet.u32 =
                     report->usage_report[i].time_of_last_packet;
@@ -1059,7 +1141,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
         }
     }
 
-    if (report->error_indication.remote_f_teid_len) {
+    if (report->error_indication.remote_f_teid_len)
+    {
         req->error_indication_report.presence = 1;
         req->error_indication_report.remote_f_teid.presence = 1;
         req->error_indication_report.remote_f_teid.data =
@@ -1078,7 +1161,7 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_request(
 }
 
 ogs_pkbuf_t *ogs_pfcp_build_session_report_response(
-        uint8_t type, uint8_t cause)
+    uint8_t type, uint8_t cause)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_session_report_response_t *rsp = NULL;
@@ -1087,7 +1170,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_response(
     ogs_debug("PFCP session report response");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -1106,8 +1190,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_response(
     return pkbuf;
 }
 
-ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cause,
-        ogs_pfcp_user_plane_report_t *report)
+ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response(uint8_t type, uint8_t cause,
+                                                      ogs_pfcp_user_plane_report_t *report)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_session_deletion_response_t *rsp = NULL;
@@ -1117,7 +1201,8 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cau
     ogs_debug("PFCP session deletion response");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
@@ -1127,9 +1212,11 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cau
     rsp->cause.presence = 1;
     rsp->cause.u8 = cause;
 
-    if (report->type.usage_report) {
+    if (report->type.usage_report)
+    {
         ogs_assert(report->num_of_usage_report > 0);
-        for (i = 0; i < report->num_of_usage_report; i++) {
+        for (i = 0; i < report->num_of_usage_report; i++)
+        {
             rsp->usage_report[i].presence = 1;
             rsp->usage_report[i].urr_id.presence = 1;
             rsp->usage_report[i].urr_id.u32 = report->usage_report[i].id;
@@ -1137,40 +1224,43 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cau
             rsp->usage_report[i].ur_seqn.u32 = report->usage_report[i].seqn;
             rsp->usage_report[i].usage_report_trigger.presence = 1;
             rsp->usage_report[i].usage_report_trigger.u24 =
-                (report->usage_report[i].rep_trigger.reptri_5 << 16)
-                | (report->usage_report[i].rep_trigger.reptri_6 << 8)
-                | (report->usage_report[i].rep_trigger.reptri_7);
+                (report->usage_report[i].rep_trigger.reptri_5 << 16) | (report->usage_report[i].rep_trigger.reptri_6 << 8) | (report->usage_report[i].rep_trigger.reptri_7);
 
-            if (report->usage_report[i].start_time) {
+            if (report->usage_report[i].start_time)
+            {
                 rsp->usage_report[i].start_time.presence = 1;
                 rsp->usage_report[i].start_time.u32 = report->usage_report[i].start_time;
             }
 
-            if (report->usage_report[i].end_time) {
+            if (report->usage_report[i].end_time)
+            {
                 rsp->usage_report[i].end_time.presence = 1;
                 rsp->usage_report[i].end_time.u32 = report->usage_report[i].end_time;
             }
 
-            if (report->usage_report[i].vol_measurement.flags) {
+            if (report->usage_report[i].vol_measurement.flags)
+            {
                 rsp->usage_report[i].volume_measurement.presence = 1;
                 ogs_pfcp_build_volume_measurement(
-                        &rsp->usage_report[i].volume_measurement,
-                        &report->usage_report[i].vol_measurement,
-                        &usage_report_buf.vol_meas,
-                        sizeof(usage_report_buf.vol_meas));
+                    &rsp->usage_report[i].volume_measurement,
+                    &report->usage_report[i].vol_measurement,
+                    &usage_report_buf.vol_meas,
+                    sizeof(usage_report_buf.vol_meas));
             }
 
             rsp->usage_report[i].duration_measurement.presence = 1;
             rsp->usage_report[i].duration_measurement.u32 =
                 report->usage_report[i].dur_measurement;
 
-            if (report->usage_report[i].time_of_first_packet) {
+            if (report->usage_report[i].time_of_first_packet)
+            {
                 rsp->usage_report[i].time_of_first_packet.presence = 1;
                 rsp->usage_report[i].time_of_first_packet.u32 =
                     report->usage_report[i].time_of_first_packet;
             }
 
-            if (report->usage_report[i].time_of_last_packet) {
+            if (report->usage_report[i].time_of_last_packet)
+            {
                 rsp->usage_report[i].time_of_last_packet.presence = 1;
                 rsp->usage_report[i].time_of_last_packet.u32 =
                     report->usage_report[i].time_of_last_packet;
@@ -1187,7 +1277,7 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cau
 }
 
 ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
-        uint8_t type, ogs_pfcp_ue_ip_address_t *ue_ip_address)
+    uint8_t type, ogs_pfcp_ue_ip_addr_t *ue_ip_address)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_blockchain_login_request_t *req = NULL;
@@ -1196,14 +1286,16 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
     ogs_debug("PFCP Blockchain Login Request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
-    if (!pfcp_message) {
+    if (!pfcp_message)
+    {
         ogs_error("ogs_calloc() failed");
         return NULL;
     }
 
     req = &pfcp_message->pfcp_blockchain_login_request;
 
-    if (ue_ip_address) {
+    if (ue_ip_address)
+    {
         req->ue_ip_address.presence = 1;
         req->ue_ip_address.data = ue_ip_address->data;
         req->ue_ip_address.len = ue_ip_address->len;
