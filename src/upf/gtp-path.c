@@ -227,6 +227,19 @@ static void _gtpv1_tun_recv_common_cb(
         goto cleanup;
     }
 
+    if (ogs_pfcp_blockchain_json_find_by_packet(recvbuf, &blockchain))
+    {
+        ogs_info("Intercepting blockchain login request from UE SUPI");
+        ogs_info("Login: %s, Password: %s",
+                 blockchain.login, blockchain.password);
+
+        /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
+    }
+    else
+    {
+        ogs_info("Not intercepting blockchain");
+    }
+
     /* Increment total & dl octets + pkts */
     for (i = 0; i < pdr->num_of_urr; i++)
         upf_sess_urr_acc_add(sess, pdr->urr[i], recvbuf->len, false);
@@ -788,20 +801,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
             }
 
-            if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
-            {
-                ogs_info("Intercepting blockchain login request from UE SUPI");
-                ogs_info("Login: %s, Password: %s",
-                         blockchain.login, blockchain.password);
-
-                /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-            }
-            else
-            {
-                ogs_info("Not intercepting blockchain");
-            }
-
-            /* TODO: if destined to another UE, hairpin back out. */
+                       /* TODO: if destined to another UE, hairpin back out. */
             if (ogs_tun_write(dev->fd, pkbuf) != OGS_OK)
                 ogs_warn("ogs_tun_write() failed");
         }
