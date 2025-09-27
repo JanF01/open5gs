@@ -390,3 +390,20 @@ int upf_pfcp_send_session_report_request(
 
     return rv;
 }
+
+int upf_pfcp_blockchain_data_operation(
+        upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain)
+{
+    ogs_assert(sess);
+    //ogs_assert(pkbuf);
+
+    ogs_info("Performing blockchain data operation for session %p", sess);
+    // TODO: Implement actual blockchain interaction here.
+    // This might involve parsing the JSON payload from pkbuf,
+    // interacting with a blockchain client, and sending a response.
+
+    // For now, just log the packet data
+  //  ogs_log_hexdump(OGS_LOG_INFO, pkbuf->data, pkbuf->len);
+
+   // return OGS_OK;
+}

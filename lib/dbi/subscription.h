@@ -48,6 +48,12 @@ int ogs_dbi_update_mme(char *supi, char *mme_host, char *mme_realm,
 int ogs_dbi_subscription_data(char *supi,
         ogs_subscription_data_t *subscription_data);
 
+int ogs_dbi_insert_subscriber_blockchain_data(
+    const char *supi,
+    const char *blockchain_node_id,
+    const char *login, const char *hashed_password);
+
+
 #ifdef __cplusplus
 }
 #endif

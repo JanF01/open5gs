@@ -25,6 +25,8 @@
 #include "metrics.h"
 #include "ogs-metrics.h"          /* for ogs_metrics_register_connected_ues */
 #include "connected_ues.h"        /* declare smf_dump_connected_ues() */
+#include "smf_custom_api.h"       /* Keep for now, will be removed later */
+#include "smf_sbi_custom_handler.h" /* New custom SBI handler */
 
 static ogs_thread_t *thread;
 static void smf_main(void *data);
@@ -46,6 +48,12 @@ int smf_initialize(void)
     ogs_sbi_context_init(OpenAPI_nf_type_SMF);
 
     smf_context_init();
+
+    rv = smf_custom_api_init(); /* Keep for now, will be removed later */
+    if (rv != OGS_OK) return rv;
+
+    rv = smf_sbi_custom_init(); /* Initialize new custom SBI handler */
+    if (rv != OGS_OK) return rv;
 
     rv = ogs_gtp_xact_init();
     if (rv != OGS_OK) return rv;
@@ -89,6 +97,11 @@ int smf_initialize(void)
     rv = smf_sbi_open();
     if (rv != 0) return OGS_ERROR;
 
+    rv = smf_custom_api_run(); /* Keep for now, will be removed later */
+    if (rv != OGS_OK) return OGS_ERROR;
+
+    /* The custom SBI service runs as part of the main SBI server, no separate thread needed here */
+
     thread = ogs_thread_create(smf_main, NULL);
     if (!thread) return OGS_ERROR;
 
@@ -131,6 +144,9 @@ void smf_terminate(void)
     event_termination();
     ogs_thread_destroy(thread);
     ogs_timer_delete(t_termination_holding);
+
+    smf_custom_api_terminate(); /* Keep for now, will be removed later */
+    smf_sbi_custom_final();     /* Finalize new custom SBI handler */
 
     smf_gtp_close();
     smf_pfcp_close();

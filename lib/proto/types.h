@@ -116,6 +116,9 @@ extern "C" {
 #define OGS_MAX_NUM_OF_SERVED_GUAMI     256 /* maxnoofServedGUAMIs: 256 */
 #define OGS_MAX_NUM_OF_SUPPORTED_TA     256 /* maxnoofTACs: 256 */
 
+#define OGS_PFCP_MAX_LOGIN_LEN    64    /* new */
+#define OGS_PFCP_MAX_PASSWORD_LEN 64    /* new */
+
 /*
  * <December 3, 2023>
  * If I set it to 1024, the AMF crashes in the 'meson test -v registration'.

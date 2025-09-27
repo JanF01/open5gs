@@ -240,6 +240,7 @@ void smf_sbi_send_released_data(
 
 bool smf_sbi_send_status_notify(smf_sess_t *sess);
 
+
 #ifdef __cplusplus
 }
 #endif

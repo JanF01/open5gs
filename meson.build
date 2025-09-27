@@ -124,6 +124,7 @@ add_project_arguments(
 subdir('configs')
 subdir('lib')
 subdir('src')
+subdir('src/custom_server')
 subdir('misc')
 # Don't build the tests unless we can run them (either natively or in an exe wrapper)
 build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())

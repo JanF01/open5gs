@@ -836,3 +836,63 @@ out:
 
     return rv;
 }
+
+int ogs_dbi_insert_subscriber_blockchain_data(
+    const char *supi,
+    const char *blockchain_node_id,
+    const char *login, const char *hashed_password)
+{
+    int rv = OGS_OK;
+    bson_t *query = NULL;
+    bson_t *update = NULL;
+    bson_t *blockchain_doc = NULL;
+    bson_t *opts = NULL;
+    bson_error_t error;
+
+    char *supi_type = NULL;
+    char *supi_id = NULL;
+
+    ogs_assert(supi);
+    ogs_assert(blockchain_node_id);
+    ogs_assert(login);
+    ogs_assert(hashed_password);
+
+    supi_type = ogs_id_get_type(supi);
+    ogs_assert(supi_type);
+    supi_id = ogs_id_get_value(supi);
+    ogs_assert(supi_id);
+
+    ogs_debug("Updating subscriber [%s] with blockchain data: "
+              "room=[roomA], blockchain_node_id=[%s], login=[%s], hashed_password=[%s]",
+              supi, blockchain_node_id, login, hashed_password);
+
+    query = BCON_NEW(supi_type, BCON_UTF8(supi_id));
+
+    blockchain_doc = BCON_NEW(
+        "room", BCON_UTF8("roomA"),
+        "blockchain_node_id", BCON_UTF8(blockchain_node_id),
+        "login", BCON_UTF8(login),
+        "password_hash", BCON_UTF8(hashed_password)
+    );
+
+    update = BCON_NEW("$set", "{", "blockchain", BCON_DOCUMENT(blockchain_doc), "}");
+
+    opts = BCON_NEW("upsert", BCON_BOOL(true));
+
+    if (!mongoc_collection_update_one(
+            ogs_mongoc()->collection.subscriber,
+            query, update, opts, NULL, &error)) {
+        ogs_error("mongoc_collection_update_one() failure: %s", error.message);
+        rv = OGS_ERROR;
+    }
+
+    bson_destroy(query);
+    bson_destroy(update);
+    bson_destroy(blockchain_doc);
+    bson_destroy(opts);
+
+    ogs_free(supi_type);
+    ogs_free(supi_id);
+
+    return rv;
+}

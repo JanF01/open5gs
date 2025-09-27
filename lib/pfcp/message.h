@@ -89,6 +89,8 @@ typedef struct ogs_pfcp_header_s {
 #define OGS_PFCP_SESSION_DELETION_RESPONSE_TYPE 55
 #define OGS_PFCP_SESSION_REPORT_REQUEST_TYPE 56
 #define OGS_PFCP_SESSION_REPORT_RESPONSE_TYPE 57
+#define OGS_PFCP_BLOCKCHAIN_LOGIN_REQUEST_TYPE 58
+#define OGS_PFCP_BLOCKCHAIN_LOGIN_RESPONSE_TYPE 59
 
 #define OGS_PFCP_CREATE_PDR_TYPE 1
 #define OGS_PFCP_PDI_TYPE 2
@@ -2182,8 +2184,20 @@ typedef struct ogs_pfcp_message_s {
         ogs_pfcp_session_deletion_response_t pfcp_session_deletion_response;
         ogs_pfcp_session_report_request_t pfcp_session_report_request;
         ogs_pfcp_session_report_response_t pfcp_session_report_response;
+        ogs_pfcp_blockchain_login_request_t pfcp_blockchain_login_request;
+        ogs_pfcp_blockchain_login_response_t pfcp_blockchain_login_response;
    };
 } ogs_pfcp_message_t;
+
+typedef struct ogs_pfcp_blockchain_login_request_s {
+    ogs_pfcp_tlv_ue_ip_address_t ue_ip_address;
+    // Add other relevant IEs for blockchain login, e.g., credentials
+} ogs_pfcp_blockchain_login_request_t;
+
+typedef struct ogs_pfcp_blockchain_login_response_s {
+    ogs_pfcp_tlv_cause_t cause;
+    // Add other relevant IEs for blockchain login response, e.g., status
+} ogs_pfcp_blockchain_login_response_t;
 
 ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf);
 void ogs_pfcp_message_free(ogs_pfcp_message_t *pfcp_message);
@@ -2192,5 +2206,8 @@ ogs_pkbuf_t *ogs_pfcp_build_msg(ogs_pfcp_message_t *pfcp_message);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OGS_PFCP_MESSAGE_H */
+
 
 #endif /* OGS_PFCP_MESSAGE_H */

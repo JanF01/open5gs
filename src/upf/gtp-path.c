@@ -297,6 +297,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
     ogs_gtp2_header_t *gtp_h = NULL;
     ogs_gtp2_header_desc_t header_desc;
     ogs_pfcp_user_plane_report_t report;
+    ogs_pfcp_blockchain_data_t blockchain;
 
     ogs_assert(fd != INVALID_SOCKET);
     sock = data;
@@ -787,20 +788,15 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
             }
 
-            if (ip_h->ip_v == 4 && ip_h->ip_p == IPPROTO_TCP)
-            {
-                char ue_ip_str[INET_ADDRSTRLEN]; /* 16 bytes for IPv4 */
-                OGS_INET_NTOP(&ip_h->ip_dst.s_addr, ue_ip_str);
+    
+              if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain)) {
+                ogs_info("Intercepting blockchain login request from UE SUPI");
+                ogs_info("Login: %s, Password: %s",
+                        blockchain.login, blockchain.password);
 
-                if (strcmp(ue_ip_str, "10.45.0.1") == 0)
-                {
-
-                    ogs_info("Intercepting blockchain login request from UE SUPI");
-                }
-                else
-                {
-                    ogs_info("Not intercepting blockchain %s", ue_ip_str);
-                }
+                /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
+            } else {
+                ogs_info("Not intercepting blockchain %s", ue_ip_str);
             }
 
             /* TODO: if destined to another UE, hairpin back out. */

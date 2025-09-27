@@ -278,3 +278,73 @@ ogs_pfcp_rule_t *ogs_pfcp_pdr_rule_find_by_packet(
 
     return NULL;
 }
+
+/* new */
+bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
+                                             ogs_pfcp_blockchain_data_t *blockchain)
+{
+    struct ip *ip_h = NULL;
+    struct tcphdr *tcph = NULL;
+    uint16_t ip_hlen = 0;
+    uint16_t dst_port = 0;
+    char dst_ip_str[INET_ADDRSTRLEN];
+
+    ogs_assert(pkbuf);
+    ogs_assert(pkbuf->len);
+    ogs_assert(pkbuf->data);
+
+    memset(blockchain, 0, sizeof(*blockchain));
+
+    ip_h = (struct ip *)pkbuf->data;
+
+    if (ip_h->ip_v == 4) {
+        ip_hlen = (ip_h->ip_hl) * 4;
+        OGS_INET_NTOP(&ip_h->ip_dst.s_addr, dst_ip_str);
+
+        if (strcmp(dst_ip_str, "10.45.0.1") == 0 && ip_h->ip_p == IPPROTO_TCP) {
+            tcph = (struct tcphdr *)((char *)pkbuf->data + ip_hlen);
+            dst_port = be16toh(tcph->th_dport);
+
+            if (dst_port == 9500) {
+                char *payload = (char *)pkbuf->data + ip_hlen + (tcph->th_off * 4);
+                int payload_len = pkbuf->len - ip_hlen - (tcph->th_off * 4);
+
+                if (payload_len <= 0 || payload_len > pkbuf->len)
+                    return false;
+
+                char *login_start = strstr(payload, "\"login\"");
+                char *pass_start  = strstr(payload, "\"password\"");
+
+                if (login_start && pass_start) {
+                    char *lq = strchr(login_start + 7, '\"');
+                    char *lq_end = lq ? strchr(lq + 1, '\"') : NULL;
+
+                    char *pq = strchr(pass_start + 10, '\"');
+                    char *pq_end = pq ? strchr(pq + 1, '\"') : NULL;
+
+                    if (lq && lq_end && pq && pq_end) {
+                        int login_len = lq_end - (lq + 1);
+                        int pass_len  = pq_end - (pq + 1);
+
+                        if (login_len > 0 && login_len < OGS_PFCP_MAX_LOGIN_LEN) {
+                            memcpy(blockchain->login, lq + 1, login_len);
+                            blockchain->login[login_len] = '\0';
+                            blockchain->login_len = login_len;
+                        }
+
+                        if (pass_len > 0 && pass_len < OGS_PFCP_MAX_PASSWORD_LEN) {
+                            memcpy(blockchain->password, pq + 1, pass_len);
+                            blockchain->password[pass_len] = '\0';
+                            blockchain->password_len = pass_len;
+                        }
+
+
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}

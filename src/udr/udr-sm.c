@@ -174,6 +174,10 @@ void udr_state_operational(ogs_fsm_t *s, udr_event_t *e)
                 udr_nudr_dr_handle_policy_data(stream, &message);
                 break;
 
+            CASE(OGS_SBI_RESOURCE_NAME_BLOCKCHAIN_DATA)
+                udr_nudr_dr_handle_blockchain_data(stream, &message); // new
+                break;    
+
             DEFAULT
                 ogs_error("Invalid resource name [%s]",
                         message.h.resource.component[0]);

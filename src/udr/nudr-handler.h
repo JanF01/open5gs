@@ -35,6 +35,9 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
 bool udr_nudr_dr_handle_policy_data(
         ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
+        
+bool udr_nudr_dr_handle_blockchain_data(
+        ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);  // new
 
 #ifdef __cplusplus
 }

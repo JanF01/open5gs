@@ -71,6 +71,7 @@ libsmf_sources = files('''
     local-path.h
     metrics.h
     connected_ues.h
+    imsi-lookup-server.h
 
     init.c
     event.c
@@ -114,7 +115,9 @@ libsmf_sources = files('''
     local-path.c
     metrics.c
     connected_ues.c
-'''.split())
+    smf_custom_api.c
+    imsi-lookup-server.c
+    '''.split())
 
 libsmf = static_library('smf',
     sources : libsmf_sources,

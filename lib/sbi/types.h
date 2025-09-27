@@ -161,6 +161,9 @@ typedef enum {
 #define OGS_SBI_SERVICE_NAME_NAMF_CALLBACK "namf-callback"
 #define OGS_SBI_SERVICE_NAME_NSMF_CALLBACK "nsmf-callback"
 
+/* New custom resource for IMSI lookup */
+#define OGS_SBI_RESOURCE_NAME_IMSI_BY_IP "imsi-by-ip"
+
 OpenAPI_nf_type_e ogs_sbi_service_type_to_nf_type(
         ogs_sbi_service_type_e service_type);
 const char *ogs_sbi_service_type_to_name(ogs_sbi_service_type_e service_type);
@@ -275,6 +278,8 @@ typedef enum {
 
 const char *ogs_sbi_app_strerror(ogs_sbi_app_errno_e e);
 ogs_sbi_app_errno_e ogs_sbi_app_errno(const char *str);
+
+int ogs_str_to_ipv4(const char *str, uint32_t *ipv4_addr);
 
 #ifdef __cplusplus
 }

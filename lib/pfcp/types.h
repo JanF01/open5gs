@@ -1542,6 +1542,14 @@ typedef struct ogs_pfcp_user_plane_report_s {
     } error_indication;
 } ogs_pfcp_user_plane_report_t;
 
+/* new */
+typedef struct ogs_pfcp_blockchain_data_s {
+    uint8_t login[OGS_PFCP_MAX_LOGIN_LEN];
+    uint8_t password[OGS_PFCP_MAX_PASSWORD_LEN];
+    uint8_t login_len;
+    uint8_t password_len;
+} ogs_pfcp_blockchain_data_t;
+
 int16_t ogs_pfcp_build_volume_measurement(ogs_tlv_octet_t *octet,
         ogs_pfcp_volume_measurement_t *volume, void *data, int data_len);
 int16_t ogs_pfcp_parse_volume_measurement(

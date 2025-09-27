@@ -1185,3 +1185,35 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response( uint8_t type, uint8_t cau
 
     return pkbuf;
 }
+
+ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
+        uint8_t type, ogs_pfcp_ue_ip_address_t *ue_ip_address)
+{
+    ogs_pfcp_message_t *pfcp_message = NULL;
+    ogs_pfcp_blockchain_login_request_t *req = NULL;
+    ogs_pkbuf_t *pkbuf = NULL;
+
+    ogs_debug("PFCP Blockchain Login Request");
+
+    pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
+    if (!pfcp_message) {
+        ogs_error("ogs_calloc() failed");
+        return NULL;
+    }
+
+    req = &pfcp_message->pfcp_blockchain_login_request;
+
+    if (ue_ip_address) {
+        req->ue_ip_address.presence = 1;
+        req->ue_ip_address.data = ue_ip_address->data;
+        req->ue_ip_address.len = ue_ip_address->len;
+    }
+
+    pfcp_message->h.type = type;
+    pkbuf = ogs_pfcp_build_msg(pfcp_message);
+    ogs_expect(pkbuf);
+
+    ogs_free(pfcp_message);
+
+    return pkbuf;
+}

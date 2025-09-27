@@ -191,3 +191,17 @@ ogs_sbi_app_errno_e ogs_sbi_app_errno(const char *str)
 
     return OGS_SBI_APP_ERRNO_NULL;
 }
+
+int ogs_str_to_ipv4(const char *str, uint32_t *ipv4_addr)
+{
+    ogs_assert(str);
+    ogs_assert(ipv4_addr);
+
+    if (inet_pton(AF_INET, str, ipv4_addr) != 1) {
+        ogs_error("inet_pton() failed for IPv4 address [%s]", str);
+        return OGS_ERROR;
+    }
+    *ipv4_addr = ntohl(*ipv4_addr); // Convert to host byte order for consistency if needed elsewhere
+
+    return OGS_OK;
+}

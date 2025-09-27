@@ -57,6 +57,7 @@ int smf_sbi_open(void)
         ogs_sbi_nf_service_add_allowed_nf_type(service, OpenAPI_nf_type_SMF);
     }
 
+
     /* Initialize NRF NF Instance */
     nf_instance = ogs_sbi_self()->nrf_instance;
     if (nf_instance)
@@ -1163,3 +1164,4 @@ bool smf_sbi_send_status_notify(smf_sess_t *sess)
 
     return rc;
 }
+

@@ -29,7 +29,6 @@
 #include "ogs-diameter-s6b.h"
 #include "ogs-pfcp.h"
 #include "ogs-sbi.h"
-#include "ogs-dbi.h"
 #include "ogs-app.h"
 #include "ogs-ngap.h"
 #include "ogs-nas-5gs.h"

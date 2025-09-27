@@ -41,6 +41,9 @@ int upf_pfcp_send_session_deletion_response(ogs_pfcp_xact_t *xact,
 int upf_pfcp_send_session_report_request(
         upf_sess_t *sess, ogs_pfcp_user_plane_report_t *report);
 
+int upf_pfcp_blockchain_data_operation(
+        upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain);
+
 #ifdef __cplusplus
 }
 #endif
