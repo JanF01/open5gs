@@ -4696,13 +4696,13 @@ ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf)
                                &ogs_pfcp_msg_desc_pfcp_session_report_response, pkbuf, OGS_TLV_MODE_T2_L2);
         ogs_expect(rv == OGS_OK);
         break;
-    case OGS_PFCP_BLOCKCHAIN_LOGIN_REQUEST_TYPE:
+    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
         rv = ogs_tlv_parse_msg(&pfcp_message->pfcp_blockchain_credentials_request,
-                               &ogs_pfcp_msg_desc_pfcp_blockchain_login_request, pkbuf, OGS_TLV_MODE_T2_L2);
+                               &ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request, pkbuf, OGS_TLV_MODE_T2_L2);
         ogs_expect(rv == OGS_OK);
         break;
 
-    case OGS_PFCP_BLOCKCHAIN_LOGIN_RESPONSE_TYPE:
+    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
         rv = ogs_tlv_parse_msg(
             &pfcp_message->pfcp_blockchain_login_response,
             &ogs_pfcp_msg_desc_pfcp_blockchain_login_response, pkbuf, OGS_TLV_MODE_T2_L2);
@@ -4837,11 +4837,11 @@ ogs_pkbuf_t *ogs_pfcp_build_msg(ogs_pfcp_message_t *pfcp_message)
         break;
     case OGS_PFCP_BLOCKCHAIN_LOGIN_REQUEST_TYPE:
         pkbuf = ogs_tlv_build_msg(&ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request,
-                                  &pfcp_message->pfcp_blockchain_login_request, OGS_TLV_MODE_T2_L2);
+                                  &pfcp_message->pfcp_blockchain_credentials_request, OGS_TLV_MODE_T2_L2);
         break;
     case OGS_PFCP_BLOCKCHAIN_LOGIN_RESPONSE_TYPE:
         pkbuf = ogs_tlv_build_msg(&ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response,
-                                  &pfcp_message->pfcp_blockchain_login_response, OGS_TLV_MODE_T2_L2);
+                                  &pfcp_message->pfcp_blockchain_credentials_response, OGS_TLV_MODE_T2_L2);
         break;
     default:
         ogs_warn("Not implemented(type:%d)", pfcp_message->h.type);

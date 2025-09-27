@@ -97,8 +97,8 @@ extern "C"
 #define OGS_PFCP_SESSION_DELETION_RESPONSE_TYPE 55
 #define OGS_PFCP_SESSION_REPORT_REQUEST_TYPE 56
 #define OGS_PFCP_SESSION_REPORT_RESPONSE_TYPE 57
-#define OGS_PFCP_BLOCKCHAIN_LOGIN_REQUEST_TYPE 58
-#define OGS_PFCP_BLOCKCHAIN_LOGIN_RESPONSE_TYPE 59
+#define OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE 58
+#define OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE 59
 
 #define OGS_PFCP_CREATE_PDR_TYPE 1
 #define OGS_PFCP_PDI_TYPE 2
@@ -2341,8 +2341,8 @@ extern "C"
             ogs_pfcp_session_deletion_response_t pfcp_session_deletion_response;
             ogs_pfcp_session_report_request_t pfcp_session_report_request;
             ogs_pfcp_session_report_response_t pfcp_session_report_response;
-            ogs_pfcp_blockchain_login_request_t pfcp_blockchain_login_request;
-            ogs_pfcp_blockchain_login_response_t pfcp_blockchain_login_response;
+            ogs_pfcp_blockchain_credentials_request_t pfcp_blockchain_credentials_request;
+            ogs_pfcp_blockchain_credentials_response_t pfcp_blockchain_credentials_response;
         };
     } ogs_pfcp_message_t;
 
@@ -2365,7 +2365,5 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OGS_PFCP_MESSAGE_H */
 
 #endif /* OGS_PFCP_MESSAGE_H */
