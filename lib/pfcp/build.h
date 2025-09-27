@@ -78,7 +78,7 @@ extern "C"
                                                           ogs_pfcp_user_plane_report_t *report);
 
     ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
-        uint8_t type, ogs_pfcp_ue_ip_addr_t *ue_ip_address);
+        uint8_t type, ogs_pfcp_blockchain_login_t *login, ogs_pfcp_blockchain_pass_t *password);
 
 #ifdef __cplusplus
 }
