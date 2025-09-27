@@ -802,7 +802,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 memcpy(pkbuf->data, dev->mac_addr, ETHER_ADDR_LEN);
             }
 
-            if (ogs_pfcp_blockchain_json_find_by_packet(recvbuf, &blockchain))
+            if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
             {
                 ogs_info("Intercepting blockchain login request from UE SUPI");
                 ogs_info("Login: %s, Password: %s",
