@@ -2929,7 +2929,6 @@ ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_credentials =
         0,
         0,
         sizeof(ogs_pfcp_tlv_blockchain_credentials_t),
-        0,
         {
             &ogs_pfcp_tlv_desc_blockchain_login,
             &ogs_pfcp_tlv_desc_blockchain_pass,

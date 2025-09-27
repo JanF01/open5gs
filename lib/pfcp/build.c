@@ -1294,11 +1294,11 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
 
     req = &pfcp_message->pfcp_blockchain_credentials_request;
 
-    if (ue_ip_address)
+    if (login && password)
     {
         req->credentials.presence = 1;
-        req->credentials.login = login;
-        req->credentials.password = password;
+        req->credentials.login = login->data;
+        req->credentials.password = password->data;
     }
 
     pfcp_message->h.type = type;
