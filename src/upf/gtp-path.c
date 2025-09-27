@@ -113,24 +113,11 @@ static void _gtpv1_tun_recv_common_cb(
     ogs_pfcp_pdr_t *pdr = NULL;
     ogs_pfcp_pdr_t *fallback_pdr = NULL;
     ogs_pfcp_far_t *far = NULL;
-    ogs_pfcp_blockchain_data_t blockchain;
     ogs_pfcp_user_plane_report_t report;
     int i;
 
     recvbuf = ogs_tun_read(fd, packet_pool);
 
-    if (ogs_pfcp_blockchain_json_find_by_packet(recvbuf, &blockchain))
-    {
-        ogs_info("Intercepting blockchain login request FIRST");
-        ogs_info("Login: %s, Password: %s",
-                 blockchain.login, blockchain.password);
-
-        /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-    }
-    else
-    {
-        ogs_info("Not intercepting blockchain FIRST");
-    }
     if (!recvbuf)
     {
         ogs_warn("ogs_tun_read() failed");
@@ -239,19 +226,6 @@ static void _gtpv1_tun_recv_common_cb(
             upf_gtp_handle_multicast(recvbuf);
         }
         goto cleanup;
-    }
-
-    if (ogs_pfcp_blockchain_json_find_by_packet(recvbuf, &blockchain))
-    {
-        ogs_info("Intercepting blockchain login request from UE SUPI");
-        ogs_info("Login: %s, Password: %s",
-                 blockchain.login, blockchain.password);
-
-        /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-    }
-    else
-    {
-        ogs_info("Not intercepting blockchain");
     }
 
     /* Increment total & dl octets + pkts */
@@ -405,18 +379,6 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
     if (header_desc.type == OGS_GTPU_MSGTYPE_END_MARKER)
     {
         /* Nothing */
-        if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
-        {
-            ogs_info("Intercepting blockchain login request from UE SUPI v3");
-            ogs_info("Login: %s, Password: %s",
-                     blockchain.login, blockchain.password);
-
-            /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-        }
-        else
-        {
-            ogs_info("Not intercepting blockchain v3");
-        }
     }
     else if (header_desc.type == OGS_GTPU_MSGTYPE_ERR_IND)
     {
@@ -460,19 +422,6 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
 
         ip_h = (struct ip *)pkbuf->data;
         ogs_assert(ip_h);
-
-        if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
-        {
-            ogs_info("Intercepting blockchain login request from UE SUPI v2");
-            ogs_info("Login: %s, Password: %s",
-                     blockchain.login, blockchain.password);
-
-            /*upf_pfcp_blockchain_data_operation(sess, &blockchain);*/
-        }
-        else
-        {
-            ogs_info("Not intercepting blockchain v2");
-        }
 
         /*
          * Issue #2210, Discussion #2208, #2209
