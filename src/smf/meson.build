@@ -113,7 +113,6 @@ libsmf_sources = files('''
     local-path.c
     metrics.c
     connected_ues.c
-    smf_custom_api.c
     '''.split())
 
 libsmf = static_library('smf',
