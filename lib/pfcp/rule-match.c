@@ -345,25 +345,22 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
 
                 /* Make a null-terminated copy of the payload */
                 char tmp_payload[4096];
-                int copy_len = (payload_len < (int)sizeof(tmp_payload) - 1)
-                                   ? payload_len
-                                   : (int)sizeof(tmp_payload) - 1;
+                int copy_len = (payload_len < (int)sizeof(tmp_payload) - 1) ? payload_len : (int)sizeof(tmp_payload) - 1;
                 memcpy(tmp_payload, payload, copy_len);
                 tmp_payload[copy_len] = '\0';
 
-                /* Skip HTTP headers to find JSON body */
-                char *json_start = strstr(tmp_payload, "\r\n\r\n");
-                if (!json_start)
-                    json_start = strstr(tmp_payload, "\n\n"); // fallback
-
+                /* Find the start of the JSON payload */
+                char *json_start = strchr(tmp_payload, '{');
                 if (!json_start)
                 {
                     ogs_error("Cannot find JSON body in payload");
+                    ogs_info("Payload dump:\n%.*s", copy_len, tmp_payload);
                     return false;
                 }
 
-                json_start += (json_start[1] == '\n') ? 2 : 4; // skip header separator
+                ogs_info("JSON body: %s", json_start);
 
+                /* Parse login and password */
                 char login[OGS_PFCP_MAX_LOGIN_LEN];
                 char password[OGS_PFCP_MAX_PASSWORD_LEN];
 
@@ -384,7 +381,7 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                 }
                 else
                 {
-                    ogs_error("json didn't match");
+                    ogs_error("JSON didn't match expected format");
                     return false;
                 }
             }
