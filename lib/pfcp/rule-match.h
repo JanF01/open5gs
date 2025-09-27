@@ -25,12 +25,13 @@
 #define OGS_PFCP_RULE_MATCH_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-ogs_pfcp_rule_t *ogs_pfcp_pdr_rule_find_by_packet(
-                    ogs_pfcp_pdr_t *pdr, ogs_pkbuf_t *pkbuf);
-bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf, ogs_pfcp_blockchain_data_t *blockchain)/* new */
+    ogs_pfcp_rule_t *ogs_pfcp_pdr_rule_find_by_packet(
+        ogs_pfcp_pdr_t *pdr, ogs_pkbuf_t *pkbuf);
+    bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf, ogs_pfcp_blockchain_data_t *blockchain); /* new */
 
 #ifdef __cplusplus
 }
