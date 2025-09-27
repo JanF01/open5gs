@@ -394,7 +394,7 @@ ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_login =
         0,
         0,
         sizeof(ogs_pfcp_tlv_blockchain_login_t),
-        {NULL}}
+        {NULL}};
 
 ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_pass =
     {
@@ -404,7 +404,17 @@ ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_pass =
         0,
         0,
         sizeof(ogs_pfcp_tlv_blockchain_pass_t),
-        {NULL}}
+        {NULL}};
+
+ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_node_id =
+    {
+        OGS_TLV_VAR_STR,
+        "Blockchain Node ID",
+        OGS_PFCP_BLOCKCHAIN_NODE_ID,
+        0,
+        0,
+        sizeof(ogs_pfcp_tlv_blockchain_node_id_t),
+        {NULL}};
 
 ogs_tlv_desc_t ogs_pfcp_tlv_desc_f_seid = {OGS_TLV_VAR_STR, "F-SEID", OGS_PFCP_F_SEID_TYPE, 0, 0, sizeof(ogs_pfcp_tlv_f_seid_t), {NULL}};
 
@@ -2946,6 +2956,7 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
         0,
         0,
         {&ogs_pfcp_tlv_desc_blockchain_credentials,
+         &ogs_pfcp_tlv_desc_blockchain_node_id,
          NULL}};
 
 ogs_tlv_desc_t ogs_pfcp_tlv_desc_update_pdr =

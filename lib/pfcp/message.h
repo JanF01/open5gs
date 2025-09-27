@@ -422,8 +422,9 @@ extern "C"
 #define OGS_PFCP_VENDOR_SPECIFIC_NODE_REPORT_TYPE_TYPE 320
 #define OGS_PFCP_CONFIGURED_TIME_DOMAIN_TYPE 321
 #define OGS_PFCP_BLOCKCHAIN_CREDENTIALS 322
-#define OGS_PFCP_BLOCKCHAIN_LOGIN 322
-#define OGS_PFCP_BLOCKCHAIN_PASSWORD 322
+#define OGS_PFCP_BLOCKCHAIN_LOGIN 323
+#define OGS_PFCP_BLOCKCHAIN_PASSWORD 324
+#define OGS_PFCP_BLOCKCHAIN_NODE_ID 325
 
     /* Information Element TLV Descriptor */
     extern ogs_tlv_desc_t ogs_pfcp_tlv_desc_cause;
@@ -1011,6 +1012,7 @@ extern "C"
     typedef ogs_tlv_octet_t ogs_pfcp_tlv_configured_time_domain_t;
     typedef ogs_tlv_octet_t ogs_pfcp_tlv_blockchain_login_t;
     typedef ogs_tlv_octet_t ogs_pfcp_tlv_blockchain_pass_t;
+    typedef ogs_tlv_octet_t ogs_pfcp_tlv_blockchain_node_id_t;
 
     /* Structure for Group Information Element */
     typedef struct ogs_pfcp_tlv_ethernet_packet_filter_s
@@ -2038,6 +2040,7 @@ extern "C"
     typedef struct ogs_pfcp_blockchain_credentials_response_s
     {
         ogs_pfcp_tlv_blockchain_credentials_t credentials;
+        ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id;
     } ogs_blockchain_credentials_response_t;
 
     typedef struct ogs_pfcp_association_update_request_s
