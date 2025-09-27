@@ -337,7 +337,7 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
 
                 if (payload_len <= 0 || payload_len > pkbuf->len)
                 {
-                    ogs_debug("pkbuf->len=%d ip_hlen=%d tcp_hlen=%d payload_len=%d",
+                    ogs_error("pkbuf->len=%d ip_hlen=%d tcp_hlen=%d payload_len=%d",
                               pkbuf->len, ip_hlen, tcph->th_off * 4, payload_len);
                     ogs_error("no payload");
                     return false;
