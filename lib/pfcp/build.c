@@ -1277,7 +1277,7 @@ ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response(uint8_t type, uint8_t caus
 }
 
 ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
-    uint8_t type, ogs_pfcp_ue_ip_addr_t *ue_ip_address)
+    uint8_t type, ogs_pfcp_blockchain_login_t *login, ogs_pfcp_blockchain_pass_t *password)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pfcp_blockchain_credentials_request_t *req = NULL;
@@ -1292,13 +1292,13 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
         return NULL;
     }
 
-    req = &pfcp_message->pfcp_blockchain_login_request;
+    req = &pfcp_message->pfcp_blockchain_credentials_request;
 
     if (ue_ip_address)
     {
-        req->ue_ip_address.presence = 1;
-        req->ue_ip_address.data = ue_ip_address->data;
-        req->ue_ip_address.len = ue_ip_address->len;
+        req->credentials.presence = 1;
+        req->credentials.login = login;
+        req->credentials.password = password;
     }
 
     pfcp_message->h.type = type;
