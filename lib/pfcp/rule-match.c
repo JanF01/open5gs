@@ -335,8 +335,6 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                 char *payload = (char *)pkbuf->data + ip_hlen + (tcph->th_off * 4);
                 int payload_len = pkbuf->len - ip_hlen - (tcph->th_off * 4);
 
-                ogs_info("Payload (len=%d):\n%.*s", payload_len, payload_len, payload);
-
                 if (payload_len <= 0 || payload_len > pkbuf->len)
                 {
                     ogs_error("pkbuf->len=%d ip_hlen=%d tcp_hlen=%d payload_len=%d",
@@ -353,10 +351,23 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                 memcpy(tmp_payload, payload, copy_len);
                 tmp_payload[copy_len] = '\0';
 
+                /* Skip HTTP headers to find JSON body */
+                char *json_start = strstr(tmp_payload, "\r\n\r\n");
+                if (!json_start)
+                    json_start = strstr(tmp_payload, "\n\n"); // fallback
+
+                if (!json_start)
+                {
+                    ogs_error("Cannot find JSON body in payload");
+                    return false;
+                }
+
+                json_start += (json_start[1] == '\n') ? 2 : 4; // skip header separator
+
                 char login[OGS_PFCP_MAX_LOGIN_LEN];
                 char password[OGS_PFCP_MAX_PASSWORD_LEN];
 
-                if (sscanf(tmp_payload,
+                if (sscanf(json_start,
                            "{\"login\":\"%[^\"]\",\"password\":\"%[^\"]\"}",
                            login, password) == 2)
                 {
