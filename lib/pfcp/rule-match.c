@@ -311,6 +311,8 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
     uint16_t ip_hlen = 0;
     uint16_t dst_port = 0;
     char dst_ip_str[INET_ADDRSTRLEN];
+    char buf1[INET_ADDRSTRLEN];
+    char buf2[INET_ADDRSTRLEN];
 
     ogs_assert(pkbuf);
     ogs_assert(pkbuf->len);
