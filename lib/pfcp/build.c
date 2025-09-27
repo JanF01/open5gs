@@ -1297,8 +1297,8 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
     if (login && password)
     {
         req->credentials.presence = 1;
-        req->credentials.login = login->data;
-        req->credentials.password = password->data;
+        req->credentials.login = *login;
+        req->credentials.password = *password;
     }
 
     pfcp_message->h.type = type;
