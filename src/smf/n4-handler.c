@@ -1804,3 +1804,10 @@ uint8_t smf_n4_handle_session_report_request(
     }
     return cause_value;
 }
+
+uint8_t smf_n4_handle_blockchain_credentials(
+        smf_sess_t *sess, ogs_pfcp_xact_t *pfcp_xact,
+        ogs_pfcp_blockchain_credentials_request_t *pfcp_req){
+
+
+        }  
