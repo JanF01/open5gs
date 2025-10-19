@@ -254,6 +254,62 @@ end:
     return request;
 }
 
+ogs_sbi_request_t *smf_nudm_sdm_build_blockchain_credentials(
+    smf_sess_t *sess, void *data)
+{
+    ogs_sbi_message_t message;
+    ogs_sbi_request_t *request = NULL;
+    smf_ue_t *smf_ue = NULL;
+
+    OpenAPI_sdm_blockchain_credentials_t BlockchainCredentials;
+    OpenAPI_snssai_t sNSSAI;
+
+    ogs_pfcp_tlv_blockchain_credentials_t *blockchain_credentials =
+        (ogs_pfcp_tlv_blockchain_credentials_t *)data;
+
+    ogs_assert(sess);
+    ogs_assert(blockchain_credentials);
+
+    smf_ue = smf_ue_find_by_id(sess->smf_ue_id);
+    ogs_assert(smf_ue);
+    ogs_assert(smf_ue->supi);
+
+    memset(&message, 0, sizeof(message));
+    memset(&BlockchainCredentials, 0, sizeof(BlockchainCredentials));
+    memset(&sNSSAI, 0, sizeof(sNSSAI));
+
+    message.h.method = (char *)OGS_SBI_HTTP_METHOD_POST;
+    message.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDM_SDM;
+    message.h.api.version = (char *)OGS_SBI_API_V2;
+    message.h.resource.component[0] = smf_ue->supi;
+    message.h.resource.component[1] =
+        (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS;
+
+    /* --- Populate blockchain credentials --- */
+    BlockchainCredentials.login = ogs_strdup((char *)blockchain_credentials->login.value);
+    BlockchainCredentials.password = ogs_strdup((char *)blockchain_credentials->password.value);
+
+    /* --- Include serving S-NSSAI context --- */
+    sNSSAI.sst = sess->s_nssai.sst;
+    sNSSAI.sd = ogs_s_nssai_sd_to_string(sess->s_nssai.sd);
+    BlockchainCredentials.single_nssai = &sNSSAI;
+
+    /* --- Attach to message --- */
+    message.SdmBlockchainCredentials = &BlockchainCredentials;
+
+    /* --- Build the SBI request (OpenAPI -> JSON -> HTTP body) --- */
+    request = ogs_sbi_build_request(&message);
+    ogs_expect(request);
+
+end:
+    if (sNSSAI.sd)
+        ogs_free(sNSSAI.sd);
+    ogs_free(BlockchainCredentials.login);
+    ogs_free(BlockchainCredentials.password);
+
+    return request;
+}
+
 ogs_sbi_request_t *smf_nudm_sdm_build_subscription_delete(
         smf_sess_t *sess, void *data)
 {

@@ -77,7 +77,7 @@ extern "C"
     ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response(uint8_t type, uint8_t cause,
                                                           ogs_pfcp_user_plane_report_t *report);
 
-    ogs_pkbuf_t *ogs_pfcp_build_blockchain_login_request(
+    ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_request(
         uint8_t type, ogs_pfcp_tlv_blockchain_login_t *login, ogs_pfcp_tlv_blockchain_pass_t *password);
 
 #ifdef __cplusplus

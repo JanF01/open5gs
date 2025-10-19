@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "ogs-diameter-rx.h": "c"
+        "ogs-diameter-rx.h": "c",
+        "sdm_blockchain_credentials.h": "c",
+        "ogs-kdf.h": "c"
     }
 }

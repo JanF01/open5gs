@@ -20,6 +20,7 @@
 #include "sbi-path.h"
 #include "nnrf-handler.h"
 #include "nudm-handler.h"
+#include "nudr-handler.h"
 
 bool udm_nudm_ueau_handle_get(
     udm_ue_t *udm_ue, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
@@ -782,5 +783,79 @@ bool udm_nudm_sdm_handle_subscription_delete(
     ogs_assert(response);
     ogs_sbi_server_send_response(stream, response);
 
+    return true;
+}
+
+bool udm_nudm_sdm_handle_blockchain_credentials(
+        udm_ue_t *udm_ue, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
+{
+    int r;
+    OpenAPI_sdm_blockchain_credentials_t *SdmBlockchainCredentials = NULL;
+
+    ogs_assert(udm_ue);
+    ogs_assert(stream);
+    ogs_assert(recvmsg);
+
+    SdmBlockchainCredentials = recvmsg->SdmBlockchainCredentials;
+    if (!SdmBlockchainCredentials) {
+        ogs_error("[%s] Missing Blockchain Credentials payload", udm_ue->supi);
+        ogs_assert(true == ogs_sbi_server_send_error(
+            stream,
+            OGS_SBI_HTTP_STATUS_BAD_REQUEST,
+            recvmsg,
+            "Missing SdmBlockchainCredentials in request body",
+            udm_ue->supi,
+            NULL));
+        return false;
+    }
+
+    /* Basic validation */
+    if (!SdmBlockchainCredentials->login || !SdmBlockchainCredentials->password) {
+        ogs_error("[%s] Incomplete Blockchain Credentials", udm_ue->supi);
+        ogs_assert(true == ogs_sbi_server_send_error(
+            stream,
+            OGS_SBI_HTTP_STATUS_BAD_REQUEST,
+            recvmsg,
+            "Login or Password missing",
+            udm_ue->supi,
+            NULL));
+        return false;
+    }
+
+    /* Debug / trace */
+    ogs_info("Received Blockchain Credentials for SUPI[%s]", udm_ue->supi);
+    ogs_debug("Login: %s", SdmBlockchainCredentials->login);
+    ogs_debug("Password: %s", SdmBlockchainCredentials->password);
+
+    if (SdmBlockchainCredentials->single_nssai) {
+        ogs_debug("Single NSSAI: SST[%d] SD[%s]",
+            SdmBlockchainCredentials->single_nssai->sst,
+            SdmBlockchainCredentials->single_nssai->sd ?
+                SdmBlockchainCredentials->single_nssai->sd : "(none)");
+    }
+
+    /* Forward to UDR — NUDR_DR */
+    r = udm_ue_sbi_discover_and_send(
+            OGS_SBI_SERVICE_TYPE_NUDR_DR,
+            NULL,
+            udm_nudr_dr_build_blockchain_credentials,
+            udm_ue,
+            stream,
+            UDM_SBI_NO_STATE,
+            SdmBlockchainCredentials);
+
+    if (r != OGS_OK) {
+        ogs_error("[%s] Failed to forward Blockchain Credentials to UDR", udm_ue->supi);
+        ogs_assert(true == ogs_sbi_server_send_error(
+            stream,
+            OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR,
+            recvmsg,
+            "Failed to contact UDR",
+            udm_ue->supi,
+            NULL));
+        return false;
+    }
+
+    ogs_info("[%s] Blockchain Credentials forwarded to UDR successfully", udm_ue->supi);
     return true;
 }

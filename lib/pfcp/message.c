@@ -2924,7 +2924,7 @@ ogs_tlv_desc_t ogs_pfcp_tlv_desc_created_pdr =
 ogs_tlv_desc_t ogs_pfcp_tlv_desc_blockchain_credentials =
     {
         OGS_TLV_COMPOUND,
-        "Blockchain Login",
+        "Blockchain Credentials",
         OGS_PFCP_BLOCKCHAIN_CREDENTIALS, /* unique IE type number */
         0,
         0,
@@ -2939,7 +2939,7 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request =
     {
         OGS_TLV_MESSAGE,
         "Blockchain Credentials Request",
-        0,
+        OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE,
         0,
         0,
         0,
@@ -2950,7 +2950,7 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
     {
         OGS_TLV_MESSAGE,
         "Blockchain Credentials Response",
-        0,
+        OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE,
         0,
         0,
         0,

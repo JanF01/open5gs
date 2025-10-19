@@ -79,6 +79,8 @@ int ogs_base64_encode_binary(
 int ogs_fbase64_decode(const char *header,
         const uint8_t *data, size_t data_size, ogs_datum_t *result);
 
+int ogs_crypt_hash_password(const char *password, char *out_hash, size_t out_size);
+
 int ogs_pem_decode_curve25519_key(const char *filename, uint8_t *key);
 int ogs_pem_decode_secp256r1_key(const char *filename, uint8_t *key);
 

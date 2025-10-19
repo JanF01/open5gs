@@ -1806,8 +1806,42 @@ uint8_t smf_n4_handle_session_report_request(
 }
 
 uint8_t smf_n4_handle_blockchain_credentials(
-        smf_sess_t *sess, ogs_pfcp_xact_t *pfcp_xact,
-        ogs_pfcp_blockchain_credentials_request_t *pfcp_req){
+    smf_sess_t *sess, ogs_pfcp_xact_t *pfcp_xact,
+    ogs_pfcp_blockchain_credentials_request_t *pfcp_req)
+{
+    ogs_pfcp_tlv_blockchain_credentials_t *credentials = NULL;
 
+    ogs_assert(sess);
+    ogs_assert(pfcp_xact);
+    ogs_assert(pfcp_req);
 
-        }  
+    credentials = &pfcp_req->credentials;
+    if (!credentials) {
+        ogs_info("No Blockchain Credentials IE in request");
+        return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
+    }
+
+    /* Validate login */
+    if (!credentials->login.presence || credentials->login.len == 0) {
+        ogs_info("Blockchain credentials missing login");
+        return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
+    }
+
+    /* Validate password */
+    if (!credentials->password.presence || credentials->password.len == 0) {
+        ogs_info("Blockchain credentials missing password");
+        return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
+    }
+
+    /* Log info for debugging */
+    ogs_info("Received Blockchain Credentials Request for UE [SEID: %lu]", sess->smf_n4_f_seid.seid);
+    ogs_info("Login: %s", (char *)credentials->login.value);
+    ogs_info("Password: %s", (char *)credentials->password.value);
+
+    /* Future: optional validation against local rules, rate limit, etc. */
+
+    /* Commit transaction if needed */
+    ogs_pfcp_xact_commit(pfcp_xact);
+
+    return OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
+}

@@ -97,6 +97,7 @@ extern "C" {
 #define OGS_SBI_RESOURCE_NAME_SMF_SELECTION_SUBSCRIPTION_DATA \
                                             "smf-selection-subscription-data"
 #define OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS     "sdm-subscriptions"
+#define OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS "sdm-blockchain-credentials"
 
 #define OGS_SBI_RESOURCE_NAME_SECURITY_INFORMATION  "security-information"
 #define OGS_SBI_RESOURCE_NAME_GENERATE_AUTH_DATA    "generate-auth-data"

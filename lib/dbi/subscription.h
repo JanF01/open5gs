@@ -48,10 +48,17 @@ int ogs_dbi_update_mme(char *supi, char *mme_host, char *mme_realm,
 int ogs_dbi_subscription_data(char *supi,
         ogs_subscription_data_t *subscription_data);
 
-int ogs_dbi_insert_subscriber_blockchain_data(
+#define OGS_HASH_HEX_LEN (OGS_SHA256_DIGEST_SIZE * 2 + 1)
+
+int ogs_dbi_get_or_insert_subscriber_blockchain(
     const char *supi,
-    const char *blockchain_node_id,
-    const char *login, const char *hashed_password);
+    const char *login,
+    const char *password,
+    char *out_blockchain_node_id,
+    size_t id_size);
+
+int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size);
+int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex);
 
 
 #ifdef __cplusplus

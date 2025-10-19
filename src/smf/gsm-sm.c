@@ -818,7 +818,7 @@ void smf_gsm_state_wait_pfcp_establishment(ogs_fsm_t *s, smf_event_t *e)
                     ogs_assert(r != OGS_ERROR);
                 } else if (HOME_ROUTED_ROAMING_IN_HSMF(sess)) {
                     r = smf_sbi_discover_and_send(
-                            OGS_SBI_SERVICE_TYPE_NUDM_UECM, NULL,
+                            OGS_SBI_SERVICE_TYPE_NUDM_SDM, NULL,
                             smf_nudm_uecm_build_registration,
                             sess, stream,
                             SMF_UECM_STATE_REGISTERED_HR,
@@ -1011,8 +1011,14 @@ void smf_gsm_state_operational(ogs_fsm_t *s, smf_event_t *e)
                             &pfcp_message->pfcp_blockchain_credentials_request);
 
             if (pfcp_cause == OGS_PFCP_CAUSE_REQUEST_ACCEPTED) {
-                // forward blockchain data to UDR via Nudr SBI API
-                //smf_udr_send_blockchain_data(sess, &pfcp_message->pfcp_blockchain_credentials_request);
+                r = smf_sbi_discover_and_send(
+                            OGS_SBI_SERVICE_TYPE_NUDM_SDM, NULL,
+                            smf_nudm_sdm_build_blockchain_credentials,
+                            sess, stream,
+                            SMF_UECM_STATE_BLOCKCHAIN_CREDENTIALS,
+                            &pfcp_message->pfcp_blockchain_credentials_request);
+                ogs_expect(r == OGS_OK);
+                ogs_assert(r != OGS_ERROR);
             }
             break;
 

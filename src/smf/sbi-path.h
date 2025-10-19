@@ -101,6 +101,8 @@ bool smf_sbi_send_request(
     (SMF_UECM_STATE_DEREG_BY_AMF | SMF_STATE_HR)    /* 0xC2 */
 #define SMF_UECM_STATE_DEREG_BY_N1N2_HR             \
     (SMF_UECM_STATE_DEREG_BY_N1N2 | SMF_STATE_HR)   /* 0xC3 */
+#define SMF_UECM_STATE_BLOCKCHAIN_CREDENTIALS       \
+    (SMF_UECM_STATE_BASE + 0x04U) /* 0x44 */
 
 int smf_sbi_discover_and_send(
         ogs_sbi_service_type_e service_type,

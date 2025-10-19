@@ -335,3 +335,30 @@ end:
 
     return request;
 }
+
+ogs_sbi_request_t *udm_nudr_dr_build_blockchain_credentials(
+        udm_ue_t *udm_ue, void *data)
+{
+    ogs_assert(udm_ue);
+    OpenAPI_sdm_blockchain_credentials_t *cred = data;
+    ogs_assert(cred);
+
+    ogs_sbi_message_t sendmsg;
+    memset(&sendmsg, 0, sizeof(sendmsg));
+
+    sendmsg.h.method = OGS_SBI_HTTP_METHOD_POST;
+    sendmsg.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDR_DR;
+    sendmsg.h.api.version = (char *)OGS_SBI_API_V1;
+
+    sendmsg.h.resource.component[0] = (char *)OGS_SBI_RESOURCE_NAME_SUBSCRIPTION_DATA;
+    sendmsg.h.resource.component[1] = udm_ue->supi;
+    sendmsg.h.resource.component[2] = (char *)OGS_SBI_RESOURCE_NAME_BLOCKCHAIN_CREDENTIALS;
+
+    /* Forward the payload */
+    sendmsg.SdmBlockchainCredentials = cred;
+
+    ogs_sbi_request_t *request = ogs_sbi_build_request(&sendmsg);
+    ogs_assert(request);
+
+    return request;
+}
