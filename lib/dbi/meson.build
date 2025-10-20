@@ -35,10 +35,10 @@ libdbi = library('ogsdbi',
     version : libogslib_version,
     c_args : '-DOGS_DBI_COMPILATION',
     include_directories : [libdbi_inc, libinc],
-    dependencies : [libproto_dep, libmongoc_dep],
+    dependencies : [libproto_dep, libmongoc_dep, libcrypt_dep],
     install : true)
 
 libdbi_dep = declare_dependency(
     link_with : libdbi,
     include_directories : [libdbi_inc, libinc],
-    dependencies : [libproto_dep, libmongoc_dep])
+    dependencies : [libproto_dep, libmongoc_dep, libcrypt_dep])
