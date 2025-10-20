@@ -10,27 +10,28 @@
 #include "snssai.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct OpenAPI_sdm_blockchain_credentials_s OpenAPI_sdm_blockchain_credentials_t;
-typedef struct OpenAPI_sdm_blockchain_credentials_s {
-    char *login;
-    char *password;
-    OpenAPI_snssai_t *single_nssai;
-} OpenAPI_sdm_blockchain_credentials_t;
+    typedef struct OpenAPI_sdm_blockchain_credentials_s OpenAPI_sdm_blockchain_credentials_t;
+    typedef struct OpenAPI_sdm_blockchain_credentials_s
+    {
+        char *login;
+        char *password;
+        OpenAPI_snssai_t *single_nssai;
+    } OpenAPI_sdm_blockchain_credentials_t;
 
-OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_create(
-    char *login,
-    char *password,
-    OpenAPI_snssai_t *single_nssai
-);
+    OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_create(
+        char *login,
+        char *password,
+        OpenAPI_snssai_t *single_nssai);
 
-void OpenAPI_sdm_blockchain_credentials_free(OpenAPI_sdm_blockchain_credentials_t *sdm_blockchain_credentials);
+    void OpenAPI_sdm_blockchain_credentials_free(OpenAPI_sdm_blockchain_credentials_t *sdm_blockchain_credentials);
 
-cJSON *OpenAPI_sdm_blockchain_credentials_convertToJSON(OpenAPI_sdm_blockchain_credentials_t *sdm_blockchain_credentials);
+    cJSON *OpenAPI_sdm_blockchain_credentials_convertToJSON(OpenAPI_sdm_blockchain_credentials_t *sdm_blockchain_credentials);
 
-OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_parseFromJSON(cJSON *sdm_blockchain_credentialsJSON);
+    OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_parseFromJSON(cJSON *sdm_blockchain_credentialsJSON);
 
 #ifdef __cplusplus
 }
