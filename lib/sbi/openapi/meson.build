@@ -1013,6 +1013,8 @@ libsbi_openapi_sources = files('''
     model/scp_info.c
     model/sc_type.c
     model/sdm_blockchain_credentials.c
+    model/sdm_blockchain_node_id.c
+    model/sdm_blockchain_credentials_response.c
     model/sdm_subscription_1.c
     model/sdm_subscription.c
     model/sdm_subs_modification.c

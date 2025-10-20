@@ -90,6 +90,7 @@
 #include "model/termination_notification.h"
 #include "model/deregistration_data.h"
 #include "model/sdm_blockchain_credentials.h"
+#include "model/sdm_blockchain_credentials_response.h"
 #include "model/sdm_subscription.h"
 #include "model/modification_notification.h"
 #include "model/sec_negotiate_req_data.h"
