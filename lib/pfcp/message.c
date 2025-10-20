@@ -4700,7 +4700,6 @@ ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf)
                                &ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request, pkbuf, OGS_TLV_MODE_T2_L2);
         ogs_expect(rv == OGS_OK);
         break;
-
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
         rv = ogs_tlv_parse_msg(
             &pfcp_message->pfcp_blockchain_credentials_response,
