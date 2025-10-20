@@ -1015,7 +1015,8 @@ static inline void ogs_generate_random_string(char *buf, size_t len)
 {
     static const char charset[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (size_t i = 0; i < len; i++)
+    size_t i; // declare before the for loop (C89 style)
+    for (i = 0; i < len; i++)
     {
         buf[i] = charset[rand() % (sizeof(charset) - 1)];
     }
