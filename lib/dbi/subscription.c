@@ -18,7 +18,7 @@
  */
 
 #include "ogs-dbi.h"
-
+#include "ogs-sha2.c"
 int ogs_dbi_auth_info(char *supi, ogs_dbi_auth_info_t *auth_info)
 {
     int rv = OGS_OK;
