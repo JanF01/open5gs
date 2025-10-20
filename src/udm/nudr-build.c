@@ -20,7 +20,7 @@
 #include "nudr-build.h"
 
 ogs_sbi_request_t *udm_nudr_dr_build_authentication_subscription(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_request_t *request = NULL;
@@ -44,10 +44,12 @@ ogs_sbi_request_t *udm_nudr_dr_build_authentication_subscription(
     message.h.resource.component[3] =
         (char *)OGS_SBI_RESOURCE_NAME_AUTHENTICATION_SUBSCRIPTION;
 
-    if (!sqn) {
+    if (!sqn)
+    {
         message.h.method = (char *)OGS_SBI_HTTP_METHOD_GET;
-
-    } else {
+    }
+    else
+    {
         message.h.method = (char *)OGS_SBI_HTTP_METHOD_PATCH;
         message.http.content_type = (char *)OGS_SBI_CONTENT_PATCH_TYPE;
 
@@ -70,8 +72,10 @@ ogs_sbi_request_t *udm_nudr_dr_build_authentication_subscription(
     request = ogs_sbi_build_request(&message);
     ogs_assert(request);
 
-    if (PatchItemList) {
-        OpenAPI_list_for_each(PatchItemList, node) {
+    if (PatchItemList)
+    {
+        OpenAPI_list_for_each(PatchItemList, node)
+        {
             pitem = node->data;
             if (pitem)
                 OpenAPI_any_type_free(pitem->value);
@@ -83,7 +87,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_authentication_subscription(
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_update_authentication_status(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_request_t *request = NULL;
@@ -103,11 +107,14 @@ ogs_sbi_request_t *udm_nudr_dr_build_update_authentication_status(
     message.h.resource.component[3] =
         (char *)OGS_SBI_RESOURCE_NAME_AUTHENTICATION_STATUS;
 
-    if (udm_ue->auth_event->auth_removal_ind) {
-            message.h.method = (char *)OGS_SBI_HTTP_METHOD_DELETE;
-    } else {
+    if (udm_ue->auth_event->auth_removal_ind)
+    {
+        message.h.method = (char *)OGS_SBI_HTTP_METHOD_DELETE;
+    }
+    else
+    {
         message.AuthEvent = OpenAPI_auth_event_copy(
-                message.AuthEvent, udm_ue->auth_event);
+            message.AuthEvent, udm_ue->auth_event);
     }
 
     request = ogs_sbi_build_request(&message);
@@ -119,7 +126,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_update_authentication_status(
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_update_amf_context(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_request_t *request = NULL;
@@ -142,19 +149,19 @@ ogs_sbi_request_t *udm_nudr_dr_build_update_amf_context(
     message.Amf3GppAccessRegistration =
         OpenAPI_amf3_gpp_access_registration_copy(
             message.Amf3GppAccessRegistration,
-                udm_ue->amf_3gpp_access_registration);
+            udm_ue->amf_3gpp_access_registration);
 
     request = ogs_sbi_build_request(&message);
     ogs_assert(request);
 
     OpenAPI_amf3_gpp_access_registration_free(
-            message.Amf3GppAccessRegistration);
+        message.Amf3GppAccessRegistration);
 
     return request;
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_patch_amf_context(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_request_t *request = NULL;
@@ -185,8 +192,10 @@ ogs_sbi_request_t *udm_nudr_dr_build_patch_amf_context(
     request = ogs_sbi_build_request(&message);
     ogs_assert(request);
 
-    if (PatchItemList) {
-        OpenAPI_list_for_each(PatchItemList, node) {
+    if (PatchItemList)
+    {
+        OpenAPI_list_for_each(PatchItemList, node)
+        {
             pitem = node->data;
             if (pitem)
                 OpenAPI_any_type_free(pitem->value);
@@ -198,7 +207,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_patch_amf_context(
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_query_subscription_provisioned(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     char buf[OGS_PLMNIDSTRLEN];
 
@@ -225,37 +234,38 @@ ogs_sbi_request_t *udm_nudr_dr_build_query_subscription_provisioned(
 
     SWITCH(recvmsg->h.resource.component[1])
     CASE(OGS_SBI_RESOURCE_NAME_SM_DATA)
-        if (recvmsg->param.dnn)
-            sendmsg.param.dnn = recvmsg->param.dnn;
-        if (recvmsg->param.single_nssai_presence) {
-            sendmsg.param.single_nssai_presence = true;
-            memcpy(&sendmsg.param.s_nssai, &recvmsg->param.s_nssai,
-                    sizeof(sendmsg.param.s_nssai));
-        }
-        break;
+    if (recvmsg->param.dnn)
+        sendmsg.param.dnn = recvmsg->param.dnn;
+    if (recvmsg->param.single_nssai_presence)
+    {
+        sendmsg.param.single_nssai_presence = true;
+        memcpy(&sendmsg.param.s_nssai, &recvmsg->param.s_nssai,
+               sizeof(sendmsg.param.s_nssai));
+    }
+    break;
 
     CASE(OGS_SBI_RESOURCE_NAME_SMF_SELECT_DATA)
-        sendmsg.h.resource.component[4] =
-            (char *)OGS_SBI_RESOURCE_NAME_SMF_SELECTION_SUBSCRIPTION_DATA;
-        break;
+    sendmsg.h.resource.component[4] =
+        (char *)OGS_SBI_RESOURCE_NAME_SMF_SELECTION_SUBSCRIPTION_DATA;
+    break;
 
     CASE(OGS_SBI_RESOURCE_NAME_NSSAI)
-        sendmsg.h.resource.component[4] = (char *)OGS_SBI_RESOURCE_NAME_AM_DATA;
-        sendmsg.param.fields[0] = (char *)OGS_SBI_RESOURCE_NAME_NSSAI;
-        sendmsg.param.num_of_fields = 1;
-        break;
+    sendmsg.h.resource.component[4] = (char *)OGS_SBI_RESOURCE_NAME_AM_DATA;
+    sendmsg.param.fields[0] = (char *)OGS_SBI_RESOURCE_NAME_NSSAI;
+    sendmsg.param.num_of_fields = 1;
+    break;
 
     DEFAULT
     END
 
-    request = ogs_sbi_build_request(&sendmsg);
+        request = ogs_sbi_build_request(&sendmsg);
     ogs_assert(request);
 
     return request;
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_update_smf_context(
-        udm_sess_t *sess, void *data)
+    udm_sess_t *sess, void *data)
 {
     udm_ue_t *udm_ue = NULL;
     ogs_sbi_message_t message;
@@ -277,14 +287,16 @@ ogs_sbi_request_t *udm_nudr_dr_build_update_smf_context(
     message.h.resource.component[3] =
         (char *)OGS_SBI_RESOURCE_NAME_SMF_REGISTRATIONS;
     message.h.resource.component[4] = ogs_msprintf("%d", sess->psi);
-    if (!message.h.resource.component[4]) {
+    if (!message.h.resource.component[4])
+    {
         ogs_error("No memory : message.h.resource.component[4]");
         goto end;
     }
 
     message.SmfRegistration = OpenAPI_smf_registration_copy(
-            message.SmfRegistration, sess->smf_registration);
-    if (!message.SmfRegistration) {
+        message.SmfRegistration, sess->smf_registration);
+    if (!message.SmfRegistration)
+    {
         ogs_error("OpenAPI_smf_registration_copy() failed");
         goto end;
     }
@@ -300,7 +312,7 @@ end:
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_delete_smf_context(
-        udm_sess_t *sess, void *data)
+    udm_sess_t *sess, void *data)
 {
     udm_ue_t *udm_ue = NULL;
     ogs_sbi_message_t message;
@@ -322,7 +334,8 @@ ogs_sbi_request_t *udm_nudr_dr_build_delete_smf_context(
     message.h.resource.component[3] =
         (char *)OGS_SBI_RESOURCE_NAME_SMF_REGISTRATIONS;
     message.h.resource.component[4] = ogs_msprintf("%d", sess->psi);
-    if (!message.h.resource.component[4]) {
+    if (!message.h.resource.component[4])
+    {
         ogs_error("No memory : message.h.resource.component[4]");
         goto end;
     }
@@ -337,7 +350,7 @@ end:
 }
 
 ogs_sbi_request_t *udm_nudr_dr_build_blockchain_credentials(
-        udm_ue_t *udm_ue, void *data)
+    udm_ue_t *udm_ue, void *data)
 {
     ogs_assert(udm_ue);
     OpenAPI_sdm_blockchain_credentials_t *cred = data;
@@ -346,7 +359,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_blockchain_credentials(
     ogs_sbi_message_t sendmsg;
     memset(&sendmsg, 0, sizeof(sendmsg));
 
-    sendmsg.h.method = OGS_SBI_HTTP_METHOD_POST;
+    sendmsg.h.method = (char *)OGS_SBI_HTTP_METHOD_POST;
     sendmsg.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDR_DR;
     sendmsg.h.api.version = (char *)OGS_SBI_API_V1;
 
