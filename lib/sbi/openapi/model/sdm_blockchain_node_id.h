@@ -15,13 +15,14 @@ extern "C"
         char *blockchain_node_id; // 12 characters
     } OpenAPI_sdm_blockchain_node_id_t;
 
-    OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_create(const char *blockchain_node_id);
+    OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_create(char *blockchain_node_id);
     void OpenAPI_sdm_blockchain_node_id_free(OpenAPI_sdm_blockchain_node_id_t *obj);
     cJSON *OpenAPI_sdm_blockchain_node_id_convertToJSON(OpenAPI_sdm_blockchain_node_id_t *obj);
     OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_parseFromJSON(cJSON *json);
+    OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_copy(OpenAPI_sdm_blockchain_node_id_t *dst, OpenAPI_sdm_blockchain_node_id_t *src);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* _OpenAPI_sdm_blockchain_node_id_H_ */
