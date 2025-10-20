@@ -23,22 +23,22 @@
 #include "context.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-bool udr_nudr_dr_handle_subscription_authentication(
-        ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
-bool udr_nudr_dr_handle_subscription_context(
-        ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
-bool udr_nudr_dr_handle_subscription_provisioned(
-        ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
+        bool udr_nudr_dr_handle_subscription_authentication(
+            ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
+        bool udr_nudr_dr_handle_subscription_context(
+            ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
+        bool udr_nudr_dr_handle_subscription_provisioned(
+            ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
 
-bool udr_nudr_dr_handle_policy_data(
-        ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
+        bool udr_nudr_dr_handle_policy_data(
+            ogs_sbi_stream_t *stream, ogs_sbi_message_t *message);
 
-bool udr_nudr_dr_handle_blockchain_credentials(
-        void *udm_ue, ogs_sbi_stream_t *stream, int state, void *data);
-
+        bool udr_nudr_dr_handle_blockchain_credentials(
+            ogs_sbi_stream_t *stream, ogs_sbi_message_t *rcvmsg);
 
 #ifdef __cplusplus
 }
