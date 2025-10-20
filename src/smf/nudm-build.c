@@ -39,11 +39,11 @@ ogs_sbi_request_t *smf_nudm_sdm_build_get(smf_sess_t *sess, void *data)
 
     message.param.single_nssai_presence = true;
     memcpy(&message.param.s_nssai, &sess->s_nssai,
-            sizeof(message.param.s_nssai));
+           sizeof(message.param.s_nssai));
 
     message.param.plmn_id_presence = true;
     memcpy(&message.param.plmn_id, &sess->home_plmn_id,
-            sizeof(message.param.plmn_id));
+           sizeof(message.param.plmn_id));
 
     if (sess->session.name)
         message.param.dnn = sess->session.name;
@@ -55,7 +55,7 @@ ogs_sbi_request_t *smf_nudm_sdm_build_get(smf_sess_t *sess, void *data)
 }
 
 ogs_sbi_request_t *smf_nudm_uecm_build_registration(
-        smf_sess_t *sess, void *data)
+    smf_sess_t *sess, void *data)
 {
     smf_ue_t *smf_ue = NULL;
     ogs_sbi_message_t message;
@@ -87,7 +87,8 @@ ogs_sbi_request_t *smf_nudm_uecm_build_registration(
     message.h.resource.component[2] =
         (char *)OGS_SBI_RESOURCE_NAME_SMF_REGISTRATIONS;
     message.h.resource.component[3] = ogs_msprintf("%d", sess->psi);
-    if (!message.h.resource.component[3]) {
+    if (!message.h.resource.component[3])
+    {
         ogs_error("No memory : message.h.resource.component[3]");
         goto end;
     }
@@ -102,7 +103,8 @@ ogs_sbi_request_t *smf_nudm_uecm_build_registration(
     SmfRegistration.dnn = sess->session.name;
 
     SmfRegistration.plmn_id = ogs_sbi_build_plmn_id(&sess->serving_plmn_id);
-    if (!SmfRegistration.plmn_id) {
+    if (!SmfRegistration.plmn_id)
+    {
         ogs_error("No memory : SmfRegistration.plmn_id");
         goto end;
     }
@@ -119,7 +121,7 @@ end:
 }
 
 ogs_sbi_request_t *smf_nudm_uecm_build_deregistration(
-        smf_sess_t *sess, void *data)
+    smf_sess_t *sess, void *data)
 {
     smf_ue_t *smf_ue = NULL;
     ogs_sbi_message_t message;
@@ -142,7 +144,8 @@ ogs_sbi_request_t *smf_nudm_uecm_build_deregistration(
     message.h.resource.component[2] =
         (char *)OGS_SBI_RESOURCE_NAME_SMF_REGISTRATIONS;
     message.h.resource.component[3] = ogs_msprintf("%d", sess->psi);
-    if (!message.h.resource.component[3]) {
+    if (!message.h.resource.component[3])
+    {
         ogs_error("No memory : message.h.resource.component[3]");
         goto end;
     }
@@ -157,7 +160,7 @@ end:
 }
 
 ogs_sbi_request_t *smf_nudm_sdm_build_subscription(
-        smf_sess_t *sess, void *data)
+    smf_sess_t *sess, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_header_t header;
@@ -184,7 +187,7 @@ ogs_sbi_request_t *smf_nudm_sdm_build_subscription(
     message.h.api.version = (char *)OGS_SBI_API_V2;
     message.h.resource.component[0] = smf_ue->supi;
     message.h.resource.component[1] =
-            (char *)OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS;
+        (char *)OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS;
 
     memset(&SDMSubscription, 0, sizeof(SDMSubscription));
     memset(&sNSSAI, 0, sizeof(sNSSAI));
@@ -193,7 +196,8 @@ ogs_sbi_request_t *smf_nudm_sdm_build_subscription(
         NF_INSTANCE_ID(ogs_sbi_self()->nf_instance);
 
     server = ogs_sbi_server_first();
-    if (!server) {
+    if (!server)
+    {
         ogs_error("No server");
         goto end;
     }
@@ -205,7 +209,8 @@ ogs_sbi_request_t *smf_nudm_sdm_build_subscription(
         (char *)OGS_SBI_RESOURCE_NAME_SDMSUBSCRIPTION_NOTIFY;
     header.resource.component[1] = smf_ue->supi;
     SDMSubscription.callback_reference = ogs_sbi_server_uri(server, &header);
-    if (!SDMSubscription.callback_reference) {
+    if (!SDMSubscription.callback_reference)
+    {
         ogs_error("No callback_reference");
         goto end;
     }
@@ -220,9 +225,9 @@ ogs_sbi_request_t *smf_nudm_sdm_build_subscription(
     SDMSubscription.implicit_unsubscribe = 1;
 
     OGS_SBI_FEATURES_SET(supported_features,
-            OGS_SBI_NUDM_SDM_LIMITED_SUBSCRIPTIONS);
+                         OGS_SBI_NUDM_SDM_LIMITED_SUBSCRIPTIONS);
     SDMSubscription.supported_features =
-            ogs_uint64_to_string(supported_features);
+        ogs_uint64_to_string(supported_features);
 
     SDMSubscription.is_unique_subscription = true;
     SDMSubscription.unique_subscription = 1;
@@ -286,8 +291,8 @@ ogs_sbi_request_t *smf_nudm_sdm_build_blockchain_credentials(
         (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS;
 
     /* --- Populate blockchain credentials --- */
-    BlockchainCredentials.login = ogs_strdup((char *)blockchain_credentials->login.value);
-    BlockchainCredentials.password = ogs_strdup((char *)blockchain_credentials->password.value);
+    BlockchainCredentials.login = ogs_strdup((char *)blockchain_credentials->login.data);
+    BlockchainCredentials.password = ogs_strdup((char *)blockchain_credentials->password.data);
 
     /* --- Include serving S-NSSAI context --- */
     sNSSAI.sst = sess->s_nssai.sst;
@@ -311,7 +316,7 @@ end:
 }
 
 ogs_sbi_request_t *smf_nudm_sdm_build_subscription_delete(
-        smf_sess_t *sess, void *data)
+    smf_sess_t *sess, void *data)
 {
     ogs_sbi_message_t message;
     ogs_sbi_request_t *request = NULL;
