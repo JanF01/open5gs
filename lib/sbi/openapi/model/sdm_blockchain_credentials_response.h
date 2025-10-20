@@ -1,7 +1,11 @@
 #ifndef _OpenAPI_sdm_blockchain_credentials_response_H_
 #define _OpenAPI_sdm_blockchain_credentials_response_H_
 
+#include <string.h>
 #include "../external/cJSON.h"
+#include "../include/list.h"
+#include "../include/keyValuePair.h"
+#include "../include/binary.h"
 #include "sdm_blockchain_node_id.h"
 
 #ifdef __cplusplus

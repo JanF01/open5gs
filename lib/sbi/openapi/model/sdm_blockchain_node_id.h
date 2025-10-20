@@ -2,6 +2,9 @@
 #define _OpenAPI_sdm_blockchain_node_id_H_
 
 #include <string.h>
+#include "../include/list.h"
+#include "../include/keyValuePair.h"
+#include "../include/binary.h"
 #include "../external/cJSON.h"
 
 #ifdef __cplusplus
