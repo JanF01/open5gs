@@ -416,51 +416,61 @@ int upf_pfcp_send_session_report_request(
 int upf_pfcp_blockchain_credentials(
     upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain)
 {
-int rv;
+    int rv;
     ogs_pkbuf_t *n4buf = NULL;
     ogs_pfcp_header_t h;
     ogs_pfcp_xact_t *xact = NULL;
     ogs_pfcp_tlv_blockchain_login_t login_tlv;
     ogs_pfcp_tlv_blockchain_pass_t pass_tlv;
 
-    upf_metrics_inst_global_inc(UPF_METR_GLOB_CTR_SM_N4BLOCKCHAINCREDENTIALS);
-
     ogs_assert(sess);
     ogs_assert(blockchain);
 
-    memset(&h, 0, sizeof(ogs_pfcp_header_t));
+    // Increment metric counter
+    upf_metrics_inst_global_inc(UPF_METR_GLOB_CTR_SM_N4BLOCKCHAINCREDENTIALS);
+
+    // Prepare PFCP header
+    memset(&h, 0, sizeof(h));
     h.type = OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE;
     h.seid = sess->smf_n4_f_seid.seid;
 
-    // Convert blockchain struct fields into TLV octets
+    // Prepare TLV for login
     login_tlv.presence = 1;
     login_tlv.len = blockchain->login_len;
-    memcpy(login_tlv.value, blockchain->login, blockchain->login_len);
+    login_tlv.data = blockchain->login;
 
+    // Prepare TLV for password
     pass_tlv.presence = 1;
     pass_tlv.len = blockchain->password_len;
-    memcpy(pass_tlv.value, blockchain->password, blockchain->password_len);
+    pass_tlv.data = blockchain->password;
 
+    // Create a local PFCP transaction
     xact = ogs_pfcp_xact_local_create(
         sess->pfcp_node, sess_timeout, OGS_UINT_TO_POINTER(sess->id));
-    if (!xact) {
+    if (!xact)
+    {
         ogs_error("ogs_pfcp_xact_local_create() failed");
         return OGS_ERROR;
     }
 
+    // Build the blockchain credentials request buffer
     n4buf = ogs_pfcp_build_blockchain_credentials_request(
         h.type, &login_tlv, &pass_tlv);
-    if (!n4buf) {
+    if (!n4buf)
+    {
         ogs_error("ogs_pfcp_build_blockchain_credentials_request() failed");
         return OGS_ERROR;
     }
 
+    // Attach buffer to the transaction
     rv = ogs_pfcp_xact_update_tx(xact, &h, n4buf);
-    if (rv != OGS_OK) {
+    if (rv != OGS_OK)
+    {
         ogs_error("ogs_pfcp_xact_update_tx() failed");
         return OGS_ERROR;
     }
 
+    // Commit transaction
     rv = ogs_pfcp_xact_commit(xact);
     ogs_expect(rv == OGS_OK);
 
