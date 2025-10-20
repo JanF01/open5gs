@@ -612,7 +612,7 @@ extern "C"
         OpenAPI_deregistration_data_t *DeregistrationData;
         OpenAPI_sdm_subscription_t *SDMSubscription;
         OpenAPI_sdm_blockchain_credentials_t *SdmBlockchainCredentials;
-        OpenAPI_sdm_blockchain_credentials_response_t *SdmBlockchainCredentials;
+        OpenAPI_sdm_blockchain_credentials_response_t *SdmBlockchainCredentialsResponse;
         OpenAPI_modification_notification_t *ModificationNotification;
         OpenAPI_smf_registration_t *SmfRegistration;
         OpenAPI_sec_negotiate_req_data_t *SecNegotiateReqData;
