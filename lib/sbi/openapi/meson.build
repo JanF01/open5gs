@@ -1012,6 +1012,7 @@ libsbi_openapi_sources = files('''
     model/scp_domain_routing_info_subscription.c
     model/scp_info.c
     model/sc_type.c
+    model/sdm_blockchain_credentials.c
     model/sdm_subscription_1.c
     model/sdm_subscription.c
     model/sdm_subs_modification.c
@@ -1367,7 +1368,6 @@ libsbi_openapi_sources = files('''
     model/wlan_performance_req.c
     model/wlan_per_ss_id_performance_info.c
     model/wlan_per_ts_performance_info.c
-    model/sdm_blockchain_credentials.c
 '''.split())
 
 libsbi_openapi_inc = include_directories('.')

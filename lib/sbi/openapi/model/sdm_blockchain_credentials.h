@@ -33,6 +33,9 @@ extern "C"
 
     OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_parseFromJSON(cJSON *sdm_blockchain_credentialsJSON);
 
+    OpenAPI_sdm_blockchain_credentials_t *
+    OpenAPI_sdm_blockchain_credentials_copy(OpenAPI_sdm_blockchain_credentials_t *dst, OpenAPI_sdm_blockchain_credentials_t *src);
+
 #ifdef __cplusplus
 }
 #endif

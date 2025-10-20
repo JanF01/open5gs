@@ -1,10 +1,9 @@
 
-#include "sdm_blockchain_credentials.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "sdm_blockchain_credentials.h"
 
 OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_create(
     char *login,
@@ -19,6 +18,51 @@ OpenAPI_sdm_blockchain_credentials_t *OpenAPI_sdm_blockchain_credentials_create(
     local_var->single_nssai = single_nssai;
 
     return local_var;
+}
+
+OpenAPI_sdm_blockchain_credentials_t *
+OpenAPI_sdm_blockchain_credentials_copy(OpenAPI_sdm_blockchain_credentials_t *dst, OpenAPI_sdm_blockchain_credentials_t *src)
+{
+    cJSON *item = NULL;
+    char *content = NULL;
+
+    ogs_assert(src);
+
+    // Convert source object to JSON
+    item = OpenAPI_sdm_blockchain_credentials_convertToJSON(src);
+    if (!item)
+    {
+        ogs_error("OpenAPI_sdm_blockchain_credentials_convertToJSON() failed");
+        return NULL;
+    }
+
+    // Serialize JSON to string
+    content = cJSON_Print(item);
+    cJSON_Delete(item);
+
+    if (!content)
+    {
+        ogs_error("cJSON_Print() failed");
+        return NULL;
+    }
+
+    // Parse the JSON string back to cJSON object
+    item = cJSON_Parse(content);
+    ogs_free(content);
+    if (!item)
+    {
+        ogs_error("cJSON_Parse() failed");
+        return NULL;
+    }
+
+    // Free the destination object if it exists
+    OpenAPI_sdm_blockchain_credentials_free(dst);
+
+    // Parse JSON to create a new deep-copied object
+    dst = OpenAPI_sdm_blockchain_credentials_parseFromJSON(item);
+    cJSON_Delete(item);
+
+    return dst;
 }
 
 void OpenAPI_sdm_blockchain_credentials_free(OpenAPI_sdm_blockchain_credentials_t *obj)
