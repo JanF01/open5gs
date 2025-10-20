@@ -25,41 +25,44 @@
 #define OGS_DBI_SUBSCRIPTION_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct ogs_dbi_auth_info_s {
-    uint8_t       k[OGS_KEY_LEN];
-    uint8_t       use_opc;
-    uint8_t       opc[OGS_KEY_LEN];
-    uint8_t       op[OGS_KEY_LEN];
-    uint8_t       amf[OGS_AMF_LEN];
-    uint8_t       rand[OGS_RAND_LEN];
-    uint64_t      sqn;
-} ogs_dbi_auth_info_t;
+    typedef struct ogs_dbi_auth_info_s
+    {
+        uint8_t k[OGS_KEY_LEN];
+        uint8_t use_opc;
+        uint8_t opc[OGS_KEY_LEN];
+        uint8_t op[OGS_KEY_LEN];
+        uint8_t amf[OGS_AMF_LEN];
+        uint8_t rand[OGS_RAND_LEN];
+        uint64_t sqn;
+    } ogs_dbi_auth_info_t;
 
-int ogs_dbi_auth_info(char *supi, ogs_dbi_auth_info_t *auth_info);
-int ogs_dbi_update_sqn(char *supi, uint64_t sqn);
-int ogs_dbi_increment_sqn(char *supi);
-int ogs_dbi_update_imeisv(char *supi, char *imeisv);
-int ogs_dbi_update_mme(char *supi, char *mme_host, char *mme_realm,
-    bool purge_flag);
-
-int ogs_dbi_subscription_data(char *supi,
-        ogs_subscription_data_t *subscription_data);
+    int ogs_dbi_auth_info(char *supi, ogs_dbi_auth_info_t *auth_info);
+    int ogs_dbi_update_sqn(char *supi, uint64_t sqn);
+    int ogs_dbi_increment_sqn(char *supi);
+    int ogs_dbi_update_imeisv(char *supi, char *imeisv);
+    int ogs_dbi_update_mme(char *supi, char *mme_host, char *mme_realm,
+                           bool purge_flag);
+    void ogs_init_rand(void);
+    const char *bson_lookup_utf8(const bson_t *doc, const char *key);
+    void ogs_generate_random_string(char *buf, size_t len);
+    int ogs_dbi_subscription_data(char *supi,
+                                  ogs_subscription_data_t *subscription_data);
 
 #define OGS_HASH_HEX_LEN (OGS_SHA256_DIGEST_SIZE * 2 + 1)
 
-int ogs_dbi_get_or_insert_subscriber_blockchain(
-    const char *supi,
-    const char *login,
-    const char *password,
-    char *out_blockchain_node_id,
-    size_t id_size);
+    int ogs_dbi_get_or_insert_subscriber_blockchain(
+        const char *supi,
+        const char *login,
+        const char *password,
+        char *out_blockchain_node_id,
+        size_t id_size);
 
-int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size);
-int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex);
-
+    int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size);
+    int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex);
 
 #ifdef __cplusplus
 }

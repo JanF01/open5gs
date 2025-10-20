@@ -1005,13 +1005,13 @@ int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex)
     return (strcmp(hashed_password, stored_hash_hex) == 0) ? OGS_OK : OGS_ERROR;
 }
 
-static inline void ogs_init_rand(void)
+void ogs_init_rand(void)
 {
     srand((unsigned int)time(NULL));
 }
 
 // Random alphanumeric string generator
-static inline void ogs_generate_random_string(char *buf, size_t len)
+void ogs_generate_random_string(char *buf, size_t len)
 {
     static const char charset[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -1024,7 +1024,7 @@ static inline void ogs_generate_random_string(char *buf, size_t len)
 }
 
 // BSON UTF-8 lookup helper
-static inline const char *bson_lookup_utf8(const bson_t *doc, const char *key)
+const char *bson_lookup_utf8(const bson_t *doc, const char *key)
 {
     bson_iter_t iter;
     if (bson_iter_init_find(&iter, doc, key))
