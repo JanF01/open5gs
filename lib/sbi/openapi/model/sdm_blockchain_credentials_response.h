@@ -19,6 +19,8 @@ extern "C"
     void OpenAPI_sdm_blockchain_credentials_response_free(OpenAPI_sdm_blockchain_credentials_response_t *obj);
     cJSON *OpenAPI_sdm_blockchain_credentials_response_convertToJSON(OpenAPI_sdm_blockchain_credentials_response_t *obj);
     OpenAPI_sdm_blockchain_credentials_response_t *OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(cJSON *json);
+    OpenAPI_sdm_blockchain_credentials_response_t *OpenAPI_sdm_blockchain_credentials_response_copy(OpenAPI_sdm_blockchain_credentials_response_t *dst,
+                                                                                                    OpenAPI_sdm_blockchain_credentials_response_t *src);
 
 #ifdef __cplusplus
 }

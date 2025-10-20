@@ -1,5 +1,6 @@
 #include "sdm_blockchain_credentials_response.h"
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include "sdm_blockchain_node_id.h"
@@ -8,7 +9,8 @@
 OpenAPI_sdm_blockchain_credentials_response_t *
 OpenAPI_sdm_blockchain_credentials_response_create(OpenAPI_sdm_blockchain_node_id_t *node_id)
 {
-    OpenAPI_sdm_blockchain_credentials_response_t *obj = ogs_malloc(sizeof(OpenAPI_sdm_blockchain_credentials_response_t));
+    OpenAPI_sdm_blockchain_credentials_response_t *obj =
+        ogs_malloc(sizeof(OpenAPI_sdm_blockchain_credentials_response_t));
     ogs_assert(obj);
     obj->node_id = node_id;
     return obj;
@@ -19,11 +21,13 @@ void OpenAPI_sdm_blockchain_credentials_response_free(OpenAPI_sdm_blockchain_cre
 {
     if (!obj)
         return;
+
     if (obj->node_id)
     {
         OpenAPI_sdm_blockchain_node_id_free(obj->node_id);
         obj->node_id = NULL;
     }
+
     ogs_free(obj);
 }
 
@@ -42,7 +46,7 @@ cJSON *OpenAPI_sdm_blockchain_credentials_response_convertToJSON(OpenAPI_sdm_blo
         cJSON *node_id_JSON = OpenAPI_sdm_blockchain_node_id_convertToJSON(obj->node_id);
         if (!node_id_JSON)
         {
-            ogs_error("OpenAPI_sdm_blockchain_credentials_response_convertToJSON: node_id");
+            ogs_error("OpenAPI_sdm_blockchain_credentials_response_convertToJSON: node_id failed");
             cJSON_Delete(item);
             return NULL;
         }
@@ -77,10 +81,12 @@ OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(cJSON *json)
 
 // Deep copy
 OpenAPI_sdm_blockchain_credentials_response_t *
-OpenAPI_sdm_blockchain_credentials_response_copy(OpenAPI_sdm_blockchain_credentials_response_t *dst, OpenAPI_sdm_blockchain_credentials_response_t *src)
+OpenAPI_sdm_blockchain_credentials_response_copy(OpenAPI_sdm_blockchain_credentials_response_t *dst,
+                                                 OpenAPI_sdm_blockchain_credentials_response_t *src)
 {
     if (!src)
         return NULL;
+
     if (!dst)
         return OpenAPI_sdm_blockchain_credentials_response_create(
             OpenAPI_sdm_blockchain_node_id_copy(NULL, src->node_id));
