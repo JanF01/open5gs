@@ -797,11 +797,8 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_assert(far->sess);
                 sess = UPF_SESS(far->sess);
                 ogs_assert(sess);
-                if (blockchain.login && blockchain.password)
-                {
-                    ogs_assert(OGS_OK ==
-                               upf_pfcp_blockchain_credentials(sess, &blockchain));
-                }
+                ogs_assert(OGS_OK ==
+                           upf_pfcp_blockchain_credentials(sess, &blockchain));
             }
             else
             {
