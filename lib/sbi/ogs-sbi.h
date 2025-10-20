@@ -89,6 +89,7 @@
 #include "model/sm_policy_notification.h"
 #include "model/termination_notification.h"
 #include "model/deregistration_data.h"
+#include "model/sdm_blockchain_credentials.h"
 #include "model/sdm_subscription.h"
 #include "model/modification_notification.h"
 #include "model/sec_negotiate_req_data.h"
@@ -129,10 +130,11 @@
 #undef OGS_SBI_INSIDE
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-extern int __ogs_sbi_domain;
+    extern int __ogs_sbi_domain;
 
 #undef OGS_LOG_DOMAIN
 #define OGS_LOG_DOMAIN __ogs_sbi_domain

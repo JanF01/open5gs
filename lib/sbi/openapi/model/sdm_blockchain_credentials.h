@@ -1,5 +1,11 @@
-#ifndef OpenAPI_sdm_blockchain_credentials_H_
-#define OpenAPI_sdm_blockchain_credentials_H_
+/*
+ * sdm_blockchain_credentials.h
+ *
+ *
+ */
+
+#ifndef _OpenAPI_sdm_blockchain_credentials_H_
+#define _OpenAPI_sdm_blockchain_credentials_H_
 
 #include <string.h>
 #include "../external/cJSON.h"
@@ -40,4 +46,4 @@ extern "C"
 }
 #endif
 
-#endif /* OpenAPI_sdm_blockchain_credentials_H_ */
+#endif /* _OpenAPI_sdm_blockchain_credentials_H_ */
