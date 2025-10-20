@@ -232,7 +232,7 @@ void ogs_sbi_message_free(ogs_sbi_message_t *message)
     if (message->SdmBlockchainCredentials)
         OpenAPI_sdm_blockchain_credentials_free(message->SdmBlockchainCredentials);
     if (message->SdmBlockchainCredentialsResponse)
-        OpenAPI_sdm_blockchain_credentials_free(message->SdmBlockchainCredentialsResponse);
+        OpenAPI_sdm_blockchain_credentials_response_free(message->SdmBlockchainCredentialsResponse);
     if (message->links)
     {
         OpenAPI_clear_and_free_string_list(message->links->items);
@@ -2050,6 +2050,12 @@ static char *build_json(ogs_sbi_message_t *message)
     {
         item = OpenAPI_sdm_blockchain_credentials_convertToJSON(
             message->SdmBlockchainCredentials);
+        ogs_assert(item);
+    }
+    else if (message->SdmBlockchainCredentialsResponse)
+    {
+        item = OpenAPI_sdm_blockchain_credentials_response_convertToJSON(
+            message->SdmBlockchainCredentialsResponse);
         ogs_assert(item);
     }
 
