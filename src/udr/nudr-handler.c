@@ -1458,8 +1458,6 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_sbi_stream_t *stream, ogs_sbi_message_t *rcvmsg)
 {
     OpenAPI_sdm_blockchain_credentials_t *cred;
-    bool db_result;
-
     ogs_assert(stream);
     ogs_assert(rcvmsg);
 
@@ -1504,9 +1502,9 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_info("Blockchain credentials stored successfully for SUPI[%s], Node ID[%s]",
              rcvmsg->h.resource.component[1], blockchain_node_id);
 
-    // --- Prepare and send response with blockchain_node_id ---
+    // --- Prepare and send response ---
     memset(&response_data, 0, sizeof(response_data));
-    response_data.node_id = ogs_strdup(blockchain_node_id);
+    response_data.node_id = OpenAPI_sdm_blockchain_node_id_create(blockchain_node_id);
     ogs_assert(response_data.node_id);
 
     memset(&sendmsg, 0, sizeof(sendmsg));
@@ -1516,7 +1514,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(response);
     ogs_assert(true == ogs_sbi_server_send_response(stream, response));
 
-    ogs_free(response_data.node_id);
+    OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
 
     return true;
 }
