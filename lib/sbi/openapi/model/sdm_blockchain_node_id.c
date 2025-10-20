@@ -1,8 +1,9 @@
-#include "sdm_blockchain_node_id.h"
+
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "../include/ogs_assert.h"
+#include "sdm_blockchain_node_id.h"
 
 OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_create(const char *blockchain_node_id)
 {

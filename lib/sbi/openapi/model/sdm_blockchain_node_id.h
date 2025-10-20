@@ -9,6 +9,7 @@ extern "C"
 {
 #endif
 
+    typedef struct OpenAPI_sdm_blockchain_node_id_s OpenAPI_sdm_blockchain_node_id_t;
     typedef struct OpenAPI_sdm_blockchain_node_id_s
     {
         char *blockchain_node_id; // 12 characters

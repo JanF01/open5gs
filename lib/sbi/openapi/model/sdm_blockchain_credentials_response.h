@@ -9,6 +9,7 @@ extern "C"
 {
 #endif
 
+    typedef struct OpenAPI_sdm_blockchain_credentials_response_s OpenAPI_sdm_blockchain_credentials_response_t;
     typedef struct OpenAPI_sdm_blockchain_credentials_response_s
     {
         OpenAPI_sdm_blockchain_node_id_t *node_id;
