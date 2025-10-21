@@ -1502,10 +1502,13 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(response_data.node_id);
 
     // --- Allocate per-request context ---
-    udr_sbi_ctx_t *ctx = ogs_pool_calloc(&pool, sizeof(*ctx));
+    udr_sbi_ctx_t *ctx = NULL;
+    ogs_pool_alloc(&pool, &ctx);
+    ogs_assert(ctx);
+    memset(ctx, 0, sizeof(*ctx));
     ctx->supi = supi;
     ctx->stream = stream;
-    ctx->state = UDR_SBI_STATE_NONE; // Set the state in the context
+    ctx->state = UDR_SBI_NO_STATE; // Set the state in the context
 
     // --- Send asynchronously to UDM using stateless UDR SBI object ---
     int r = udr_sbi_discover_and_send(
