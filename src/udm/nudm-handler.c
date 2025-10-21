@@ -867,17 +867,17 @@ bool udm_nudm_sdm_handle_blockchain_node_id(
         recvmsg->SdmBlockchainCredentialsResponse;
     ogs_assert(resp);
 
-    if (!resp->node_id || !resp->node_id->data) {
+    if (!resp->node_id || !resp->node_id->blockchain_node_id) {
         ogs_error("[%s] Missing blockchain node_id in response", udm_ue->supi);
         return false;
     }
 
     ogs_info("[%s] Received blockchain node_id from UDR: %s",
-             udm_ue->supi, resp->node_id->data);
+             udm_ue->supi, resp->node_id->blockchain_node_id);
 
     // Forward to SMF
     int r = udm_ue_sbi_discover_and_send(
-        OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN,
+        OGS_SBI_SERVICE_TYPE_NSMF_BLOCKCHAIN,
         NULL,
         udm_smf_build_blockchain_credentials_response,
         udm_ue,
