@@ -1521,7 +1521,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     if (r != OGS_OK) {
         ogs_error("Failed to forward Blockchain Node ID to UDM for SUPI[%s]", supi);
-        ogs_pool_free(ctx);
+        ogs_pool_free(&udr_sbi_ctx_pool, ctx);
         OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
         return false;
     }

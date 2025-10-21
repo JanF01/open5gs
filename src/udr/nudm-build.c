@@ -2,8 +2,7 @@
 #include "nudm-build.h"
 
 ogs_sbi_request_t *
-udr_nudm_sdm_build_blockchain_node_id(void *context,
-    ogs_sbi_stream_t *stream, void *data)
+udr_nudm_sdm_build_blockchain_node_id(void *context, void *data)
 {
     OpenAPI_sdm_blockchain_credentials_response_t *resp =
         (OpenAPI_sdm_blockchain_credentials_response_t *)data;

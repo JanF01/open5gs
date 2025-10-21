@@ -8,8 +8,7 @@
 extern "C" {
 #endif
 
-ogs_sbi_request_t * udr_nudm_sdm_build_blockchain_node_id(void *context,
-    ogs_sbi_stream_t *stream, void *data);
+ogs_sbi_request_t * udr_nudm_sdm_build_blockchain_node_id(void *context, void *data);
 
 
 #ifdef __cplusplus
