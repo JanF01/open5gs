@@ -9,12 +9,21 @@ udr_nudm_sdm_build_blockchain_node_id(void *context,
         (OpenAPI_sdm_blockchain_credentials_response_t *)data;
 
     ogs_assert(resp);
-    ogs_sbi_message_t *msg = ogs_sbi_message_new();
+    ogs_sbi_message_t sendmsg;
+    memset(&sendmsg, 0, sizeof(sendmsg));
 
-    msg->SdmBlockchainCredentialsResponse = resp;
-    msg->h.service.name = OGS_SBI_SERVICE_NAME_NUDM_SDM;
-    msg->h.resource.component[0] = OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS;
-    msg->h.method = OGS_SBI_HTTP_METHOD_POST;
+    sendmsg.h.method = (char *)OGS_SBI_HTTP_METHOD_POST;
+    sendmsg.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDM_SDM;
+    sendmsg.h.api.version = (char *)OGS_SBI_API_V1;
 
-    return msg;
+    sendmsg.h.resource.component[0] = (char *)OGS_SBI_RESOURCE_NAME_SUBSCRIPTION_DATA;
+    sendmsg.h.resource.component[1] = (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID;
+
+
+    sendmsg.SdmBlockchainCredentialsResponse = resp;
+
+    ogs_sbi_request_t *request = ogs_sbi_build_request(&sendmsg);
+    ogs_assert(request);
+
+    return request;
 }

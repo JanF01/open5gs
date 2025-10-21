@@ -1502,7 +1502,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(response_data.node_id);
 
     // --- Send to UDM (asynchronously) ---
-    int r = udr_sbi_discover_and_send(
+    int r = ogs_sbi_discover_and_send(
         OGS_SBI_SERVICE_NAME_NUDM_SDM,               // target service (UDM)
         NULL,                                        // discovery hint
         udr_nudm_sdm_build_blockchain_node_id,       // builder
