@@ -821,8 +821,6 @@ static ogs_pfcp_xact_stage_t ogs_pfcp_xact_get_stage(uint8_t type, uint32_t xid)
     case OGS_PFCP_SESSION_MODIFICATION_REQUEST_TYPE:
     case OGS_PFCP_SESSION_DELETION_REQUEST_TYPE:
     case OGS_PFCP_SESSION_REPORT_REQUEST_TYPE:
-        stage = PFCP_XACT_INITIAL_STAGE;
-        break;
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
         return PFCP_XACT_INITIAL_STAGE;
     case OGS_PFCP_HEARTBEAT_RESPONSE_TYPE:
@@ -833,11 +831,10 @@ static ogs_pfcp_xact_stage_t ogs_pfcp_xact_get_stage(uint8_t type, uint32_t xid)
     case OGS_PFCP_SESSION_ESTABLISHMENT_RESPONSE_TYPE:
     case OGS_PFCP_SESSION_MODIFICATION_RESPONSE_TYPE:
     case OGS_PFCP_SESSION_DELETION_RESPONSE_TYPE:
+    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
     case OGS_PFCP_SESSION_REPORT_RESPONSE_TYPE:
         stage = PFCP_XACT_FINAL_STAGE;
         break;
-    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
-        return PFCP_XACT_FINAL_STAGE;
 
     default:
         ogs_error("Not implemented PFCPv2 Message Type(%d)", type);
