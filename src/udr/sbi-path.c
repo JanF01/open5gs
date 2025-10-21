@@ -59,7 +59,7 @@ int udr_sbi_open(void)
 
     if (!udr_sbi_obj_initialized) {
         memset(&udr_sbi_obj, 0, sizeof(udr_sbi_obj));
-        udr_sbi_obj.type = OGS_SBI_OBJ_TYPE_UDR;
+        udr_sbi_obj.type = OGS_SBI_OBJ_BASE;
         ogs_list_init(&udr_sbi_obj.xact_list);
         udr_sbi_obj_initialized = true;
     }    
