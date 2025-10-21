@@ -49,6 +49,9 @@ bool smf_nsmf_handle_release_data_in_hsmf(
 bool smf_nsmf_callback_handle_sdm_data_change_notify(
     ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg);
 
+bool smf_nsmf_handle_blockchain_credentials_response(
+    smf_sess_t *sess, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg);
+
 #ifdef __cplusplus
 }
 #endif

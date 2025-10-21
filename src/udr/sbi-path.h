@@ -22,6 +22,8 @@
 
 #include "context.h"
 
+#include "nudm-build.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

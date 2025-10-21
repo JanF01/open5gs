@@ -2740,3 +2740,35 @@ cleanup:
 
     return true;
 }
+
+bool smf_nsmf_handle_blockchain_credentials_response(
+    smf_sess_t *sess, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
+{
+    OpenAPI_sdm_blockchain_credentials_response_t *resp =
+        recvmsg->SdmBlockchainCredentialsResponse;
+    ogs_assert(sess);
+    ogs_assert(resp);
+
+    ogs_info("SMF received Blockchain Node ID [%s] for SEID:%lu",
+             resp->node_id ? resp->node_id->value : "(null)",
+             sess->smf_n4_seid);
+
+    // Build PFCP response
+    ogs_pfcp_blockchain_credentials_response_t pfcp_rsp;
+    memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
+
+    pfcp_rsp.cause.presence = 1;
+    pfcp_rsp.cause.u8 = OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
+
+    if (resp->node_id && resp->node_id->value) {
+        pfcp_rsp.node_id.presence = 1;
+        pfcp_rsp.node_id.data = resp->node_id->value;
+        pfcp_rsp.node_id.len = strlen(resp->node_id->value);
+    }
+
+    ogs_pfcp_send_blockchain_credentials_response(
+        sess->pending_blockchain_xact, &pfcp_rsp);
+
+    sess->pending_blockchain_xact = NULL;
+    return true;
+}

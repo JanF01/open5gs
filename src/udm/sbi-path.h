@@ -21,6 +21,7 @@
 #define UDM_SBI_PATH_H
 
 #include "nudr-build.h"
+#include "nsmf-build.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -233,6 +233,9 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
                             udm_ue, stream, message);
                     break;
                 CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+                    udm_nudm_sdm_handle_blockchain_node_id(udm_ue, stream, message);
+                    break;    
+                CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
                     udm_nudm_sdm_handle_blockchain_credentials(
                             udm_ue, stream, message);
                     break;

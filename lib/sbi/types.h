@@ -112,6 +112,7 @@ typedef enum {
 #define OGS_SBI_SERVICE_NAME_NSMF_PDUSESSION "nsmf-pdusession"
 #define OGS_SBI_SERVICE_NAME_NSMF_EVENT_EXPOSURE "nsmf-event-exposure"
 #define OGS_SBI_SERVICE_NAME_NSMF_NIDD "nsmf-nidd"
+#define OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN "nsmf-blockchain"
 #define OGS_SBI_SERVICE_NAME_NAUSF_AUTH "nausf-auth"
 #define OGS_SBI_SERVICE_NAME_NAUSF_SORPROTECTION "nausf-sorprotection"
 #define OGS_SBI_SERVICE_NAME_NAUSF_UPUPROTECTION "nausf-upuprotection"
