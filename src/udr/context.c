@@ -113,7 +113,3 @@ int udr_context_parse_config(void)
 
     return OGS_OK;
 }
-
-OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t) *udr_get_sbi_ctx_pool(void) {
-    return &udr_sbi_ctx_pool;
-}
