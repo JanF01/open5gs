@@ -8,13 +8,12 @@
 extern "C" {
 #endif
 
+ogs_sbi_message_t *
+udm_smf_build_blockchain_credentials_response(void *context,
+    ogs_sbi_stream_t *stream, void *data);
 
 #ifdef __cpluspluss
 }
 #endif
-
-ogs_sbi_message_t *
-udm_smf_build_blockchain_credentials_response(void *context,
-    ogs_sbi_stream_t *stream, void *data)
 
 #endif /* UDM_NSMF_BUILD_H */
