@@ -1503,7 +1503,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     // --- Allocate per-request context ---
     udr_sbi_ctx_t *ctx = NULL;
-    ogs_pool_alloc(&pool, &ctx);
+    ogs_pool_alloc(&udr_sbi_ctx_pool, &ctx);
     ogs_assert(ctx);
     memset(ctx, 0, sizeof(*ctx));
     ctx->supi = supi;

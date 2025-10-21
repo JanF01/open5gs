@@ -104,6 +104,7 @@ int udr_sbi_discover_and_send(
     );
     if (!xact) {
         ogs_error("udr_sbi_discover_and_send() failed");
+        ogs_pool_free(&udr_sbi_ctx_pool, ctx); // Free the context if transaction creation fails
         return OGS_ERROR;
     }
 
@@ -113,8 +114,11 @@ int udr_sbi_discover_and_send(
     if (r != OGS_OK) {
         ogs_error("udr_sbi_discover_and_send() failed");
         ogs_sbi_xact_remove(xact);
+        ogs_pool_free(&udr_sbi_ctx_pool, ctx); // Free the context if sending fails
         return r;
     }
 
+    // The context will be freed when the SBI transaction completes or is removed.
+    // For now, we assume it's managed by the SBI layer after this point.
     return OGS_OK;
 }

@@ -6,6 +6,7 @@
         "ogs-kdf.h": "c",
         "stdbool.h": "c",
         "nudr-build.h": "c",
-        "context.h": "c"
+        "context.h": "c",
+        "sbi-path.h": "c"
     }
 }
