@@ -35,8 +35,6 @@ extern int __udr_log_domain;
 #undef OGS_LOG_DOMAIN
 #define OGS_LOG_DOMAIN __udr_log_domain
 
-extern OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t);
-
 typedef struct udr_sbi_ctx_s {
     const char *supi;
     ogs_sbi_stream_t *stream;
@@ -48,6 +46,8 @@ typedef struct udr_context_s {
 
 ogs_sbi_object_t udr_sbi_obj;
 bool udr_sbi_obj_initialized = false;
+
+extern OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t);
 
 void udr_context_init(void);
 void udr_context_final(void);
