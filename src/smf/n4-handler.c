@@ -2046,29 +2046,38 @@ uint8_t smf_n4_handle_blockchain_credentials(
         return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
     }
 
-    /* Validate login */
     if (!credentials->login.presence || credentials->login.len == 0)
     {
         ogs_info("Blockchain credentials missing login");
         return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
     }
-
-    /* Validate password */
     if (!credentials->password.presence || credentials->password.len == 0)
     {
         ogs_info("Blockchain credentials missing password");
         return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
     }
 
-    /* Log info for debugging */
     ogs_info("Received Blockchain Credentials Request for UE [SEID: %lu]", sess->smf_n4_seid);
     ogs_info("Login: %s", (char *)credentials->login.data);
     ogs_info("Password: %s", (char *)credentials->password.data);
 
-    /* Future: optional validation against local rules, rate limit, etc. */
+    /*
+     * IMPORTANT:
+     * Do NOT commit the PFCP xact here. The SBI request is asynchronous:
+     * - Keep pfcp_xact so the SBI callback can send the PFCP response later.
+     *
+     * How to keep it:
+     * - Either attach pfcp_xact pointer to `sess` or to a per-request context
+     *   that the SBI callback receives. Example: sess->pending_blockchain_xact = pfcp_xact;
+     * - Make sure the object lifetime is managed and pfcp_xact is not freed
+     *   until you send the response (or time it out).
+     *
+     * Return REQUEST_ACCEPTED to caller so they continue SBI flow.
+     */
 
-    /* Commit transaction if needed */
-    ogs_pfcp_xact_commit(pfcp_xact);
+    /* store xact for later response (example field on session) */
+    sess->pending_blockchain_xact = pfcp_xact;
 
+    /* do not call ogs_pfcp_xact_commit(pfcp_xact) here */
     return OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
 }
