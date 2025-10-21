@@ -2,20 +2,26 @@
 #include "nsmf-build.h"
 
 
-ogs_sbi_message_t *
-udm_smf_build_blockchain_credentials_response(void *context,
-    ogs_sbi_stream_t *stream, void *data)
+ogs_sbi_request_t *udm_smf_build_blockchain_credentials_response(void *context, void *data)
 {
     OpenAPI_sdm_blockchain_credentials_response_t *resp =
         (OpenAPI_sdm_blockchain_credentials_response_t *)data;
-
     ogs_assert(resp);
-    ogs_sbi_message_t *msg = ogs_sbi_message_new();
 
-    msg->SdmBlockchainCredentialsResponse = resp;
-    msg->h.service.name = OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN;
-    msg->h.resource.component[0] = OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS_RESPONSE;
-    msg->h.method = OGS_SBI_HTTP_METHOD_POST;
+    ogs_sbi_message_t sendmsg;
+    memset(&sendmsg, 0, sizeof(sendmsg));
 
-    return msg;
+    sendmsg.h.method = (char *)OGS_SBI_HTTP_METHOD_POST;
+    sendmsg.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN;
+    sendmsg.h.api.version = (char *)OGS_SBI_API_V1;
+
+    sendmsg.h.resource.component[0] =
+        (char *)OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS;
+
+    sendmsg.SdmBlockchainCredentialsResponse = resp;
+
+    ogs_sbi_request_t *request = ogs_sbi_build_request(&sendmsg);
+    ogs_assert(request);
+
+    return request;
 }
