@@ -18,7 +18,7 @@
 libudr_sources = files('''
     context.c
     event.c
-
+    nudm-build.c
     nudr-handler.c
 
     sbi-path.c

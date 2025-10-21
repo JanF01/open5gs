@@ -21,7 +21,7 @@ libudm_sources = files('''
 
     nnrf-handler.c
     nudm-handler.c
-
+    nsmf-build.c
     nudr-build.c
     nudr-handler.c
     ue-sm.c
