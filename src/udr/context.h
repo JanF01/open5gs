@@ -47,7 +47,16 @@ typedef struct udr_context_s {
 ogs_sbi_object_t udr_sbi_obj;
 bool udr_sbi_obj_initialized = false;
 
-OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t) *udr_get_sbi_ctx_pool(void);
+typedef struct {
+    const char *name;
+    int head, tail;
+    int size, avail;
+    udr_sbi_ctx_t **free, *array, **index;
+    ogs_hash_t *id_hash;
+    ogs_pool_id_t id;
+} udr_sbi_ctx_pool_t;
+
+extern udr_sbi_ctx_pool_t udr_sbi_ctx_pool;
 
 void udr_context_init(void);
 void udr_context_final(void);

@@ -21,7 +21,7 @@
 
 static udr_context_t self;
 
-static OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t);
+udr_sbi_ctx_pool_t udr_sbi_ctx_pool;
 
 int __udr_log_domain;
 
