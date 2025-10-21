@@ -2,8 +2,9 @@
 #include "nsmf-build.h"
 
 
-ogs_sbi_request_t *udm_smf_build_blockchain_credentials_response(void *context, void *data)
+ogs_sbi_request_t *udm_smf_build_blockchain_credentials_response(udm_ue_t *udm_ue, void *data)
 {
+    ogs_assert(udm_ue);
     OpenAPI_sdm_blockchain_credentials_response_t *resp =
         (OpenAPI_sdm_blockchain_credentials_response_t *)data;
     ogs_assert(resp);
@@ -17,6 +18,7 @@ ogs_sbi_request_t *udm_smf_build_blockchain_credentials_response(void *context, 
 
     sendmsg.h.resource.component[0] =
         (char *)OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS;
+    sendmsg.h.resource.component[1] = udm_ue->supi;
 
     sendmsg.SdmBlockchainCredentialsResponse = resp;
 
