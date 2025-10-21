@@ -881,7 +881,7 @@ bool udm_nudm_sdm_handle_blockchain_node_id(
         NULL,
         udm_smf_build_blockchain_credentials_response,
         udm_ue,
-        stream,
+        stream, // Pass the original stream from the initial request
         UDM_SBI_NO_STATE,
         resp);
     ogs_expect(r == OGS_OK);

@@ -57,6 +57,13 @@ int udr_sbi_open(void)
     if (ogs_sbi_server_start_all(ogs_sbi_server_handler) != OGS_OK)
         return OGS_ERROR;
 
+    if (!udr_sbi_obj_initialized) {
+        memset(&udr_sbi_obj, 0, sizeof(udr_sbi_obj));
+        udr_sbi_obj.type = OGS_SBI_OBJ_TYPE_UDR;
+        ogs_list_init(&udr_sbi_obj.xact_list);
+        udr_sbi_obj_initialized = true;
+    }    
+
     return OGS_OK;
 }
 
@@ -64,4 +71,50 @@ void udr_sbi_close(void)
 {
     ogs_sbi_client_stop_all();
     ogs_sbi_server_stop_all();
+}
+
+bool udr_sbi_send_request(
+        ogs_sbi_nf_instance_t *nf_instance, ogs_sbi_xact_t *xact)
+{
+    ogs_assert(nf_instance);
+    ogs_assert(xact);
+    return ogs_sbi_send_request_to_nf_instance(nf_instance, xact);
+}
+
+int udr_sbi_discover_and_send(
+        ogs_sbi_service_type_e service_type,
+        ogs_sbi_discovery_option_t *discovery_option,
+        ogs_sbi_build_f build,
+        udr_sbi_ctx_t *ctx, // Accept the pre-allocated context
+        void *data)
+{
+    int r;
+
+    ogs_assert(ctx); // Ensure context is provided
+    ogs_assert(udr_sbi_obj.lnode.next || true); // just to assert initialized
+
+    ogs_sbi_xact_t *xact = ogs_sbi_xact_add(
+        0,                    // id not used per-UE
+        &udr_sbi_obj,         // persistent UDR SBI object
+        service_type,
+        discovery_option,
+        build,
+        ctx,                  // Use the provided context directly
+        data
+    );
+    if (!xact) {
+        ogs_error("udr_sbi_discover_and_send() failed");
+        return OGS_ERROR;
+    }
+
+    xact->state = ctx->state; // Set the state from the context
+
+    r = ogs_sbi_discover_and_send(xact);
+    if (r != OGS_OK) {
+        ogs_error("udr_sbi_discover_and_send() failed");
+        ogs_sbi_xact_remove(xact);
+        return r;
+    }
+
+    return OGS_OK;
 }

@@ -28,11 +28,22 @@
 extern "C" {
 #endif
 
+#define UDR_SBI_NO_STATE                                   0
+
 int udr_sbi_open(void);
 void udr_sbi_close(void);
 
 #ifdef __cplusplus
 }
 #endif
+
+bool udr_sbi_send_request(
+        ogs_sbi_nf_instance_t *nf_instance, ogs_sbi_xact_t *xact);
+int udr_sbi_discover_and_send(
+        ogs_sbi_service_type_e service_type,
+        ogs_sbi_discovery_option_t *discovery_option,
+        ogs_sbi_build_f build,
+        udr_sbi_ctx_t *ctx, // Accept the pre-allocated context
+        void *data);
 
 #endif /* UDR_SBI_PATH_H */

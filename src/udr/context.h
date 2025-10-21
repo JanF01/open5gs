@@ -35,8 +35,14 @@ extern int __udr_log_domain;
 #undef OGS_LOG_DOMAIN
 #define OGS_LOG_DOMAIN __udr_log_domain
 
-typedef struct udr_context_s {
-} udr_context_t;
+typedef struct udr_sbi_ctx_s {
+    const char *supi;
+    ogs_sbi_stream_t *stream;
+    int state; // To carry the state for the transaction
+} udr_sbi_ctx_t;
+
+ogs_sbi_object_t udr_sbi_obj;
+bool udr_sbi_obj_initialized = false;
 
 void udr_context_init(void);
 void udr_context_final(void);
