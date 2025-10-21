@@ -1502,8 +1502,10 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(response_data.node_id);
 
     // --- Allocate per-request context ---
+
+    auto *pool = udr_get_sbi_ctx_pool();
     udr_sbi_ctx_t *ctx = NULL;
-    ogs_pool_alloc(&udr_sbi_ctx_pool, &ctx);
+    ogs_pool_alloc(pool, &ctx);
     ogs_assert(ctx);
     memset(ctx, 0, sizeof(*ctx));
     ctx->supi = supi;
@@ -1521,7 +1523,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     if (r != OGS_OK) {
         ogs_error("Failed to forward Blockchain Node ID to UDM for SUPI[%s]", supi);
-        ogs_pool_free(&udr_sbi_ctx_pool, ctx);
+        ogs_pool_free(pool, ctx);
         OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
         return false;
     }

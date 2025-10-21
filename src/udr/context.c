@@ -21,6 +21,8 @@
 
 static udr_context_t self;
 
+static OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t);
+
 int __udr_log_domain;
 
 static int context_initialized = 0;
@@ -110,4 +112,8 @@ int udr_context_parse_config(void)
     if (rv != OGS_OK) return rv;
 
     return OGS_OK;
+}
+
+OGS_POOL(udr_sbi_ctx_pool, udr_sbi_ctx_t) *udr_get_sbi_ctx_pool(void) {
+    return &udr_sbi_ctx_pool;
 }
