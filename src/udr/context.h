@@ -44,8 +44,8 @@ typedef struct udr_sbi_ctx_s {
 typedef struct udr_context_s {
 } udr_context_t;
 
-ogs_sbi_object_t udr_sbi_obj;
-bool udr_sbi_obj_initialized = false;
+extern ogs_sbi_object_t udr_sbi_obj;
+extern bool udr_sbi_obj_initialized;
 
 typedef struct {
     const char *name;

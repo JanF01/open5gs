@@ -21,6 +21,8 @@
 
 static udr_context_t self;
 
+ogs_sbi_object_t udr_sbi_obj;
+bool udr_sbi_obj_initialized = false;
 udr_sbi_ctx_pool_t udr_sbi_ctx_pool;
 
 int __udr_log_domain;
