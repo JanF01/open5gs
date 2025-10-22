@@ -1190,6 +1190,37 @@ ogs_pkbuf_t *ogs_pfcp_build_session_report_response(
     return pkbuf;
 }
 
+ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_response(
+    uint8_t type,
+    ogs_pfcp_blockchain_credentials_response_t *rsp)
+{
+    ogs_pfcp_message_t *pfcp_message = NULL;
+    ogs_pkbuf_t *pkbuf = NULL;
+
+    ogs_debug("PFCP blockchain credentials response");
+
+    pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
+    if (!pfcp_message) {
+        ogs_error("ogs_calloc() failed");
+        return NULL;
+    }
+
+    // Attach the message structure
+    pfcp_message->pfcp_blockchain_credentials_response = *rsp;
+
+    // Set PFCP message header
+    pfcp_message->h.type = type;
+
+    // Build final PFCP buffer
+    pkbuf = ogs_pfcp_build_msg(pfcp_message);
+    ogs_expect(pkbuf);
+
+    // Free temporary structure
+    ogs_free(pfcp_message);
+
+    return pkbuf;
+}
+
 ogs_pkbuf_t *ogs_pfcp_build_session_deletion_response(uint8_t type, uint8_t cause,
                                                       ogs_pfcp_user_plane_report_t *report)
 {
