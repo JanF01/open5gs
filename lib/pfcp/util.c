@@ -140,6 +140,16 @@ ogs_pfcp_extract_node_id(ogs_pfcp_message_t *message,
         requirement = OGS_PFCP_NODE_ID_OPTIONAL;
         break;
 
+    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
+        tlv_node_id = &message->pfcp_blockchain_credentials_request.node_id;
+        requirement = OGS_PFCP_NODE_ID_OPTIONAL;; // or OPTIONAL, depending on your spec
+        break;
+        
+    case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
+        tlv_node_id = &message->pfcp_blockchain_credentials_response.node_id;
+        requirement = OGS_PFCP_NODE_ID_OPTIONAL;;
+        break;    
+
     /* Add other message types with node_id here as needed */
 
     case OGS_PFCP_HEARTBEAT_REQUEST_TYPE:
