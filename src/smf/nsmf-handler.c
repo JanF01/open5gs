@@ -2761,9 +2761,9 @@ bool smf_nsmf_handle_blockchain_credentials_response(
     pfcp_rsp.cause.u8 = OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
 
     if (resp->node_id && resp->node_id->blockchain_node_id) {
-        pfcp_rsp.node_id.presence = 1;
-        pfcp_rsp.node_id.data = resp->node_id->blockchain_node_id;
-        pfcp_rsp.node_id.len = strlen(resp->node_id->blockchain_node_id);
+        pfcp_rsp.blockchain_node_id.presence = 1;
+        pfcp_rsp.blockchain_node_id.data = resp->node_id->blockchain_node_id;
+        pfcp_rsp.blockchain_node_id.len = strlen(resp->node_id->blockchain_node_id);
     }
 
     ogs_pfcp_send_blockchain_credentials_response(
