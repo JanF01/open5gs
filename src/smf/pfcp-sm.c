@@ -367,6 +367,18 @@ void smf_pfcp_state_associated(ogs_fsm_t *s, smf_event_t *e)
             }
             ogs_fsm_dispatch(&sess->sm, e);
             break;
+        case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
+            if (!message->h.seid_presence) ogs_error("No SEID");
+
+            if (!sess) {
+                    ogs_error("No Session");
+                    ogs_pfcp_send_error_message(xact, 0,
+                        OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE,
+                        OGS_PFCP_CAUSE_SESSION_CONTEXT_NOT_FOUND, 0);
+                    break;
+            }
+            ogs_fsm_dispatch(&sess->sm, e);
+            break;
 
         default:
             ogs_error("Not implemented PFCP message type[%d]",
