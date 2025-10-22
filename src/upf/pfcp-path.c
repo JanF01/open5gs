@@ -361,6 +361,7 @@ static void sess_timeout(ogs_pfcp_xact_t *xact, void *data)
     {
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
         ogs_error("No PFCP blockchain credentials response");
+        break;
     case OGS_PFCP_SESSION_REPORT_REQUEST_TYPE:
         ogs_error("No PFCP session report response");
         break;
