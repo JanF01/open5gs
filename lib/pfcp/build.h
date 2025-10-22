@@ -80,7 +80,7 @@ extern "C"
     ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_request(
         uint8_t type, ogs_pfcp_tlv_blockchain_login_t *login, ogs_pfcp_tlv_blockchain_pass_t *password);
     ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_response(
-        uint8_t type, ogs_pfcp_blockchain_credentials_response_t *rsp)
+        uint8_t type, ogs_pfcp_blockchain_credentials_response_t *rsp);
 
 
 #ifdef __cplusplus
