@@ -1086,3 +1086,40 @@ int smf_pfcp_send_session_report_response(
 
     return rv;
 }
+
+int smf_pfcp_send_blockchain_credentials_response(
+    ogs_pfcp_xact_t *xact, smf_sess_t *sess,
+    ogs_pfcp_blockchain_credentials_response_t *rsp)
+{
+    int rv;
+    ogs_pkbuf_t *sxabuf = NULL;
+    ogs_pfcp_header_t h;
+
+    ogs_assert(xact);
+    ogs_assert(sess);
+    ogs_assert(rsp);
+
+    /* Prepare PFCP header (send to UPF) */
+    memset(&h, 0, sizeof(h));
+    h.type = OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE;
+    h.seid = sess->upf_n4_seid; /* use UPF's SEID for replying */
+
+    /* Build PFCP payload */
+    sxabuf = ogs_pfcp_build_blockchain_credentials_response(h.type, rsp);
+    if (!sxabuf) {
+        ogs_error("ogs_pfcp_build_blockchain_credentials_response() failed");
+        return OGS_ERROR;
+    }
+
+    /* Attach to transaction (adds PFCP header and stores packet for step) */
+    rv = ogs_pfcp_xact_update_tx(xact, &h, sxabuf);
+    if (rv != OGS_OK) {
+        ogs_error("ogs_pfcp_xact_update_tx() failed");
+        return OGS_ERROR;
+    }
+
+    rv = ogs_pfcp_xact_commit(xact);
+    ogs_expect(rv == OGS_OK);
+
+    return rv;
+}

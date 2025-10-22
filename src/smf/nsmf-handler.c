@@ -2767,7 +2767,7 @@ bool smf_nsmf_handle_blockchain_credentials_response(
     }
 
     smf_pfcp_send_blockchain_credentials_response(
-        sess->pending_blockchain_xact, &pfcp_rsp);
+        sess->pending_blockchain_xact, sess, &pfcp_rsp);
 
     sess->pending_blockchain_xact = NULL;
     return true;
