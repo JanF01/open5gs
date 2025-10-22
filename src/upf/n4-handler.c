@@ -562,7 +562,7 @@ void upf_n4_handle_blockchain_credentials_response(
 
     ogs_info("Received PFCP Blockchain Credentials Response for SEID:%lu", sess->smf_n4_f_seid.seid);
 
-    if (rsp->cause.presence)
+    if (rsp->presence)
         ogs_info("PFCP Cause: %u", rsp->cause.u8);
 
     ogs_pfcp_xact_commit(xact);
