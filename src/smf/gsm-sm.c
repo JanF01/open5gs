@@ -342,7 +342,7 @@ void smf_gsm_state_initial(ogs_fsm_t *s, smf_event_t *e)
         CASE(OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN)
             SWITCH(sbi_message->h.resource.component[0])
             CASE(OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS)
-                smf_nsmf_handle_blockchain_credentials_response(sess, stream, message);
+                smf_nsmf_handle_blockchain_credentials_response(sess, stream, sbi_message);
                 break;
 
             DEFAULT
