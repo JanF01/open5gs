@@ -2035,11 +2035,13 @@ extern "C"
     typedef struct ogs_pfcp_blockchain_credentials_request_s
     {
         ogs_pfcp_tlv_blockchain_credentials_t credentials;
+        ogs_pfcp_tlv_node_id_t node_id;
     } ogs_pfcp_blockchain_credentials_request_t;
 
     typedef struct ogs_pfcp_blockchain_credentials_response_s
     {
         ogs_pfcp_tlv_cause_t cause;
+        ogs_pfcp_tlv_node_id_t node_id;
         ogs_pfcp_tlv_offending_ie_t offending_ie;
         ogs_pfcp_tlv_blockchain_credentials_t credentials;
         ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id;

@@ -2944,6 +2944,7 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request =
         0,
         0,
         {&ogs_pfcp_tlv_desc_blockchain_credentials,
+         &ogs_pfcp_tlv_desc_node_id,   
          NULL}};
 
 ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
@@ -2954,7 +2955,8 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
         0,
         0,
         0,
-        {&ogs_pfcp_tlv_desc_cause,  
+        {&ogs_pfcp_tlv_desc_cause,
+         &ogs_pfcp_tlv_desc_node_id,     
          &ogs_pfcp_tlv_desc_offending_ie,
          &ogs_pfcp_tlv_desc_blockchain_credentials,
          &ogs_pfcp_tlv_desc_blockchain_node_id,
