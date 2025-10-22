@@ -2849,6 +2849,18 @@ void smf_gsm_state_wait_pfcp_deletion(ogs_fsm_t *s, smf_event_t *e)
             END
             break;
 
+        CASE(OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN)
+            SWITCH(sbi_message->h.resource.component[0])
+            CASE(OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS)
+                smf_nsmf_handle_blockchain_credentials_response(sess, stream, sbi_message);
+                break;
+
+            DEFAULT
+                ogs_error("Unknown NSMF-Blockchain resource [%s]",
+                        sbi_message->h.resource.component[0]);
+                break;
+            END
+            break;
         DEFAULT
             ogs_error("[%s:%d] Invalid API name [%s]",
                     smf_ue->supi, sess->psi, sbi_message->h.service.name);
