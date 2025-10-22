@@ -2954,7 +2954,8 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
         0,
         0,
         0,
-        {&ogs_pfcp_tlv_desc_blockchain_credentials,
+        {&ogs_pfcp_tlv_desc_cause,   
+         &ogs_pfcp_tlv_desc_blockchain_credentials,
          &ogs_pfcp_tlv_desc_blockchain_node_id,
          NULL}};
 
@@ -4701,9 +4702,8 @@ ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf)
         ogs_expect(rv == OGS_OK);
         break;
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
-        rv = ogs_tlv_parse_msg(
-            &pfcp_message->pfcp_blockchain_credentials_response,
-            &ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response, pkbuf, OGS_TLV_MODE_T2_L2);
+        rv = ogs_tlv_parse_msg(&pfcp_message->pfcp_blockchain_credentials_response,
+                               &ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response, pkbuf, OGS_TLV_MODE_T2_L2);
         ogs_expect(rv == OGS_OK);
         break;
     default:
