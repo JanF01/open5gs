@@ -560,11 +560,43 @@ void upf_n4_handle_blockchain_credentials_response(
     ogs_assert(xact);
     ogs_assert(rsp);
 
-    ogs_info("Received PFCP Blockchain Credentials Response for SEID:%lu", sess->smf_n4_f_seid.seid);
+    ogs_info("Received PFCP Blockchain Credentials Response for SEID: %lu",
+             sess->smf_n4_f_seid.seid);
 
-    if (rsp->presence)
+    /* --- Cause IE --- */
+    if (rsp->cause.presence)
         ogs_info("PFCP Cause: %u", rsp->cause.u8);
+    else
+        ogs_warn("PFCP Cause IE not present");
 
+    /* --- Blockchain Credentials IE --- */
+    if (rsp->credentials.presence) {
+        const char *login_str = NULL;
+        const char *password_str = NULL;
+
+        if (rsp->credentials.login.presence && rsp->credentials.login.data)
+            login_str = (char *)rsp->credentials.login.data;
+
+        if (rsp->credentials.password.presence && rsp->credentials.password.data)
+            password_str = (char *)rsp->credentials.password.data;
+
+        ogs_info("Blockchain Credentials:");
+        ogs_info("  - Login: %s", login_str ? login_str : "(missing)");
+        ogs_info("  - Password: %s", password_str ? password_str : "(missing)");
+    } else {
+        ogs_warn("Blockchain Credentials IE not present in response");
+    }
+
+    /* --- Blockchain Node ID IE --- */
+    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data) {
+        ogs_info("Blockchain Node ID: %.*s",
+                 rsp->blockchain_node_id.len,
+                 (char *)rsp->blockchain_node_id.data);
+    } else {
+        ogs_warn("Blockchain Node ID IE not present in response");
+    }
+
+    /* --- Commit the PFCP transaction --- */
     ogs_pfcp_xact_commit(xact);
 
     ogs_info("Blockchain credentials PFCP exchange completed successfully.");
