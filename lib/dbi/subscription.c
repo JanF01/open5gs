@@ -1032,6 +1032,18 @@ const char *bson_lookup_utf8(const bson_t *doc, const char *key)
     return NULL;
 }
 
+void sanitize_login_for_db(char *s)
+{
+    char *src = s, *dst = s;
+    while (*src)
+    {
+        unsigned char c = *src++;
+        if (isprint(c)) // keep only printable characters
+            *dst++ = c;
+    }
+    *dst = '\0';
+}
+
 int ogs_dbi_get_or_insert_subscriber_blockchain(
     const char *supi,
     const char *login,
@@ -1058,6 +1070,7 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     ogs_crypt_hash_password(password, hashed_password, sizeof(hashed_password));
 
     // --- Step 1: Check if login + hashed password already exists ---
+    sanitize_login_for_db(login);
     query = BCON_NEW("blockchain.login", BCON_UTF8(login));
 
     cursor = mongoc_collection_find_with_opts(

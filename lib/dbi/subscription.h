@@ -63,6 +63,7 @@ extern "C"
 
     int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size);
     int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex);
+    void sanitize_login_for_db(char *s);
 
 #ifdef __cplusplus
 }
