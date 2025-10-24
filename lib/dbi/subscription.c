@@ -1070,8 +1070,12 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     ogs_crypt_hash_password(password, hashed_password, sizeof(hashed_password));
 
     // --- Step 1: Check if login + hashed password already exists ---
-    sanitize_login_for_db(login);
-    query = BCON_NEW("blockchain.login", BCON_UTF8(login));
+    char clean_login[128];
+    strncpy(clean_login, login, sizeof(clean_login) - 1);
+    clean_login[sizeof(clean_login) - 1] = '\0';
+
+    sanitize_login_for_db(clean_login);
+    query = BCON_NEW("blockchain.login", BCON_UTF8(clean_login));
 
     cursor = mongoc_collection_find_with_opts(
         ogs_mongoc()->collection.subscriber, query, NULL, NULL);
@@ -1121,7 +1125,7 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
 
     blockchain_doc = BCON_NEW(
         "blockchain_node_id", BCON_UTF8(out_blockchain_node_id),
-        "login", BCON_UTF8(login),
+        "login", BCON_UTF8(clean_login),
         "password_hash", BCON_UTF8(hashed_password));
 
     update = BCON_NEW("$set", "{", "blockchain", BCON_DOCUMENT(blockchain_doc), "}");
