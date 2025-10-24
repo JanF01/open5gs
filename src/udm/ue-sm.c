@@ -314,6 +314,10 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
             udm_ue, stream, message);
         break;
 
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+
+        break;
+
         DEFAULT
         SWITCH(message->h.resource.component[3])
         CASE(OGS_SBI_RESOURCE_NAME_PROVISIONED_DATA)

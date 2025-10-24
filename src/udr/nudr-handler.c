@@ -1515,7 +1515,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     // --- Send asynchronously to UDM using stateless UDR SBI object ---
     int r = udr_sbi_discover_and_send(
-        OGS_SBI_SERVICE_TYPE_NUDM_SDM,         // service type
+        OGS_SBI_SERVICE_TYPE_NUDR_DR,          // service type
         NULL,                                  // discovery option
         udr_nudm_sdm_build_blockchain_node_id, // builder callback
         ctx,                                   // per-request context
