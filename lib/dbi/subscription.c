@@ -1038,8 +1038,9 @@ void sanitize_login_for_db(char *s)
     while (*src)
     {
         unsigned char c = *src++;
-        if (isprint(c)) // keep only printable characters
-            *dst++ = c;
+        if (c <= 0x1F || c == 0x7F) // control chars (non-printable ASCII)
+            break;                  // stop at first control separator
+        *dst++ = c;
     }
     *dst = '\0';
 }
