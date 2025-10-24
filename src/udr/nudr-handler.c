@@ -1461,12 +1461,13 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(rcvmsg);
 
     OpenAPI_sdm_blockchain_credentials_t *cred = rcvmsg->SdmBlockchainCredentials;
-    if (!cred) {
+    if (!cred)
+    {
         ogs_error("No BlockchainCredentials in request for SUPI[%s]",
                   rcvmsg->h.resource.component[1]);
         ogs_assert(true == ogs_sbi_server_send_error(
-            stream, OGS_SBI_HTTP_STATUS_BAD_REQUEST, rcvmsg,
-            "No BlockchainCredentials", NULL, NULL));
+                               stream, OGS_SBI_HTTP_STATUS_BAD_REQUEST, rcvmsg,
+                               "No BlockchainCredentials", NULL, NULL));
         return false;
     }
 
@@ -1484,11 +1485,12 @@ bool udr_nudr_dr_handle_blockchain_credentials(
         blockchain_node_id,
         sizeof(blockchain_node_id));
 
-    if (dbi_rv != OGS_OK) {
+    if (dbi_rv != OGS_OK)
+    {
         ogs_error("Failed to store blockchain credentials for SUPI[%s]", supi);
         ogs_assert(true == ogs_sbi_server_send_error(
-            stream, OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR, rcvmsg,
-            "Database error", NULL, NULL));
+                               stream, OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR, rcvmsg,
+                               "Database error", NULL, NULL));
         return false;
     }
 
@@ -1502,7 +1504,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(response_data.node_id);
 
     // --- Allocate per-request context ---
-    
+
     udr_sbi_ctx_t *ctx = NULL;
     ogs_pool_alloc(&udr_sbi_ctx_pool, &ctx);
     ogs_assert(ctx);
@@ -1513,14 +1515,15 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     // --- Send asynchronously to UDM using stateless UDR SBI object ---
     int r = udr_sbi_discover_and_send(
-        OGS_SBI_SERVICE_TYPE_NUDR_DR,         // service type
-        NULL,                                 // discovery option
+        OGS_SBI_SERVICE_TYPE_NUDM_SDM,         // service type
+        NULL,                                  // discovery option
         udr_nudm_sdm_build_blockchain_node_id, // builder callback
-        ctx,                                  // per-request context
+        ctx,                                   // per-request context
         &response_data                         // payload
     );
 
-    if (r != OGS_OK) {
+    if (r != OGS_OK)
+    {
         ogs_error("Failed to forward Blockchain Node ID to UDM for SUPI[%s]", supi);
         ogs_pool_free(&udr_sbi_ctx_pool, ctx);
         OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
