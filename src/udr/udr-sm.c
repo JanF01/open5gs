@@ -142,18 +142,17 @@ void udr_state_operational(ogs_fsm_t *s, udr_event_t *e)
         udr_nudr_dr_handle_subscription_context(stream, &message);
         break;
 
-        CASE(OGS_SBI_RESOURCE_NAME_BLOCKCHAIN_CREDENTIALS)
-            SWITCH(message.h.method)
-            CASE(OGS_SBI_HTTP_METHOD_POST)
-                udr_nudr_dr_handle_blockchain_credentials(stream, &message);
-                break;
-            DEFAULT
-                ogs_error("Invalid HTTP method [%s] for blockchain credentials", message.h.method);
-                ogs_assert(true == ogs_sbi_server_send_error(
-                    stream, OGS_SBI_HTTP_STATUS_FORBIDDEN, &message,
-                    "Invalid HTTP method", message.h.method, NULL));
-            END
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+        SWITCH(message.h.method)
+        CASE(OGS_SBI_HTTP_METHOD_POST)
+        udr_nudr_dr_handle_blockchain_credentials(stream, &message);
         break;
+        DEFAULT
+        ogs_error("Invalid HTTP method [%s] for blockchain credentials", message.h.method);
+        ogs_assert(true == ogs_sbi_server_send_error(
+                               stream, OGS_SBI_HTTP_STATUS_FORBIDDEN, &message,
+                               "Invalid HTTP method", message.h.method, NULL));
+        END break;
 
         DEFAULT
         SWITCH(message.h.resource.component[3])

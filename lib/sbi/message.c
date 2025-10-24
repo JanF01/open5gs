@@ -2571,7 +2571,21 @@ static int parse_json(ogs_sbi_message_t *message,
             ogs_error("HTTP ERROR Status : %d", message->res_status);
         }
         break;
-
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+        if (message->res_status < 300)
+        {
+            message->SdmBlockchainCredentialsResponse =
+                OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(item);
+            if (!message->SdmBlockchainCredentialsResponse)
+            {
+                rv = OGS_ERROR;
+                ogs_error("JSON parse error");
+            }
+        }
+        else
+        {
+            ogs_error("HTTP ERROR Status : %d", message->res_status);
+        }
         DEFAULT
         rv = OGS_ERROR;
         ogs_error("Unknown resource name [%s]",
@@ -2618,7 +2632,6 @@ static int parse_json(ogs_sbi_message_t *message,
         ogs_error("Unknown resource name [%s]",
                   message->h.resource.component[3]);
         END break;
-
         CASE(OGS_SBI_RESOURCE_NAME_CONTEXT_DATA)
         SWITCH(message->h.resource.component[3])
         CASE(OGS_SBI_RESOURCE_NAME_AMF_3GPP_ACCESS)
@@ -2661,7 +2674,22 @@ static int parse_json(ogs_sbi_message_t *message,
         ogs_error("Unknown resource name [%s]",
                   message->h.resource.component[3]);
         END break;
-
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+        if (message->res_status < 300)
+        {
+            message->SdmBlockchainCredentials =
+                OpenAPI_sdm_blockchain_credentials_parseFromJSON(item);
+            if (!message->SdmBlockchainCredentials)
+            {
+                rv = OGS_ERROR;
+                ogs_error("JSON parse error");
+            }
+        }
+        else
+        {
+            ogs_error("HTTP ERROR Status : %d", message->res_status);
+        }
+        break;
         DEFAULT
         SWITCH(message->h.resource.component[3])
         CASE(OGS_SBI_RESOURCE_NAME_PROVISIONED_DATA)
@@ -2826,7 +2854,29 @@ static int parse_json(ogs_sbi_message_t *message,
         ogs_error("Unknown resource name [%s]",
                   message->h.resource.component[0]);
         END break;
-
+        CASE(OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN)
+        SWITCH(message->h.resource.component[0])
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+        if (message->res_status < 300)
+        {
+            message->SdmBlockchainCredentialsResponse =
+                OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(item);
+            if (!message->SdmBlockchainCredentialsResponse)
+            {
+                rv = OGS_ERROR;
+                ogs_error("JSON parse error");
+            }
+        }
+        else
+        {
+            ogs_error("HTTP ERROR Status : %d", message->res_status);
+        }
+        break;
+        DEFAULT
+        rv = OGS_ERROR;
+        ogs_error("Unknown resource name [%s]",
+                  message->h.resource.component[0]);
+        END break;
         CASE(OGS_SBI_SERVICE_NAME_NSMF_PDUSESSION)
         SWITCH(message->h.resource.component[0])
         CASE(OGS_SBI_RESOURCE_NAME_SM_CONTEXTS)

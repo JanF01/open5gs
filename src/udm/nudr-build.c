@@ -365,7 +365,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_blockchain_credentials(
 
     sendmsg.h.resource.component[0] = (char *)OGS_SBI_RESOURCE_NAME_SUBSCRIPTION_DATA;
     sendmsg.h.resource.component[1] = udm_ue->supi;
-    sendmsg.h.resource.component[2] = (char *)OGS_SBI_RESOURCE_NAME_BLOCKCHAIN_CREDENTIALS;
+    sendmsg.h.resource.component[2] = (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS;
 
     /* Forward the payload */
     sendmsg.SdmBlockchainCredentials = cred;
