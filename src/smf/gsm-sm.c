@@ -1066,17 +1066,32 @@ void smf_gsm_state_operational(ogs_fsm_t *s, smf_event_t *e)
 
         SWITCH(sbi_message->h.service.name)
         CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
-         SWITCH(sbi_message->h.resource.component[1])
-         CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+        SWITCH(sbi_message->h.resource.component[1])
+
+            CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
                 SWITCH(sbi_message->h.method)
                     CASE(OGS_SBI_HTTP_METHOD_POST)
-                        smf_nudm_handle_blockchain_node_id(sess,stream,sbi_message);
+                        smf_nudm_handle_blockchain_node_id(sess, stream, sbi_message);
                         break;
+
                     DEFAULT
                         ogs_error("[%s] Ignore invalid HTTP method [%s]",
-                            smf_ue->supi, sbi_message->h.method);
+                                smf_ue->supi, sbi_message->h.method);
                 END
-                break;    
+                break; // end CASE SDM_BLOCKCHAIN_NODE_ID
+
+            DEFAULT
+                ogs_error("Invalid resource name [%s]",
+                        sbi_message->h.resource.component[1]);
+                ogs_assert(true == ogs_sbi_server_send_error(
+                    stream,
+                    OGS_SBI_HTTP_STATUS_BAD_REQUEST,
+                    sbi_message,
+                    "Invalid resource name [%s]",
+                    sbi_message->h.resource.component[1], NULL));
+                OGS_FSM_TRAN(s, smf_gsm_state_exception);
+        END // end SWITCH(resource.component[1])
+        break;
         CASE(OGS_SBI_SERVICE_NAME_NSMF_PDUSESSION)
             SWITCH(sbi_message->h.resource.component[0])
             CASE(OGS_SBI_RESOURCE_NAME_SM_CONTEXTS)
@@ -3314,6 +3329,16 @@ void smf_gsm_state_wait_5gc_n1_n2_release(ogs_fsm_t *s, smf_event_t *e)
 
         CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
             SWITCH(sbi_message->h.resource.component[1])
+            CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+                SWITCH(sbi_message->h.method)
+                    CASE(OGS_SBI_HTTP_METHOD_POST)
+                        smf_nudm_handle_blockchain_node_id(sess,stream,sbi_message);
+                        break;
+                    DEFAULT
+                        ogs_error("[%s] Ignore invalid HTTP method [%s]",
+                            smf_ue->supi, sbi_message->h.method);
+                END
+                break;    
             CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
                 SWITCH(sbi_message->h.method)
                 CASE(OGS_SBI_HTTP_METHOD_DELETE)
