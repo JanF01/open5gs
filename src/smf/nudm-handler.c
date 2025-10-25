@@ -491,7 +491,6 @@ cleanup:
     return false;
 }
 
-
 bool smf_nudm_handle_blockchain_node_id(
     smf_sess_t *sess, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
 {
