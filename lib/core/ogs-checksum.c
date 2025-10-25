@@ -2,6 +2,20 @@
 #include "ogs-core.h"
 #include <string.h>
 
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
+#if HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
+#if HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
 
 /* Standard Internet Checksum (RFC 1071) */
 uint16_t ogs_checksum(uint16_t *addr, int len)
