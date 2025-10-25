@@ -1457,6 +1457,9 @@ cleanup:
 bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_sbi_stream_t *stream, ogs_sbi_message_t *rcvmsg)
 {
+    int status = 0;
+    char *strerror = NULL;
+
     ogs_assert(stream);
     ogs_assert(rcvmsg);
 
@@ -1464,14 +1467,9 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     OpenAPI_sdm_blockchain_credentials_t *cred = rcvmsg->SdmBlockchainCredentials;
 
     if (!supi || !cred) {
-        ogs_error("Invalid BlockchainCredentials request: missing SUPI or body");
-        ogs_assert(true == ogs_sbi_server_send_error(
-                               stream,
-                               OGS_SBI_HTTP_STATUS_BAD_REQUEST,
-                               rcvmsg,
-                               "Missing SUPI or BlockchainCredentials",
-                               NULL, NULL));
-        return false;
+        strerror = ogs_msprintf("Missing SUPI or BlockchainCredentials");
+        status = OGS_SBI_HTTP_STATUS_BAD_REQUEST;
+        goto cleanup;
     }
 
     ogs_info("Received Blockchain Credentials for SUPI[%s]", supi);
@@ -1487,20 +1485,15 @@ bool udr_nudr_dr_handle_blockchain_credentials(
         sizeof(blockchain_node_id));
 
     if (dbi_rv != OGS_OK) {
-        ogs_error("Failed to store blockchain credentials for SUPI[%s]", supi);
-        ogs_assert(true == ogs_sbi_server_send_error(
-                               stream,
-                               OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR,
-                               rcvmsg,
-                               "Database error storing blockchain credentials",
-                               NULL, NULL));
-        return false;
+        strerror = ogs_msprintf("Database error storing blockchain credentials for SUPI[%s]", supi);
+        status = OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR;
+        goto cleanup;
     }
 
     ogs_info("Blockchain credentials stored successfully for SUPI[%s], Node ID[%s]",
              supi, blockchain_node_id);
 
-    /* --- Build and send response with blockchain_node_id --- */
+    /* --- Build response using stack struct, heap allocate node_id --- */
     OpenAPI_sdm_blockchain_credentials_response_t response_data;
     memset(&response_data, 0, sizeof(response_data));
     response_data.node_id = OpenAPI_sdm_blockchain_node_id_create(blockchain_node_id);
@@ -1510,8 +1503,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     memset(&sendmsg, 0, sizeof(sendmsg));
     sendmsg.SdmBlockchainCredentialsResponse = &response_data;
 
-    ogs_sbi_response_t *response =
-        ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_OK);
+    ogs_sbi_response_t *response = ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_OK);
     ogs_assert(response);
 
     ogs_info("Sending Blockchain Node ID response to UDM for SUPI[%s]", supi);
@@ -1521,4 +1513,13 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
 
     return true;
+
+cleanup:
+    ogs_error("[%s] %s", supi ? supi : "unknown", strerror ? strerror : "Unknown error");
+    ogs_assert(true == ogs_sbi_server_send_error(stream, status, rcvmsg,
+                                                strerror, NULL, NULL));
+    if (strerror)
+        ogs_free(strerror);
+
+    return false;
 }
