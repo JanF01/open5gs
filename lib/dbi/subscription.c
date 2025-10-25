@@ -1077,25 +1077,45 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     strncpy(clean_login, login, sizeof(clean_login) - 1);
     clean_login[sizeof(clean_login) - 1] = '\0';
 
-    sanitize_login_for_db(clean_login);
-    query = BCON_NEW("blockchain.login", BCON_UTF8(clean_login));
+    supi_type = ogs_id_get_type(supi);
+    ogs_assert(supi_type);
+    supi_id = ogs_id_get_value(supi);
+    ogs_assert(supi_id);
+
+    // Find document by SUPI (IMSI)
+    query = BCON_NEW(supi_type, BCON_UTF8(supi_id));
 
     cursor = mongoc_collection_find_with_opts(
-        ogs_mongoc()->collection.subscriber, query, NULL, NULL);
+    ogs_mongoc()->collection.subscriber, query, NULL, NULL);
 
-    if (mongoc_cursor_next(cursor, &doc))
-    {
-        const char *existing_hash = bson_lookup_utf8(doc, "blockchain.password_hash");
-        if (existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK)
-        {
-            const char *existing_id = bson_lookup_utf8(doc, "blockchain.blockchain_node_id");
-            if (existing_id)
-            {
-                strncpy(out_blockchain_node_id, existing_id, id_size);
-                out_blockchain_node_id[id_size - 1] = '\0';
-                rv = OGS_OK;
-                goto cleanup;
-            }
+    if (mongoc_cursor_next(cursor, &doc)) {
+    bson_iter_t iter, sub_iter;
+
+    if (bson_iter_init_find(&iter, doc, "blockchain") &&
+        BSON_ITER_HOLDS_DOCUMENT(&iter)) {
+
+        const uint8_t *subdoc_buf = NULL;
+        uint32_t subdoc_len = 0;
+        bson_iter_document(&iter, &subdoc_len, &subdoc_buf);
+
+        bson_t subdoc;
+        bson_init_static(&subdoc, subdoc_buf, subdoc_len);
+
+        const char *existing_login = bson_lookup_utf8(&subdoc, "login");
+        const char *existing_hash = bson_lookup_utf8(&subdoc, "password_hash");
+        const char *existing_id   = bson_lookup_utf8(&subdoc, "blockchain_node_id");
+
+        if (existing_login && strcmp(existing_login, clean_login) == 0 &&
+            existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK &&
+            existing_id) {
+            strncpy(out_blockchain_node_id, existing_id, id_size);
+            out_blockchain_node_id[id_size - 1] = '\0';
+            rv = OGS_OK;
+            bson_destroy(&subdoc);
+            goto cleanup;
+        }
+
+        bson_destroy(&subdoc);
         }
     }
 
