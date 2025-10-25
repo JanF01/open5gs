@@ -2862,7 +2862,7 @@ static int parse_json(ogs_sbi_message_t *message,
             {
                 rv = OGS_ERROR;
                 ogs_error("JSON parse error");
-            }F
+            }
         }
         else
         {
