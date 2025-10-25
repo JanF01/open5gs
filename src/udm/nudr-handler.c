@@ -950,7 +950,7 @@ bool udm_nudr_dr_handle_blockchain_node_id(
     ogs_assert(stream);
     ogs_assert(recvmsg);
 
-    if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_OK) {
+    if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_CREATED) {
         ogs_error("[%s] HTTP response error [%d]",
                   udm_ue->supi, recvmsg->res_status);
         ogs_assert(true == ogs_sbi_server_send_error(
