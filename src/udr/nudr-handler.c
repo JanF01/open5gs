@@ -1509,8 +1509,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_info("Sending Blockchain Node ID response to UDM for SUPI[%s]", supi);
     ogs_assert(true == ogs_sbi_server_send_response(stream, response));
 
-    /* --- Cleanup --- */
-    OpenAPI_sdm_blockchain_credentials_response_free(response_data);
+    /* The SBI layer will free response_data after sending */
 
     return true;
 
