@@ -1574,6 +1574,27 @@ void smf_gsm_state_operational(ogs_fsm_t *s, smf_event_t *e)
             stream = ogs_sbi_stream_find_by_id(stream_id);
 
         SWITCH(sbi_message->h.service.name)
+        CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
+        SWITCH(sbi_message->h.resource.component[1])
+            CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+                SWITCH(sbi_message->h.method)
+                    CASE(OGS_SBI_HTTP_METHOD_POST)
+                        smf_nudm_handle_blockchain_node_id(sess, stream, sbi_message);
+                        break;
+
+                    DEFAULT
+                        ogs_error("[%s] Ignore invalid HTTP method [%s]",
+                                smf_ue->supi, sbi_message->h.method);
+                END
+                break; // end CASE SDM_BLOCKCHAIN_NODE_ID
+
+             DEFAULT
+                ogs_error("[%s:%d] Invalid resource name [%s]",
+                        smf_ue->supi, sess->psi,
+                        sbi_message->h.resource.component[0]);
+                ogs_assert_if_reached();
+        END
+        break;
         CASE(OGS_SBI_SERVICE_NAME_NAMF_COMM)
             SWITCH(sbi_message->h.resource.component[0])
             CASE(OGS_SBI_RESOURCE_NAME_UE_CONTEXTS)
