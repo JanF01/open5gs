@@ -1460,23 +1460,24 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(stream);
     ogs_assert(rcvmsg);
 
+    const char *supi = rcvmsg->h.resource.component[1];
     OpenAPI_sdm_blockchain_credentials_t *cred = rcvmsg->SdmBlockchainCredentials;
-    if (!cred)
-    {
-        ogs_error("No BlockchainCredentials in request for SUPI[%s]",
-                  rcvmsg->h.resource.component[1]);
+
+    if (!supi || !cred) {
+        ogs_error("Invalid BlockchainCredentials request: missing SUPI or body");
         ogs_assert(true == ogs_sbi_server_send_error(
-                               stream, OGS_SBI_HTTP_STATUS_BAD_REQUEST, rcvmsg,
-                               "No BlockchainCredentials", NULL, NULL));
+                               stream,
+                               OGS_SBI_HTTP_STATUS_BAD_REQUEST,
+                               rcvmsg,
+                               "Missing SUPI or BlockchainCredentials",
+                               NULL, NULL));
         return false;
     }
-
-    const char *supi = rcvmsg->h.resource.component[1];
 
     ogs_info("Received Blockchain Credentials for SUPI[%s]", supi);
     ogs_info("Login: %s, Password: %s", cred->login, cred->password);
 
-    // --- DB operation ---
+    /* --- Perform DB insert/retrieve operation --- */
     char blockchain_node_id[13] = {0};
     int dbi_rv = ogs_dbi_get_or_insert_subscriber_blockchain(
         supi,
@@ -1485,56 +1486,39 @@ bool udr_nudr_dr_handle_blockchain_credentials(
         blockchain_node_id,
         sizeof(blockchain_node_id));
 
-    if (dbi_rv != OGS_OK)
-    {
+    if (dbi_rv != OGS_OK) {
         ogs_error("Failed to store blockchain credentials for SUPI[%s]", supi);
         ogs_assert(true == ogs_sbi_server_send_error(
-                               stream, OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR, rcvmsg,
-                               "Database error", NULL, NULL));
+                               stream,
+                               OGS_SBI_HTTP_STATUS_INTERNAL_SERVER_ERROR,
+                               rcvmsg,
+                               "Database error storing blockchain credentials",
+                               NULL, NULL));
         return false;
     }
 
     ogs_info("Blockchain credentials stored successfully for SUPI[%s], Node ID[%s]",
              supi, blockchain_node_id);
 
-    // --- Prepare payload for UDM ---
+    /* --- Build and send response with blockchain_node_id --- */
     OpenAPI_sdm_blockchain_credentials_response_t response_data;
     memset(&response_data, 0, sizeof(response_data));
     response_data.node_id = OpenAPI_sdm_blockchain_node_id_create(blockchain_node_id);
     ogs_assert(response_data.node_id);
 
-    // --- Allocate per-request context ---
+    ogs_sbi_message_t sendmsg;
+    memset(&sendmsg, 0, sizeof(sendmsg));
+    sendmsg.SdmBlockchainCredentialsResponse = &response_data;
 
-    udr_sbi_ctx_t *ctx = NULL;
-    ogs_pool_alloc(&udr_sbi_ctx_pool, &ctx);
-    ogs_assert(ctx);
-    memset(ctx, 0, sizeof(*ctx));
-    ctx->supi = supi;
-    ctx->stream = stream;
-    ctx->state = UDR_SBI_NO_STATE; // Set the state in the context
+    ogs_sbi_response_t *response =
+        ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_OK);
+    ogs_assert(response);
 
-    // --- Send asynchronously to UDM using stateless UDR SBI object ---
-    int r = udr_sbi_discover_and_send(
-        OGS_SBI_SERVICE_TYPE_NUDM_SDM,         // service type
-        NULL,                                  // discovery option
-        udr_nudm_sdm_build_blockchain_node_id, // builder callback
-        ctx,                                   // per-request context
-        &response_data                         // payload
-    );
+    ogs_info("Sending Blockchain Node ID response to UDM for SUPI[%s]", supi);
+    ogs_assert(true == ogs_sbi_server_send_response(stream, response));
 
-    if (r != OGS_OK)
-    {
-        ogs_error("Failed to forward Blockchain Node ID to UDM for SUPI[%s]", supi);
-        ogs_pool_free(&udr_sbi_ctx_pool, ctx);
-        OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
-        return false;
-    }
-
-    ogs_info("Forwarded Blockchain Node ID [%s] to UDM for SUPI[%s]", blockchain_node_id, supi);
-
-    // --- Cleanup ---
+    /* --- Cleanup --- */
     OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
 
-    // Note: Do NOT send HTTP response to SMF; UDM will handle it
     return true;
 }

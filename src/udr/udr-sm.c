@@ -328,10 +328,6 @@ void udr_state_operational(ogs_fsm_t *s, udr_event_t *e)
                   message.h.resource.component[0]);
         ogs_assert_if_reached();
         END break;
-
-        CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
-
-        break;
         DEFAULT
         ogs_error("Invalid API name [%s]", message.h.service.name);
         ogs_assert_if_reached();

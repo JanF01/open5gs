@@ -232,9 +232,6 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
                     udm_nudm_sdm_handle_subscription_create(
                             udm_ue, stream, message);
                     break;
-                CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
-                    udm_nudm_sdm_handle_blockchain_node_id(udm_ue, stream, message);
-                    break;    
                 CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
                     udm_nudm_sdm_handle_blockchain_credentials(
                             udm_ue, stream, message);
@@ -336,6 +333,13 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
                     END
                 END
                 break;
+            CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+               if(udm_nudm_sdm_handle_blockchain_node_id(udm_ue, stream, message)){
+                        ogs_warn("udm_nudr_dr_handle_subscription_"
+                                "authentication() failed");
+                        OGS_FSM_TRAN(s, udm_ue_state_exception);
+                };
+                break;        
             DEFAULT
                 ogs_error("Invalid resource name [%s]",
                         message->h.resource.component[0]);
