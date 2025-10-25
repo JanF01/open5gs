@@ -2554,7 +2554,6 @@ static int parse_json(ogs_sbi_message_t *message,
             ogs_error("HTTP ERROR Status : %d", message->res_status);
         }
         break;
-
         CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
         if (message->res_status < 300)
         {
@@ -2564,6 +2563,22 @@ static int parse_json(ogs_sbi_message_t *message,
             {
                 rv = OGS_ERROR;
                 ogs_error("JSON parse error");
+            }
+        }
+        else
+        {
+            ogs_error("HTTP ERROR Status : %d", message->res_status);
+        }
+        break;
+        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+        if (message->res_status == OGS_SBI_HTTP_STATUS_CREATED)
+        {
+            message->SdmBlockchainCredentialsResponse =
+                OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(item);
+            if (!message->SdmBlockchainCredentialsResponse)
+            {
+                rv = OGS_ERROR;
+                ogs_error("JSON parse error: expected SdmBlockchainCredentialsResponse");
             }
         }
         else

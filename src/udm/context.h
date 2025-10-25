@@ -57,6 +57,8 @@ struct udm_ue_s {
     char *supi;
     char *serving_network_name;
     char *blockchain_node_id;
+    ogs_sbi_stream_t *smf_stream;     
+    ogs_sbi_message_t *smf_recvmsg;
 
     char *ausf_instance_id;
     char *amf_instance_id;

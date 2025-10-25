@@ -884,6 +884,9 @@ bool udm_nudm_sdm_handle_blockchain_credentials(
                   SdmBlockchainCredentials->single_nssai->sd ? SdmBlockchainCredentials->single_nssai->sd : "(none)");
     }
 
+    udm_ue->smf_stream = stream;
+    udm_ue->smf_recvmsg = recvmsg;
+
     /* Forward to UDR — NUDR_DR */
     r = udm_ue_sbi_discover_and_send(
         OGS_SBI_SERVICE_TYPE_NUDR_DR,

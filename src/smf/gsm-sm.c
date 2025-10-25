@@ -339,12 +339,6 @@ void smf_gsm_state_initial(ogs_fsm_t *s, smf_event_t *e)
                         sbi_message->h.resource.component[0], NULL));
             END
             break;
-        CASE(OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN)
-            SWITCH(sbi_message->h.resource.component[0])
-            CASE(OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS)
-                smf_nsmf_handle_blockchain_credentials_response(sess, stream, sbi_message);
-                break;
-
             DEFAULT
                 ogs_error("Unknown NSMF-Blockchain resource [%s]",
                         sbi_message->h.resource.component[0]);
@@ -2848,19 +2842,6 @@ void smf_gsm_state_wait_pfcp_deletion(ogs_fsm_t *s, smf_event_t *e)
                 ogs_assert_if_reached();
             END
             break;
-
-        CASE(OGS_SBI_SERVICE_NAME_NSMF_BLOCKCHAIN)
-            SWITCH(sbi_message->h.resource.component[0])
-            CASE(OGS_SBI_RESOURCE_NAME_SMF_BLOCKCHAIN_CREDENTIALS)
-                smf_nsmf_handle_blockchain_credentials_response(sess, stream, sbi_message);
-                break;
-
-            DEFAULT
-                ogs_error("Unknown NSMF-Blockchain resource [%s]",
-                        sbi_message->h.resource.component[0]);
-                break;
-            END
-            break;
         DEFAULT
             ogs_error("[%s:%d] Invalid API name [%s]",
                     smf_ue->supi, sess->psi, sbi_message->h.service.name);
@@ -3327,6 +3308,22 @@ void smf_gsm_state_wait_5gc_n1_n2_release(ogs_fsm_t *s, smf_event_t *e)
 
         CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
             SWITCH(sbi_message->h.resource.component[1])
+            CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+                SWITCH(sbi_message->h.method)
+                CASE(OGS_SBI_HTTP_METHOD_POST)
+                smf_nudm_handle_blockchain_node_id(sess,stream,sbi_message);
+                 DEFAULT
+                    ogs_error("[%s] Ignore invalid HTTP method [%s]",
+                        smf_ue->supi, sbi_message->h.method);
+                END
+                break;
+
+            DEFAULT
+                ogs_error("Invalid resource name [%s]",
+                        sbi_message->h.resource.component[1]);
+                ogs_assert_if_reached();
+            END
+            break;
             CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
                 SWITCH(sbi_message->h.method)
                 CASE(OGS_SBI_HTTP_METHOD_DELETE)

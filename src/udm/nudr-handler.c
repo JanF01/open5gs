@@ -971,15 +971,37 @@ bool udm_nudr_dr_handle_blockchain_node_id(
     ogs_info("[%s] Received blockchain node_id from UDR: %s",
              udm_ue->supi, resp->node_id->blockchain_node_id);
 
-    int r = udm_ue_sbi_discover_and_send(
-        OGS_SBI_SERVICE_TYPE_NSMF_BLOCKCHAIN,
-        NULL,
-        udm_smf_build_blockchain_credentials_response,
-        udm_ue,
-        stream,
-        UDM_SBI_NO_STATE,
-        resp);
-    ogs_expect(r == OGS_OK);
+    // Retrieve stored SMF stream and message
+    ogs_sbi_stream_t *smf_stream = udm_ue->smf_stream;
+    ogs_sbi_message_t *smf_recvmsg = udm_ue->smf_recvmsg;
+    ogs_assert(smf_stream);
+    ogs_assert(smf_recvmsg);
 
-    return true;
+    // Build response as usual
+    ogs_sbi_message_t sendmsg;
+    memset(&sendmsg, 0, sizeof(sendmsg));
+
+    ogs_sbi_server_t *server = ogs_sbi_server_from_stream(smf_stream);
+    ogs_assert(server);
+
+    ogs_sbi_header_t header;
+    memset(&header, 0, sizeof(header));
+    header.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDM_SDM;
+    header.api.version = (char *)OGS_SBI_API_V2;
+    header.resource.component[0] = smf_recvmsg->h.resource.component[0]; // SUPI
+    header.resource.component[1] = (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID;
+
+    sendmsg.http.location = ogs_sbi_server_uri(server, &header);
+    sendmsg.SdmBlockchainCredentialsResponse = recvmsg->SdmBlockchainCredentialsResponse;
+
+    ogs_sbi_response_t *response =
+        ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_CREATED);
+    ogs_assert(response);
+    ogs_sbi_server_send_response(smf_stream, response);
+
+    ogs_free(sendmsg.http.location);
+
+    // Clear stored SMF pointers
+    udm_ue->smf_stream = NULL;
+    udm_ue->smf_recvmsg = NULL;
 }

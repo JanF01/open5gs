@@ -490,3 +490,51 @@ cleanup:
 
     return false;
 }
+
+
+bool smf_nudm_handle_blockchain_node_id(
+    smf_sess_t *sess, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
+{
+    ogs_assert(sess);
+    ogs_assert(stream);
+    ogs_assert(recvmsg);
+
+    if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_CREATED) {
+        ogs_error("[%s] HTTP response error [%d]",
+                  udm_ue->supi, recvmsg->res_status);
+        ogs_assert(true == ogs_sbi_server_send_error(
+            stream, recvmsg->res_status, recvmsg,
+            "HTTP response error from UDR", udm_ue->supi, NULL));
+        return false;
+    }
+
+    // Extract node ID from the HTTP response body if present
+    OpenAPI_sdm_blockchain_credentials_response_t *resp =
+        recvmsg->SdmBlockchainCredentialsResponse;
+
+    if (!resp || !resp->node_id || !resp->node_id->blockchain_node_id) {
+        ogs_error("[%s] Missing blockchain node_id in response", udm_ue->supi);
+        return false;
+    }
+
+    ogs_info("[%s] Received blockchain node_id from UDR: %s",
+             udm_ue->supi, resp->node_id->blockchain_node_id);
+    // Build PFCP response
+    ogs_pfcp_blockchain_credentials_response_t pfcp_rsp;
+    memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
+
+    pfcp_rsp.cause.presence = 1;
+    pfcp_rsp.cause.u8 = OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
+
+    if (resp->node_id && resp->node_id->blockchain_node_id) {
+        pfcp_rsp.blockchain_node_id.presence = 1;
+        pfcp_rsp.blockchain_node_id.data = resp->node_id->blockchain_node_id;
+        pfcp_rsp.blockchain_node_id.len = strlen(resp->node_id->blockchain_node_id);
+    }
+
+    smf_pfcp_send_blockchain_credentials_response(
+        sess->pending_blockchain_xact, sess, &pfcp_rsp);
+
+    sess->pending_blockchain_xact = NULL;
+    return true;
+}
