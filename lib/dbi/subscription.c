@@ -1038,13 +1038,15 @@ void sanitize_login_for_db(char *s)
     while (*src)
     {
         unsigned char c = *src++;
-        if (c <= 0x1F || c == 0x7F) // control chars (non-printable ASCII)
-            break;                  // stop at first control separator
+        if (c <= 0x1F || c == 0x7F)
+            break;
         *dst++ = c;
     }
+    while (dst > s && (*(dst - 1) == ' ' || *(dst - 1) == '\t'))
+        dst--;
+
     *dst = '\0';
 }
-
 int ogs_dbi_get_or_insert_subscriber_blockchain(
     const char *supi,
     const char *login,
