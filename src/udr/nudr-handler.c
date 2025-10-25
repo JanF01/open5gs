@@ -1510,6 +1510,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     ogs_sbi_message_t sendmsg;
     memset(&sendmsg, 0, sizeof(sendmsg));
+    sendmsg.h = header;
     sendmsg.http.location = ogs_sbi_server_uri(server, &header);
     sendmsg.SdmBlockchainCredentialsResponse = response_data;
 
