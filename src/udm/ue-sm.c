@@ -50,8 +50,7 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
     udm_ue = udm_ue_find_by_id(e->udm_ue_id);
     ogs_assert(udm_ue);
 
-    switch (e->h.id)
-    {
+    switch (e->h.id) {
     case OGS_FSM_ENTRY_SIG:
         break;
 
@@ -64,217 +63,228 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
 
         stream_id = OGS_POINTER_TO_UINT(e->h.sbi.data);
         ogs_assert(stream_id >= OGS_MIN_POOL_ID &&
-                   stream_id <= OGS_MAX_POOL_ID);
+                stream_id <= OGS_MAX_POOL_ID);
 
         stream = ogs_sbi_stream_find_by_id(stream_id);
-        if (!stream)
-        {
+        if (!stream) {
             ogs_error("STREAM has already been removed [%d]", stream_id);
             break;
         }
 
         SWITCH(message->h.service.name)
         CASE(OGS_SBI_SERVICE_NAME_NUDM_UEAU)
-        SWITCH(message->h.method)
-        CASE(OGS_SBI_HTTP_METHOD_POST)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_SECURITY_INFORMATION)
-        udm_nudm_ueau_handle_get(udm_ue, stream, message);
-        break;
-        CASE(OGS_SBI_RESOURCE_NAME_AUTH_EVENTS)
-        udm_nudm_ueau_handle_result_confirmation_inform(
-            udm_ue, stream, message);
-        break;
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
+            SWITCH(message->h.method)
+            CASE(OGS_SBI_HTTP_METHOD_POST)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_SECURITY_INFORMATION)
+                    udm_nudm_ueau_handle_get(udm_ue, stream, message);
+                    break;
+                CASE(OGS_SBI_RESOURCE_NAME_AUTH_EVENTS)
+                    udm_nudm_ueau_handle_result_confirmation_inform(
+                            udm_ue, stream, message);
+                    break;
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
 
-        CASE(OGS_SBI_HTTP_METHOD_PUT)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_AUTH_EVENTS)
-        udm_nudm_ueau_handle_result_confirmation_inform(
-            udm_ue, stream, message);
-        break;
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
+            CASE(OGS_SBI_HTTP_METHOD_PUT)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_AUTH_EVENTS)
+                    udm_nudm_ueau_handle_result_confirmation_inform(
+                            udm_ue, stream, message);
+                    break;
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
 
-        DEFAULT
-        ogs_error("[%s] Invalid HTTP method [%s]",
-                  udm_ue->suci, message->h.method);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
-                                             "Invalid HTTP method", message->h.method, NULL));
-        END break;
+            DEFAULT
+                ogs_error("[%s] Invalid HTTP method [%s]",
+                        udm_ue->suci, message->h.method);
+                ogs_assert(true ==
+                    ogs_sbi_server_send_error(stream,
+                        OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
+                        "Invalid HTTP method", message->h.method, NULL));
+            END
+            break;
 
         CASE(OGS_SBI_SERVICE_NAME_NUDM_UECM)
-        SWITCH(message->h.method)
-        CASE(OGS_SBI_HTTP_METHOD_PUT)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
-        udm_nudm_uecm_handle_amf_registration(
-            udm_ue, stream, message);
-        break;
+            SWITCH(message->h.method)
+            CASE(OGS_SBI_HTTP_METHOD_PUT)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
+                    udm_nudm_uecm_handle_amf_registration(
+                            udm_ue, stream, message);
+                    break;
 
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid HTTP method", message->h.method, NULL));
-        END break;
-        CASE(OGS_SBI_HTTP_METHOD_PATCH)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
-        udm_nudm_uecm_handle_amf_registration_update(
-            udm_ue, stream, message);
-        break;
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid HTTP method", message->h.method, NULL));
+                END
+                break;
+            CASE(OGS_SBI_HTTP_METHOD_PATCH)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
+                    udm_nudm_uecm_handle_amf_registration_update(
+                            udm_ue, stream, message);
+                    break;
 
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid HTTP method", message->h.method, NULL));
-        END break;
-        CASE(OGS_SBI_HTTP_METHOD_GET)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
-        r = udm_nudm_uecm_handle_amf_registration_get(
-            udm_ue, stream, message);
-        if (!r)
-        {
-            ogs_assert(true ==
-                       ogs_sbi_server_send_error(stream,
-                                                 OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
-                                                 "Invalid UE Identifier", message->h.method, NULL));
-        }
-        break;
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid HTTP method", message->h.method, NULL));
+                END
+                break;
+            CASE(OGS_SBI_HTTP_METHOD_GET)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_REGISTRATIONS)
+                    r = udm_nudm_uecm_handle_amf_registration_get(
+                            udm_ue, stream, message);
+                    if (!r)
+                    {
+                        ogs_assert(true ==
+                            ogs_sbi_server_send_error(stream,
+                                OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
+                                "Invalid UE Identifier", message->h.method, NULL));
+                    }
+                    break;
 
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
-        DEFAULT
-        ogs_error("[%s] Invalid HTTP method [%s]",
-                  udm_ue->suci, message->h.method);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
-                                             "Invalid HTTP method", message->h.method, NULL));
-        END break;
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
+            DEFAULT
+                ogs_error("[%s] Invalid HTTP method [%s]",
+                        udm_ue->suci, message->h.method);
+                ogs_assert(true ==
+                    ogs_sbi_server_send_error(stream,
+                        OGS_SBI_HTTP_STATUS_FORBIDDEN, message,
+                        "Invalid HTTP method", message->h.method, NULL));
+            END
+            break;
 
         CASE(OGS_SBI_SERVICE_NAME_NUDM_SDM)
-        SWITCH(message->h.method)
-        CASE(OGS_SBI_HTTP_METHOD_GET)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_AM_DATA)
-        CASE(OGS_SBI_RESOURCE_NAME_SMF_SELECT_DATA)
-        CASE(OGS_SBI_RESOURCE_NAME_SM_DATA)
-        r = udm_ue_sbi_discover_and_send(
-            OGS_SBI_SERVICE_TYPE_NUDR_DR, NULL,
-            udm_nudr_dr_build_query_subscription_provisioned,
-            udm_ue, stream, UDM_SBI_NO_STATE, message);
-        ogs_expect(r == OGS_OK);
-        ogs_assert(r != OGS_ERROR);
-        break;
+            SWITCH(message->h.method)
+            CASE(OGS_SBI_HTTP_METHOD_GET)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_AM_DATA)
+                CASE(OGS_SBI_RESOURCE_NAME_SMF_SELECT_DATA)
+                CASE(OGS_SBI_RESOURCE_NAME_SM_DATA)
+                    r = udm_ue_sbi_discover_and_send(
+                            OGS_SBI_SERVICE_TYPE_NUDR_DR, NULL,
+                            udm_nudr_dr_build_query_subscription_provisioned,
+                            udm_ue, stream, UDM_SBI_NO_STATE, message);
+                    ogs_expect(r == OGS_OK);
+                    ogs_assert(r != OGS_ERROR);
+                    break;
 
-        CASE(OGS_SBI_RESOURCE_NAME_NSSAI)
-        r = udm_ue_sbi_discover_and_send(
-            OGS_SBI_SERVICE_TYPE_NUDR_DR, NULL,
-            udm_nudr_dr_build_query_subscription_provisioned,
-            udm_ue, stream, UDM_SBI_UE_PROVISIONED_NSSAI_ONLY,
-            message);
-        ogs_expect(r == OGS_OK);
-        ogs_assert(r != OGS_ERROR);
-        break;
+                CASE(OGS_SBI_RESOURCE_NAME_NSSAI)
+                    r = udm_ue_sbi_discover_and_send(
+                            OGS_SBI_SERVICE_TYPE_NUDR_DR, NULL,
+                            udm_nudr_dr_build_query_subscription_provisioned,
+                            udm_ue, stream, UDM_SBI_UE_PROVISIONED_NSSAI_ONLY,
+                            message);
+                    ogs_expect(r == OGS_OK);
+                    ogs_assert(r != OGS_ERROR);
+                    break;
 
-        CASE(OGS_SBI_RESOURCE_NAME_UE_CONTEXT_IN_SMF_DATA)
-        udm_nudm_sdm_handle_subscription_provisioned(
-            udm_ue, stream, message);
-        break;
+                CASE(OGS_SBI_RESOURCE_NAME_UE_CONTEXT_IN_SMF_DATA)
+                    udm_nudm_sdm_handle_subscription_provisioned(
+                            udm_ue, stream, message);
+                    break;
+
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
+
+            CASE(OGS_SBI_HTTP_METHOD_POST)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
+                    udm_nudm_sdm_handle_subscription_create(
+                            udm_ue, stream, message);
+                    break;
+                CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
+                    udm_nudm_sdm_handle_blockchain_node_id(udm_ue, stream, message);
+                    break;    
+                CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+                    udm_nudm_sdm_handle_blockchain_credentials(
+                            udm_ue, stream, message);
+                    break;
+
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
+
+            CASE(OGS_SBI_HTTP_METHOD_DELETE)
+                SWITCH(message->h.resource.component[1])
+                CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
+                    udm_nudm_sdm_handle_subscription_delete(
+                            udm_ue, stream, message);
+                    break;
+
+                DEFAULT
+                    ogs_error("[%s] Invalid resource name [%s]",
+                            udm_ue->suci, message->h.resource.component[1]);
+                    ogs_assert(true ==
+                        ogs_sbi_server_send_error(stream,
+                            OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                            "Invalid resource name", message->h.method, NULL));
+                END
+                break;
+            DEFAULT
+                ogs_error("[%s] Invalid HTTP method [%s]",
+                        udm_ue->supi, message->h.method);
+                ogs_assert(true ==
+                    ogs_sbi_server_send_error(stream,
+                        OGS_SBI_HTTP_STATUS_NOT_FOUND, message,
+                        "Invalid HTTP method", message->h.method,
+                        NULL));
+            END
+            break;
 
         DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
-
-        CASE(OGS_SBI_HTTP_METHOD_POST)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
-        udm_nudm_sdm_handle_subscription_create(
-            udm_ue, stream, message);
+            ogs_error("Invalid API name [%s]", message->h.service.name);
+            ogs_assert(true ==
+                ogs_sbi_server_send_error(stream,
+                    OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                    "Invalid API name", message->h.service.name, NULL));
+        END
         break;
-        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
-        udm_nudm_sdm_handle_blockchain_node_id(udm_ue, stream, message);
-        break;
-        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
-        udm_nudm_sdm_handle_blockchain_credentials(
-            udm_ue, stream, message);
-        break;
-
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
-
-        CASE(OGS_SBI_HTTP_METHOD_DELETE)
-        SWITCH(message->h.resource.component[1])
-        CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
-        udm_nudm_sdm_handle_subscription_delete(
-            udm_ue, stream, message);
-        break;
-
-        DEFAULT
-        ogs_error("[%s] Invalid resource name [%s]",
-                  udm_ue->suci, message->h.resource.component[1]);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid resource name", message->h.method, NULL));
-        END break;
-        DEFAULT
-        ogs_error("[%s] Invalid HTTP method [%s]",
-                  udm_ue->supi, message->h.method);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_NOT_FOUND, message,
-                                             "Invalid HTTP method", message->h.method,
-                                             NULL));
-        END break;
-
-        DEFAULT
-        ogs_error("Invalid API name [%s]", message->h.service.name);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid API name", message->h.service.name, NULL));
-        END break;
 
     case OGS_EVENT_SBI_CLIENT:
         message = e->h.sbi.message;
@@ -285,66 +295,63 @@ void udm_ue_state_operational(ogs_fsm_t *s, udm_event_t *e)
 
         stream_id = OGS_POINTER_TO_UINT(e->h.sbi.data);
         ogs_assert(stream_id >= OGS_MIN_POOL_ID &&
-                   stream_id <= OGS_MAX_POOL_ID);
+                stream_id <= OGS_MAX_POOL_ID);
 
         stream = ogs_sbi_stream_find_by_id(stream_id);
-        if (!stream)
-        {
+        if (!stream) {
             ogs_error("STREAM has already been removed [%d]", stream_id);
             break;
         }
 
         SWITCH(message->h.service.name)
         CASE(OGS_SBI_SERVICE_NAME_NUDR_DR)
-        SWITCH(message->h.resource.component[0])
-        CASE(OGS_SBI_RESOURCE_NAME_SUBSCRIPTION_DATA)
-        SWITCH(message->h.resource.component[2])
-        CASE(OGS_SBI_RESOURCE_NAME_AUTHENTICATION_DATA)
-        if (udm_nudr_dr_handle_subscription_authentication(
-                udm_ue, stream, message) == false)
-        {
-            ogs_warn("udm_nudr_dr_handle_subscription_"
-                     "authentication() failed");
-            OGS_FSM_TRAN(s, udm_ue_state_exception);
-        }
-        break;
+            SWITCH(message->h.resource.component[0])
+            CASE(OGS_SBI_RESOURCE_NAME_SUBSCRIPTION_DATA)
+                SWITCH(message->h.resource.component[2])
+                CASE(OGS_SBI_RESOURCE_NAME_AUTHENTICATION_DATA)
+                    if (udm_nudr_dr_handle_subscription_authentication(
+                            udm_ue, stream, message) == false) {
+                        ogs_warn("udm_nudr_dr_handle_subscription_"
+                                "authentication() failed");
+                        OGS_FSM_TRAN(s, udm_ue_state_exception);
+                    }
+                    break;
 
-        CASE(OGS_SBI_RESOURCE_NAME_CONTEXT_DATA)
-        udm_nudr_dr_handle_subscription_context(
-            udm_ue, stream, message);
-        break;
+                CASE(OGS_SBI_RESOURCE_NAME_CONTEXT_DATA)
+                    udm_nudr_dr_handle_subscription_context(
+                            udm_ue, stream, message);
+                    break;
 
-        CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
+                DEFAULT
+                    SWITCH(message->h.resource.component[3])
+                    CASE(OGS_SBI_RESOURCE_NAME_PROVISIONED_DATA)
+                        udm_nudr_dr_handle_subscription_provisioned(
+                                udm_ue, stream, e->h.sbi.state, message);
+                        break;
 
-        break;
+                    DEFAULT
+                        ogs_error("Invalid resource name [%s]",
+                                message->h.resource.component[2]);
+                        ogs_assert_if_reached();
+                    END
+                END
+                break;
+            DEFAULT
+                ogs_error("Invalid resource name [%s]",
+                        message->h.resource.component[0]);
+                ogs_assert_if_reached();
+            END
+            break;
 
         DEFAULT
-        SWITCH(message->h.resource.component[3])
-        CASE(OGS_SBI_RESOURCE_NAME_PROVISIONED_DATA)
-        udm_nudr_dr_handle_subscription_provisioned(
-            udm_ue, stream, e->h.sbi.state, message);
-        break;
-
-        DEFAULT
-        ogs_error("Invalid resource name [%s]",
-                  message->h.resource.component[2]);
-        ogs_assert_if_reached();
+            ogs_error("Invalid API name [%s]", message->h.service.name);
+            ogs_assert(true ==
+                ogs_sbi_server_send_error(stream,
+                    OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
+                    "Invalid API name", message->h.resource.component[0],
+                    NULL));
         END
-            END break;
-        DEFAULT
-        ogs_error("Invalid resource name [%s]",
-                  message->h.resource.component[0]);
-        ogs_assert_if_reached();
-        END break;
-
-        DEFAULT
-        ogs_error("Invalid API name [%s]", message->h.service.name);
-        ogs_assert(true ==
-                   ogs_sbi_server_send_error(stream,
-                                             OGS_SBI_HTTP_STATUS_BAD_REQUEST, message,
-                                             "Invalid API name", message->h.resource.component[0],
-                                             NULL));
-        END break;
+        break;
 
     default:
         ogs_error("[%s] Unknown event %s", udm_ue->suci, udm_event_get_name(e));
@@ -363,8 +370,7 @@ void udm_ue_state_exception(ogs_fsm_t *s, udm_event_t *e)
     udm_ue = udm_ue_find_by_id(e->udm_ue_id);
     ogs_assert(udm_ue);
 
-    switch (e->h.id)
-    {
+    switch (e->h.id) {
     case OGS_FSM_ENTRY_SIG:
         break;
 
