@@ -43,6 +43,7 @@ libcore_headers = ('''
     netinet/in_systm.h
     netinet/udp.h
     netinet/tcp.h
+    netinet/ip.h
     sys/ioctl.h
     sys/param.h
     sys/random.h
@@ -263,7 +264,7 @@ libcore_sources = files('''
     ogs-getopt.h
     ogs-file.h
     abts.h
-
+    ogs-checksum.c
     ogs-abort.c
     ogs-errno.c
     ogs-strings.c

@@ -63,6 +63,7 @@
 #include "core/ogs-misc.h"
 #include "core/ogs-getopt.h"
 #include "core/ogs-file.h"
+#include "core/ogs-checksum.h"
 
 #undef OGS_CORE_INSIDE
 

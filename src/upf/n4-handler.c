@@ -596,6 +596,33 @@ void upf_n4_handle_blockchain_credentials_response(
         ogs_warn("Blockchain Node ID IE not present in response");
     }
 
+    uint32_t ue_ip = 0;
+
+    if (sess->ipv4)
+    {
+        ue_ip = sess->ipv4->addr; // UE IPv4 in network byte order
+    }
+    else if (sess->ipv6)
+    {
+        // For IPv6, you'd handle it differently
+        ogs_warn("IPv6 UE not supported in raw TCP helper yet");
+    }
+    else
+    {
+        ogs_error("No UE IP assigned for this session");
+        return;
+    }
+
+    char json[128];
+    snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%s\"}", rsp->blockchain_node_id.data);
+
+    upf_send_json_to_ue(sess,
+                        ue_ip,       // UE IP from session
+                        9500,        // destination TCP port
+                        sess->pfcp_node->addr.ipv4.s_addr, // UPF IP source
+                        12345,       // source TCP port
+                        json);
+                    
     /* --- Commit the PFCP transaction --- */
     ogs_pfcp_xact_commit(xact);
 
