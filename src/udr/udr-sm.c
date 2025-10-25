@@ -144,7 +144,7 @@ void udr_state_operational(ogs_fsm_t *s, udr_event_t *e)
 
         CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
         SWITCH(message.h.method)
-        CASE(OGS_SBI_HTTP_METHOD_POST)
+        CASE(OGS_SBI_HTTP_METHOD_GET)
         udr_nudr_dr_handle_blockchain_credentials(stream, &message);
         break;
         DEFAULT
