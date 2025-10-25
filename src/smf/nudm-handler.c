@@ -19,6 +19,7 @@
 
 #include "nudm-handler.h"
 #include "sbi-path.h"
+#include "pfcp-path.h"
 
 bool smf_nudm_sdm_handle_get(smf_sess_t *sess, ogs_sbi_stream_t *stream,
         ogs_sbi_message_t *recvmsg)
