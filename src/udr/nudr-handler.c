@@ -1515,7 +1515,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
 
     /* --- Build and send response --- */
     ogs_sbi_response_t *response =
-        ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_OK);
+        ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_CREATED);
     ogs_assert(response);
 
     ogs_info("Sending Blockchain Node ID response to UDM for SUPI[%s]", supi);
