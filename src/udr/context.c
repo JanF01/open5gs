@@ -21,10 +21,6 @@
 
 static udr_context_t self;
 
-ogs_sbi_object_t udr_sbi_obj;
-bool udr_sbi_obj_initialized = false;
-udr_sbi_ctx_pool_t udr_sbi_ctx_pool;
-
 int __udr_log_domain;
 
 static int context_initialized = 0;
@@ -39,16 +35,12 @@ void udr_context_init(void)
     ogs_log_install_domain(&__ogs_dbi_domain, "dbi", ogs_core()->log.level);
     ogs_log_install_domain(&__udr_log_domain, "udr", ogs_core()->log.level);
 
-    ogs_pool_init(&udr_sbi_ctx_pool, ogs_global_conf()->max.ue * 8);
-
     context_initialized = 1;
 }
 
 void udr_context_final(void)
 {
     ogs_assert(context_initialized == 1);
-
-    ogs_pool_final(&udr_sbi_ctx_pool);
 
     context_initialized = 0;
 }
