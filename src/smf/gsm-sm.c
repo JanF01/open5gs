@@ -339,12 +339,6 @@ void smf_gsm_state_initial(ogs_fsm_t *s, smf_event_t *e)
                         sbi_message->h.resource.component[0], NULL));
             END
             break;
-            DEFAULT
-                ogs_error("Unknown NSMF-Blockchain resource [%s]",
-                        sbi_message->h.resource.component[0]);
-                break;
-            END
-            break;
         DEFAULT
             ogs_error("Invalid API name [%s]", sbi_message->h.service.name);
             ogs_assert(true ==
@@ -3310,14 +3304,14 @@ void smf_gsm_state_wait_5gc_n1_n2_release(ogs_fsm_t *s, smf_event_t *e)
             SWITCH(sbi_message->h.resource.component[1])
             CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID)
                 SWITCH(sbi_message->h.method)
-                CASE(OGS_SBI_HTTP_METHOD_POST)
-                smf_nudm_handle_blockchain_node_id(sess,stream,sbi_message);
-                break;
-                DEFAULT
-                    ogs_error("[%s] Ignore invalid HTTP method [%s]",
-                        smf_ue->supi, sbi_message->h.method);
+                    CASE(OGS_SBI_HTTP_METHOD_POST)
+                        smf_nudm_handle_blockchain_node_id(sess,stream,sbi_message);
+                        break;
+                    DEFAULT
+                        ogs_error("[%s] Ignore invalid HTTP method [%s]",
+                            smf_ue->supi, sbi_message->h.method);
                 END
-            break;    
+                break;    
             CASE(OGS_SBI_RESOURCE_NAME_SDM_SUBSCRIPTIONS)
                 SWITCH(sbi_message->h.method)
                 CASE(OGS_SBI_HTTP_METHOD_DELETE)
