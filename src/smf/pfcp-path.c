@@ -1121,5 +1121,6 @@ int smf_pfcp_send_blockchain_credentials_response(
     rv = ogs_pfcp_xact_commit(xact);
     ogs_expect(rv == OGS_OK);
 
+    sess->pending_blockchain_xact = NULL;
     return rv;
 }

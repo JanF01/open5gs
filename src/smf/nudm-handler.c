@@ -534,6 +534,5 @@ bool smf_nudm_handle_blockchain_node_id(
     smf_pfcp_send_blockchain_credentials_response(
         sess->pending_blockchain_xact, sess, &pfcp_rsp);
 
-    sess->pending_blockchain_xact = NULL;
     return true;
 }
