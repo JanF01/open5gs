@@ -57,13 +57,6 @@ int udr_sbi_open(void)
     if (ogs_sbi_server_start_all(ogs_sbi_server_handler) != OGS_OK)
         return OGS_ERROR;
 
-    if (!udr_sbi_obj_initialized) {
-        memset(&udr_sbi_obj, 0, sizeof(udr_sbi_obj));
-        udr_sbi_obj.type = OGS_SBI_OBJ_BASE;
-        ogs_list_init(&udr_sbi_obj.xact_list);
-        udr_sbi_obj_initialized = true;
-    }    
-
     return OGS_OK;
 }
 
