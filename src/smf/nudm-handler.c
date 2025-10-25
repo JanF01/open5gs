@@ -499,11 +499,11 @@ bool smf_nudm_handle_blockchain_node_id(
     ogs_assert(recvmsg);
 
     if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_CREATED) {
-        ogs_error("[%s] HTTP response error [%d]",
-                  udm_ue->supi, recvmsg->res_status);
+        ogs_error("HTTP response error [%d]",
+                  recvmsg->res_status);
         ogs_assert(true == ogs_sbi_server_send_error(
             stream, recvmsg->res_status, recvmsg,
-            "HTTP response error from UDR", udm_ue->supi, NULL));
+            "HTTP response error from UDR", recvmsg->h.resource.component[0], NULL));
         return false;
     }
 
@@ -512,12 +512,12 @@ bool smf_nudm_handle_blockchain_node_id(
         recvmsg->SdmBlockchainCredentialsResponse;
 
     if (!resp || !resp->node_id || !resp->node_id->blockchain_node_id) {
-        ogs_error("[%s] Missing blockchain node_id in response", udm_ue->supi);
+        ogs_error("[%s] Missing blockchain node_id in response", recvmsg->h.resource.component[0]);
         return false;
     }
 
-    ogs_info("[%s] Received blockchain node_id from UDR: %s",
-             udm_ue->supi, resp->node_id->blockchain_node_id);
+    ogs_info("Received blockchain node_id from UDM: %s",
+             resp->node_id->blockchain_node_id);
     // Build PFCP response
     ogs_pfcp_blockchain_credentials_response_t pfcp_rsp;
     memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
