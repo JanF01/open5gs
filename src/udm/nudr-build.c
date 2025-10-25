@@ -359,7 +359,7 @@ ogs_sbi_request_t *udm_nudr_dr_build_blockchain_credentials(
     ogs_sbi_message_t sendmsg;
     memset(&sendmsg, 0, sizeof(sendmsg));
 
-    sendmsg.h.method = (char *)OGS_SBI_HTTP_METHOD_GET;
+    sendmsg.h.method = (char *)OGS_SBI_HTTP_METHOD_POST;
     sendmsg.h.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDR_DR;
     sendmsg.h.api.version = (char *)OGS_SBI_API_V1;
 

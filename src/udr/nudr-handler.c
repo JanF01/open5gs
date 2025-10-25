@@ -1493,15 +1493,15 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_info("Blockchain credentials stored successfully for SUPI[%s], Node ID[%s]",
              supi, blockchain_node_id);
 
-    /* --- Build response using stack struct, heap allocate node_id --- */
-    OpenAPI_sdm_blockchain_credentials_response_t response_data;
-    memset(&response_data, 0, sizeof(response_data));
-    response_data.node_id = OpenAPI_sdm_blockchain_node_id_create(blockchain_node_id);
-    ogs_assert(response_data.node_id);
+    /* --- Build response using heap allocated struct --- */
+    OpenAPI_sdm_blockchain_credentials_response_t *response_data =
+        OpenAPI_sdm_blockchain_credentials_response_create(
+            OpenAPI_sdm_blockchain_node_id_create(blockchain_node_id));
+    ogs_assert(response_data);
 
     ogs_sbi_message_t sendmsg;
     memset(&sendmsg, 0, sizeof(sendmsg));
-    sendmsg.SdmBlockchainCredentialsResponse = &response_data;
+    sendmsg.SdmBlockchainCredentialsResponse = response_data;
 
     ogs_sbi_response_t *response = ogs_sbi_build_response(&sendmsg, OGS_SBI_HTTP_STATUS_OK);
     ogs_assert(response);
@@ -1510,7 +1510,7 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     ogs_assert(true == ogs_sbi_server_send_response(stream, response));
 
     /* --- Cleanup --- */
-    OpenAPI_sdm_blockchain_node_id_free(response_data.node_id);
+    OpenAPI_sdm_blockchain_credentials_response_free(response_data);
 
     return true;
 
