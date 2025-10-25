@@ -2555,7 +2555,17 @@ static int parse_json(ogs_sbi_message_t *message,
         }
         break;
         CASE(OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS)
-        if (message->res_status < 300)
+        if (message->res_status == OGS_SBI_HTTP_STATUS_CREATED)
+        {
+             message->SdmBlockchainCredentialsResponse=
+                OpenAPI_sdm_blockchain_credentials_response_parseFromJSON(item);
+            if (!message->SdmBlockchainCredentialsResponse)
+            {
+                rv = OGS_ERROR;
+                ogs_error("JSON parse error");
+            }
+        }
+        else if (message->res_status < 300)
         {
             message->SdmBlockchainCredentials =
                 OpenAPI_sdm_blockchain_credentials_parseFromJSON(item);

@@ -989,7 +989,7 @@ bool udm_nudr_dr_handle_blockchain_node_id(
     header.service.name = (char *)OGS_SBI_SERVICE_NAME_NUDM_SDM;
     header.api.version = (char *)OGS_SBI_API_V2;
     header.resource.component[0] = smf_recvmsg->h.resource.component[0]; // SUPI
-    header.resource.component[1] = (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_NODE_ID;
+    header.resource.component[1] = (char *)OGS_SBI_RESOURCE_NAME_SDM_BLOCKCHAIN_CREDENTIALS;
 
     sendmsg.http.location = ogs_sbi_server_uri(server, &header);
     sendmsg.SdmBlockchainCredentialsResponse = recvmsg->SdmBlockchainCredentialsResponse;
