@@ -496,8 +496,6 @@ bool smf_nudm_handle_blockchain_node_id(
     smf_sess_t *sess, ogs_sbi_stream_t *stream, ogs_sbi_message_t *recvmsg)
 {
     ogs_assert(sess);
-    ogs_assert(stream);
-    ogs_assert(recvmsg);
 
     if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_CREATED) {
         ogs_error("HTTP response error [%d]",
