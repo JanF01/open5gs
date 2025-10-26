@@ -398,7 +398,7 @@ ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(ogs_pkbuf_pool_t *pool,
         return NULL;
     }
 
-    ogs_pkbuf_reserve(buf, OGS_TUN_MAX_HEADROOM);
+    ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
     ogs_pkbuf_put(buf, total_len);
     uint8_t *pkt = buf->data;
 
