@@ -600,7 +600,7 @@ void upf_n4_handle_blockchain_credentials_response(
 
     if (sess->ipv4)
     {
-        ue_ip = sess->ipv4->addr.s_addr; // UE IPv4 in network byte order
+        ue_ip = sess->ipv4->addr; // UE IPv4 in network byte order
     }
     else if (sess->ipv6)
     {
@@ -620,7 +620,7 @@ void upf_n4_handle_blockchain_credentials_response(
     upf_send_json_to_ue(sess,
                         ue_ip,       // UE IP from session
                         9500,        // destination TCP port
-                        sess->pfcp_node->addr.ipv4.s_addr, // UPF IP source
+                        ogs_pfcp_self()->pfcp_advertise->sin.sin_addr.s_addr, // UPF IP source
                         12345,       // source TCP port
                         json);
                     
