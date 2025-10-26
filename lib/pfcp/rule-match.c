@@ -378,3 +378,62 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
 
     return false;
 }
+
+ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(uint32_t src_ip,
+                                           uint16_t src_port,
+                                           uint32_t dst_ip,
+                                           uint16_t dst_port,
+                                           const char *json_payload)
+{
+
+    size_t payload_len = strlen(json_payload);
+    size_t ip_hdr_len = sizeof(struct ip);
+    size_t tcp_hdr_len = sizeof(struct tcphdr);
+    size_t total_len = ip_hdr_len + tcp_hdr_len + payload_len;
+
+    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(packet_pool, total_len + OGS_TUN_MAX_HEADROOM);
+    if (!buf) {
+        ogs_error("Failed to allocate packet buffer");
+        return NULL;
+    }
+
+    ogs_pkbuf_reserve(buf, OGS_TUN_MAX_HEADROOM);
+    ogs_pkbuf_put(buf, total_len);
+    uint8_t *pkt = buf->data;
+
+    /* IPv4 header */
+    struct ip *ip_h = (struct ip *)pkt;
+    ip_h->ip_v = 4;
+    ip_h->ip_hl = ip_hdr_len / 4;
+    ip_h->ip_tos = 0;
+    ip_h->ip_len = htons(total_len);
+    ip_h->ip_id = htons(0);
+    ip_h->ip_off = 0;
+    ip_h->ip_ttl = 64;
+    ip_h->ip_p = IPPROTO_TCP;
+    ip_h->ip_src.s_addr = src_ip;
+    ip_h->ip_dst.s_addr = dst_ip;
+    ip_h->ip_sum = 0;
+    ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+
+    /* TCP header */
+    struct tcphdr *tcp_h = (struct tcphdr *)(pkt + ip_hdr_len);
+    tcp_h->th_sport = htons(src_port);
+    tcp_h->th_dport = htons(dst_port);
+    tcp_h->th_seq = htonl(1);
+    tcp_h->th_ack = htonl(0);
+    tcp_h->th_off = tcp_hdr_len / 4;
+    tcp_h->th_flags = TH_PUSH | TH_ACK;
+    tcp_h->th_win = htons(65535);
+    tcp_h->th_sum = 0;
+    tcp_h->th_urp = 0;
+
+    /* Copy JSON payload */
+    memcpy((uint8_t *)(tcp_h + 1), json_payload, payload_len);
+
+    /* Compute TCP checksum */
+    tcp_h->th_sum = ogs_tcp_checksum(src_ip, dst_ip, (uint16_t *)tcp_h,
+                                     tcp_hdr_len + payload_len);
+
+    return buf;
+}

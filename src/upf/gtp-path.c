@@ -929,60 +929,41 @@ void upf_send_json_to_ue(upf_sess_t *sess,
                          uint16_t src_port,
                          const char *json_payload)
 {
-    ogs_pkbuf_t *buf;
-    size_t payload_len = strlen(json_payload);
-    size_t ip_hdr_len = sizeof(struct ip);
-    size_t tcp_hdr_len = sizeof(struct tcphdr);
-    size_t total_len = ip_hdr_len + tcp_hdr_len + payload_len;
+    ogs_assert(sess);
+    ogs_assert(json_payload);
 
-    buf = ogs_pkbuf_alloc(packet_pool, total_len + OGS_TUN_MAX_HEADROOM);
-    ogs_assert(buf);
+    /* Build the packet */
+    ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(src_ip, src_port,
+                                                     ue_ip, ue_port,
+                                                     json_payload);
+    if (!buf) {
+        ogs_error("Failed to form JSON TCP packet");
+        return;
+    }
 
-    ogs_pkbuf_reserve(buf, OGS_TUN_MAX_HEADROOM);
-    ogs_pkbuf_put(buf, total_len);
-    uint8_t *pkt = buf->data;
+    /* Send it via UPF tunnel */
+    ogs_pfcp_dev_t *dev = NULL;
 
-    /* --- Fill IPv4 header --- */
-    struct ip *ip_h = (struct ip *)pkt;
-    ip_h->ip_v = 4;
-    ip_h->ip_hl = ip_hdr_len / 4;
-    ip_h->ip_tos = 0;
-    ip_h->ip_len = htons(total_len);
-    ip_h->ip_id = htons(0);
-    ip_h->ip_off = 0;
-    ip_h->ip_ttl = 64;
-    ip_h->ip_p = IPPROTO_TCP;
-    ip_h->ip_src.s_addr = src_ip;
-    ip_h->ip_dst.s_addr = ue_ip;
-    ip_h->ip_sum = 0;
-    ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+    if (sess->ipv4 && sess->ipv4->subnet && sess->ipv4->subnet->dev) {
+        dev = sess->ipv4->subnet->dev;
+    } else if (sess->ipv6 && sess->ipv6->subnet && sess->ipv6->subnet->dev) {
+        dev = sess->ipv6->subnet->dev;
+    }
 
-    /* --- Fill TCP header --- */
-    struct tcphdr *tcp_h = (struct tcphdr *)(pkt + ip_hdr_len);
-    tcp_h->th_sport = htons(src_port);
-    tcp_h->th_dport = htons(ue_port);
-    tcp_h->th_seq = htonl(0);  // you can customize sequence
-    tcp_h->th_ack = htonl(0);  // if no handshake
-    tcp_h->th_off = tcp_hdr_len / 4;
-    tcp_h->th_flags = TH_PUSH | TH_ACK;  // payload push
-    tcp_h->th_win = htons(65535);
-    tcp_h->th_sum = 0;
-    tcp_h->th_urp = 0;
+    if (!dev) {
+        ogs_error("Failed to find TUN device for session");
+        ogs_pkbuf_free(buf);
+        return;
+    }
 
-    /* --- Copy payload --- */
-    memcpy((uint8_t *)(tcp_h + 1), json_payload, payload_len);
-
-    /* --- Compute TCP checksum --- */
-    tcp_h->th_sum = ogs_tcp_checksum(src_ip, ue_ip, (uint16_t *)tcp_h, tcp_hdr_len + payload_len);
-
-    /* --- Send packet via UPF tunnel --- */
-    if (ogs_tun_write(sess->tun_fd, buf) != OGS_OK)
-    {
+    if (ogs_tun_write(dev->fd, buf) != OGS_OK) {
         ogs_warn("Failed to send JSON packet to UE");
     }
 
+    /* Free buffer after sending */
     ogs_pkbuf_free(buf);
 }
+
 
 int upf_gtp_open(void)
 {
