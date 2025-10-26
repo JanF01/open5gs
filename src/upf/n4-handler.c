@@ -600,7 +600,7 @@ void upf_n4_handle_blockchain_credentials_response(
 
     if (sess->ipv4)
     {
-        ue_ip = sess->ipv4->addr; // UE IPv4 in network byte order
+        ue_ip = sess->ipv4->addr.s_addr; // UE IPv4 in network byte order
     }
     else if (sess->ipv6)
     {
@@ -614,8 +614,9 @@ void upf_n4_handle_blockchain_credentials_response(
     }
 
     char json[128];
-    snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%s\"}", rsp->blockchain_node_id.data);
-
+    snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%.*s\"}",
+         rsp->blockchain_node_id.len,
+         (char *)rsp->blockchain_node_id.data);
     upf_send_json_to_ue(sess,
                         ue_ip,       // UE IP from session
                         9500,        // destination TCP port
