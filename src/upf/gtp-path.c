@@ -933,7 +933,8 @@ void upf_send_json_to_ue(upf_sess_t *sess,
     ogs_assert(json_payload);
 
     /* Build the packet */
-    ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(src_ip, src_port,
+    ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(packet_pool,
+                                                     src_ip, src_port,
                                                      ue_ip, ue_port,
                                                      json_payload);
     if (!buf) {

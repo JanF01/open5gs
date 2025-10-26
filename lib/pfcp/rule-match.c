@@ -379,7 +379,8 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
     return false;
 }
 
-ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(uint32_t src_ip,
+ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(ogs_pkbuf_pool_t *pool,
+                                           uint32_t src_ip,
                                            uint16_t src_port,
                                            uint32_t dst_ip,
                                            uint16_t dst_port,
@@ -391,7 +392,7 @@ ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(uint32_t src_ip,
     size_t tcp_hdr_len = sizeof(struct tcphdr);
     size_t total_len = ip_hdr_len + tcp_hdr_len + payload_len;
 
-    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(packet_pool, total_len + OGS_TUN_MAX_HEADROOM);
+    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
     if (!buf) {
         ogs_error("Failed to allocate packet buffer");
         return NULL;
