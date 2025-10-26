@@ -33,6 +33,13 @@ void upf_gtp_final(void);
 int upf_gtp_open(void);
 void upf_gtp_close(void);
 
+void upf_send_json_to_ue(upf_sess_t *sess,
+                         uint32_t ue_ip,
+                         uint16_t ue_port,
+                         uint32_t src_ip,
+                         uint16_t src_port,
+                         const char *json_payload);
+
 #ifdef __cplusplus
 }
 #endif
