@@ -600,7 +600,7 @@ void upf_n4_handle_blockchain_credentials_response(
 
     if (sess->ipv4)
     {
-        ue_ip = sess->ipv4->addr.s_addr; // UE IPv4 in network byte order
+        ue_ip = sess->ipv4->addr[0]; // UE IPv4 in network byte order
     }
     else if (sess->ipv6)
     {
