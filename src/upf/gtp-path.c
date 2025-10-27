@@ -929,8 +929,15 @@ void upf_send_json_to_ue(upf_sess_t *sess,
                          uint16_t src_port,
                          const char *json_payload)
 {
-    ogs_assert(sess);
-    ogs_assert(json_payload);
+    if (!sess) {
+    ogs_error("upf_send_json_to_ue(): sess is NULL!");
+    return;
+    }
+
+    if (!json_payload) {
+        ogs_error("upf_send_json_to_ue(): json_payload is NULL!");
+        return;
+    }
     ogs_info("Doesn't crash here 3");
     /* Build the packet */
     ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(packet_pool,
