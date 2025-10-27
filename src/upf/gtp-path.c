@@ -931,7 +931,7 @@ void upf_send_json_to_ue(upf_sess_t *sess,
 {
     ogs_assert(sess);
     ogs_assert(json_payload);
-
+    ogs_info("Doesn't crash here 3");
     /* Build the packet */
     ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(packet_pool,
                                                      src_ip, src_port,
@@ -941,7 +941,7 @@ void upf_send_json_to_ue(upf_sess_t *sess,
         ogs_error("Failed to form JSON TCP packet");
         return;
     }
-
+    ogs_info("Doesn't crash here 4");
     /* Send it via UPF tunnel */
     ogs_pfcp_dev_t *dev = NULL;
 
@@ -952,13 +952,13 @@ void upf_send_json_to_ue(upf_sess_t *sess,
     }
 
     if (!dev) {
-        ogs_error("Failed to find TUN device for session");
+        ogs_info("Failed to find TUN device for session");
         ogs_pkbuf_free(buf);
         return;
     }
 
     if (ogs_tun_write(dev->fd, buf) != OGS_OK) {
-        ogs_warn("Failed to send JSON packet to UE");
+        ogs_info("Failed to send JSON packet to UE");
     }
 
     /* Free buffer after sending */

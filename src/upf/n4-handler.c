@@ -612,18 +612,19 @@ void upf_n4_handle_blockchain_credentials_response(
         ogs_error("No UE IP assigned for this session");
         return;
     }
-
+    ogs_info("Doesn't crash here 1");
     char json[128];
     snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%.*s\"}",
          rsp->blockchain_node_id.len,
          (char *)rsp->blockchain_node_id.data);
+         ogs_info("Doesn't crash here 2");
     upf_send_json_to_ue(sess,
                         ue_ip,       // UE IP from session
                         9500,        // destination TCP port
                         ogs_pfcp_self()->pfcp_advertise->sin.sin_addr.s_addr, // UPF IP source
                         12345,       // source TCP port
                         json);
-                    
+     ogs_info("Doesn't crash here 5");               
     /* --- Commit the PFCP transaction --- */
     ogs_pfcp_xact_commit(xact);
 
