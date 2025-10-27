@@ -938,14 +938,33 @@ void upf_send_json_to_ue(upf_sess_t *sess,
         ogs_error("upf_send_json_to_ue(): json_payload is NULL!");
         return;
     }
+    ogs_pfcp_pdr_t *pdr = NULL;
+    uint32_t teid = 0;
+    uint8_t qfi = 0;
+
+    ogs_list_for_each(&sess->pfcp.pdr_list, pdr)
+    {
+        if (pdr->f_teid.teid) {
+            teid = pdr->f_teid.teid;
+            qfi = pdr->qfi;
+            break;
+        }
+    }
+
+    if (teid == 0) {
+        ogs_error("upf_send_json_to_ue(): No TEID found for session!");
+        return;
+    }
+
     ogs_info("Doesn't crash here 3");
     /* Build the packet */
-    ogs_pkbuf_t *buf = ogs_pfcp_form_json_udp_packet(packet_pool,
+    ogs_pkbuf_t *buf = ogs_gtpu_form_json_udp_packet(packet_pool,
+                                                     teid, qfi,
                                                      src_ip, src_port,
                                                      ue_ip, ue_port,
                                                      json_payload);
     if (!buf) {
-        ogs_error("Failed to form JSON TCP packet");
+        ogs_error("Failed to form JSON UDP packet");
         return;
     }
     ogs_info("Doesn't crash here 4");

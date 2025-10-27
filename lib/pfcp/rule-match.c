@@ -456,7 +456,7 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     // GTP-U header (8 bytes fixed) + Optional fields (4 bytes) + UDP Port Extension Header (4 bytes)
     size_t gtpu_fixed_hdr_len = sizeof(ogs_gtp1_header_t); // 8 bytes
     size_t gtpu_optional_fields_len = 4; // Sequence Number (2), N-PDU Number (1), Next Extension Header Type (1)
-    size_t gtpu_ext_hdr_len = 4; // 1 byte type, 1 byte length, 2 bytes port
+    size_t gtpu_ext_hdr_len = 8; // UDP Port Extension Header (4 bytes) + PDU Session Container (4 bytes)
 
     size_t total_gtpu_packet_len = gtpu_fixed_hdr_len + gtpu_optional_fields_len + gtpu_ext_hdr_len + inner_packet_len;
 
@@ -492,8 +492,18 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     // N-PDU Number (1 byte)
     *current_ptr = 0;
     current_ptr += 1;
-    // Next Extension Header Type (1 byte) - UdpPortExtHeader type (0b01000000)
-    *current_ptr = 0b01000000;
+    // Next Extension Header Type (1 byte) - PDU Session Container type (0b00000101)
+    *current_ptr = 0b00000101; // PDU Session Container
+    current_ptr += 1;
+
+    // PDU Session Container Extension Header
+    *current_ptr = 1; // Length (1 means 4 octets total)
+    current_ptr += 1;
+    *current_ptr = qfi; // QFI
+    current_ptr += 1;
+    *current_ptr = 0; // PDU Type (0 for IPv4, 1 for IPv6, 2 for Ethernet)
+    current_ptr += 1;
+    *current_ptr = 0b01000000; // Next Extension Header Type - UDP Port Extension Header
     current_ptr += 1;
 
     // UDP Port Extension Header

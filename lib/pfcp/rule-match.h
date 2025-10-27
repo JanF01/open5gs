@@ -38,12 +38,14 @@ extern "C"
                                            uint32_t dst_ip,
                                            uint16_t dst_port,
                                            const char *json_payload);
-    ogs_pkbuf_t *ogs_pfcp_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
-                                            uint32_t src_ip,
-                                            uint16_t src_port,
-                                            uint32_t dst_ip,
-                                            uint16_t dst_port,
-                                            const char *json_payload);
+    ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
+                                           uint32_t teid,
+                                           uint8_t qfi,
+                                           uint32_t src_ip,
+                                           uint16_t src_port,
+                                           uint32_t dst_ip,
+                                           uint16_t dst_port,
+                                           const char *json_payload);
 
 #ifdef __cplusplus
 }
