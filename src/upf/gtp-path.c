@@ -971,45 +971,13 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
                  pdr->qfi,
                  (void*)ogs_list_first(&pdr->rule_list));
 
-        /* Only consider PDRs that have f_teid (we must have an N3 endpoint) */
-        if (!pdr->f_teid.teid)
-            continue;
-
-        /* Save as a fallback (lowest precedence downlink) */
-        if (!fallback_pdr && pdr->src_if == OGS_PFCP_INTERFACE_CORE)
-            fallback_pdr = pdr;
-
-        /* Check PDR is downlink (CORE -> ACCESS) */
-        if (pdr->src_if != OGS_PFCP_INTERFACE_ACCESS)
-            continue;
-
-        /* Check FAR points to ACCESS */
-        if (!far || far->dst_if != OGS_PFCP_INTERFACE_CORE)
-            continue;
-
-        /* Check Outer header creation flags (must create outer header for N3) */
-        if (far->outer_header_creation.ip4 == 0 &&
-            far->outer_header_creation.ip6 == 0 &&
-            far->outer_header_creation.udp4 == 0 &&
-            far->outer_header_creation.udp6 == 0 &&
-            far->outer_header_creation.gtpu4 == 0 &&
-            far->outer_header_creation.gtpu6 == 0)
-            continue;
-
-        /* NOTE: the recv path optionally checks rule-list using the actual packet:
-           if (ogs_list_first(&pdr->rule_list) && ogs_pfcp_pdr_rule_find_by_packet(pdr, recvbuf) == NULL) continue;
-           We don't have a recvbuf here. If you need rule matching you can synthesize a minimal pkbuf containing an IP header+UDP/whatever and call ogs_pfcp_pdr_rule_find_by_packet().
-           For now we accept the PDR when above conditions match.
-        */
-
-        /* Found a suitable PDR */
+        if (pdr->src_if == OGS_PFCP_INTERFACE_ACCESS && far && far->dst_if == OGS_PFCP_INTERFACE_CORE) {
+        /* This is the uplink PDR (from gNB → UPF), TEID is valid */
         chosen_pdr = pdr;
         break;
+        }
     }
 
-    /* If no strict PDR found, use fallback if present */
-    if (!chosen_pdr)
-        chosen_pdr = fallback_pdr;
 
     if (!chosen_pdr) {
         ogs_error("upf_send_json_to_ue(): no downlink PDR available for UE %08x", ntohl(ue_ip));
