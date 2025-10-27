@@ -438,3 +438,53 @@ ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(ogs_pkbuf_pool_t *pool,
 
     return buf;
 }
+
+ogs_pkbuf_t *ogs_pfcp_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
+                                           uint32_t src_ip,
+                                           uint16_t src_port,
+                                           uint32_t dst_ip,
+                                           uint16_t dst_port,
+                                           const char *json_payload)
+{
+    size_t payload_len = strlen(json_payload);
+    size_t ip_hdr_len = sizeof(struct ip);
+    size_t udp_hdr_len = sizeof(struct udphdr);
+    size_t total_len = ip_hdr_len + udp_hdr_len + payload_len;
+
+    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
+    if (!buf) {
+        ogs_error("Failed to allocate packet buffer");
+        return NULL;
+    }
+
+    ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
+    ogs_pkbuf_put(buf, total_len);
+    uint8_t *pkt = buf->data;
+
+    /* IPv4 header */
+    struct ip *ip_h = (struct ip *)pkt;
+    ip_h->ip_v = 4;
+    ip_h->ip_hl = ip_hdr_len / 4;
+    ip_h->ip_tos = 0;
+    ip_h->ip_len = htons(total_len);
+    ip_h->ip_id = htons(0);
+    ip_h->ip_off = 0;
+    ip_h->ip_ttl = 64;
+    ip_h->ip_p = IPPROTO_UDP; /* Changed to UDP */
+    ip_h->ip_src.s_addr = src_ip;
+    ip_h->ip_dst.s_addr = dst_ip;
+    ip_h->ip_sum = 0;
+    ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+
+    /* UDP header */
+    struct udphdr *udp_h = (struct udphdr *)(pkt + ip_hdr_len);
+    udp_h->uh_sport = htons(src_port);
+    udp_h->uh_dport = htons(dst_port);
+    udp_h->uh_ulen = htons(udp_hdr_len + payload_len);
+    udp_h->uh_sum = 0; /* UDP checksum is optional for IPv4, set to 0 */
+
+    /* Copy JSON payload */
+    memcpy((uint8_t *)(udp_h + 1), json_payload, payload_len);
+
+    return buf;
+}

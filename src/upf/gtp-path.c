@@ -940,7 +940,7 @@ void upf_send_json_to_ue(upf_sess_t *sess,
     }
     ogs_info("Doesn't crash here 3");
     /* Build the packet */
-    ogs_pkbuf_t *buf = ogs_pfcp_form_json_tcp_packet(packet_pool,
+    ogs_pkbuf_t *buf = ogs_pfcp_form_json_udp_packet(packet_pool,
                                                      src_ip, src_port,
                                                      ue_ip, ue_port,
                                                      json_payload);
