@@ -922,7 +922,7 @@ static void _get_dev_mac_addr(char *ifname, uint8_t *mac_addr)
 #endif
 }
 
-void upf_send_json_to_ue(upf_sess_t *sess,
+void upf_send_json_to_ue(upf_sess_t *sess_param,
                          uint32_t ue_ip,
                          uint16_t ue_port,
                          uint32_t src_ip,
