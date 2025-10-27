@@ -968,23 +968,34 @@ void upf_send_json_to_ue(upf_sess_t *sess,
         return;
     }
     ogs_info("Doesn't crash here 4");
-    /* Send it via UPF tunnel */
-    ogs_pfcp_dev_t *dev = NULL;
+ogs_info("Doesn't crash here 5");
+    /* Send it via GTP-U socket */
+    ogs_sock_t *sock = NULL;
+    ogs_sockaddr_t to = {0};
+    ssize_t sent;
 
-    if (sess->ipv4 && sess->ipv4->subnet && sess->ipv4->subnet->dev) {
-        dev = sess->ipv4->subnet->dev;
-    } else if (sess->ipv6 && sess->ipv6->subnet && sess->ipv6->subnet->dev) {
-        dev = sess->ipv6->subnet->dev;
-    }
-
-    if (!dev) {
-        ogs_info("Failed to find TUN device for session");
+    if (ue_ip) { /* IPv4 */
+        sock = ogs_gtp_self()->gtpu_sock;
+        if (!sock) {
+            ogs_error("upf_send_json_to_ue(): IPv4 GTP-U socket not found!");
+            ogs_pkbuf_free(buf);
+            return;
+        }
+        to.ogs_sa_family = AF_INET;
+        to.sin.sin_addr.s_addr = htobe32(ue_ip);
+        to.ogs_sin_port = htobe16(ue_port);
+    } else { /* Assuming IPv6 if ue_ip is 0, need to handle IPv6 address explicitly if supported */
+        ogs_error("upf_send_json_to_ue(): IPv6 not yet supported for sending JSON to UE");
         ogs_pkbuf_free(buf);
         return;
     }
 
-    if (ogs_tun_write(dev->fd, buf) != OGS_OK) {
-        ogs_info("Failed to send JSON packet to UE");
+    sent = ogs_sendto(sock->fd, buf->data, buf->len, 0, &to);
+    if (sent < 0 || sent != buf->len) {
+        ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
+                        "ogs_sendto() failed for JSON packet");
+    } else {
+        ogs_info("JSON packet sent to UE successfully");
     }
 
     /* Free buffer after sending */
