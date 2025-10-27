@@ -493,7 +493,7 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     *current_ptr = 0;
     current_ptr += 1;
     // Next Extension Header Type (1 byte) - PDU Session Container type (0b00000101)
-    *current_ptr = 0b00000101; // PDU Session Container
+    *current_ptr = 0x85; // PDU Session Container
     current_ptr += 1;
 
     // PDU Session Container Extension Header
