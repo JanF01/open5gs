@@ -973,12 +973,12 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
                  (void*)ogs_list_first(&pdr->rule_list));
 
         if (pdr->src_if == OGS_PFCP_INTERFACE_ACCESS && far && far->dst_if == OGS_PFCP_INTERFACE_CORE) {
-        /* This is the uplink PDR (from gNB → UPF), TEID is valid */
-        downlink_pdr = pdr;
+       
+        uplink_pdr = pdr;
         }
         if (pdr->src_if == OGS_PFCP_INTERFACE_CORE && far && far->dst_if == OGS_PFCP_INTERFACE_ACCESS) {
-        /* This is the uplink PDR (from gNB → UPF), TEID is valid */
-        uplink_pdr = pdr;
+        
+        downlink_pdr = pdr;
         }
     }
 
