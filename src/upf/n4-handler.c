@@ -556,77 +556,112 @@ void upf_n4_handle_blockchain_credentials_response(
     upf_sess_t *sess, ogs_pfcp_xact_t *xact,
     ogs_pfcp_blockchain_credentials_response_t *rsp)
 {
-    ogs_assert(sess);
-    ogs_assert(xact);
-    ogs_assert(rsp);
+    char json[256] = {0};
+    char ue_ip_str[INET_ADDRSTRLEN] = "(none)";
+    char src_ip_str[INET_ADDRSTRLEN] = "(none)";
+    uint32_t ue_ip_n = 0;   /* network byte order */
+    uint32_t src_ip_n = 0;  /* network byte order */
+
+    /* Basic validation */
+    if (!sess) {
+        ogs_error("upf_n4_handle_blockchain_credentials_response: sess == NULL");
+        return;
+    }
+    if (!xact) {
+        ogs_error("upf_n4_handle_blockchain_credentials_response: xact == NULL");
+        return;
+    }
+    if (!rsp) {
+        ogs_error("upf_n4_handle_blockchain_credentials_response: rsp == NULL");
+        /* still commit/cleanup xact? we don't here because nothing to commit */
+        return;
+    }
 
     ogs_info("Received PFCP Blockchain Credentials Response for SEID: %lu",
-             sess->smf_n4_f_seid.seid);
+             (unsigned long)sess->smf_n4_f_seid.seid);
 
-    /* --- Cause IE --- */
-    if (rsp->cause.presence)
+    /* --- Log Cause IE if present --- */
+    if (rsp->cause.presence) {
         ogs_info("PFCP Cause: %u", rsp->cause.u8);
-    else
+    } else {
         ogs_warn("PFCP Cause IE not present");
+    }
 
-    /* --- Blockchain Credentials IE --- */
+    /* --- Log Credentials IE if present (optional) --- */
     if (rsp->credentials.presence) {
         const char *login_str = NULL;
         const char *password_str = NULL;
-
         if (rsp->credentials.login.presence && rsp->credentials.login.data)
             login_str = (char *)rsp->credentials.login.data;
-
         if (rsp->credentials.password.presence && rsp->credentials.password.data)
             password_str = (char *)rsp->credentials.password.data;
 
-        ogs_info("Blockchain Credentials:");
+        ogs_info("Blockchain Credentials present in response:");
         ogs_info("  - Login: %s", login_str ? login_str : "(missing)");
         ogs_info("  - Password: %s", password_str ? password_str : "(missing)");
     } else {
-        ogs_warn("Blockchain Credentials IE not present in response");
+        ogs_debug("Blockchain Credentials IE not present in response (that's OK)");
     }
 
-    /* --- Blockchain Node ID IE --- */
-    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data) {
-        ogs_info("Blockchain Node ID: %.*s",
-                 rsp->blockchain_node_id.len,
-                 (char *)rsp->blockchain_node_id.data);
+    /* --- Extract blockchain_node_id and build JSON --- */
+    const char *node_data = NULL;
+    int node_len = 0;
+
+    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data && rsp->blockchain_node_id.len > 0) {
+        node_data = (const char *)rsp->blockchain_node_id.data;
+        node_len = (int)rsp->blockchain_node_id.len;
+    }
+
+    if (!node_data || node_len <= 0) {
+        ogs_warn("No blockchain_node_id found in PFCP response; will send 'unknown' JSON to UE");
+        snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"unknown\"}");
     } else {
-        ogs_warn("Blockchain Node ID IE not present in response");
+        /* clamp node_len so snprintf stays safe */
+        int max_node_len = (int)sizeof(json) - 32; /* room for JSON wrapper */
+        if (node_len > max_node_len) node_len = max_node_len;
+        /* use precision to handle not-terminated binary-safe data */
+        snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%.*s\"}", node_len, node_data);
     }
 
-    uint32_t ue_ip = 0;
+    ogs_info("Prepared JSON to send to UE: %s", json);
 
-    if (sess->ipv4)
-    {
-        ue_ip = sess->ipv4->addr[0]; // UE IPv4 in network byte order
-    }
-    else if (sess->ipv6)
-    {
-        // For IPv6, you'd handle it differently
-        ogs_warn("IPv6 UE not supported in raw TCP helper yet");
-    }
-    else
-    {
-        ogs_error("No UE IP assigned for this session");
+    /* --- Get UE IPv4 address (network byte order) --- */
+    if (sess->ipv4 && sess->ipv4->addr) {
+        ue_ip_n = sess->ipv4->addr[0]; /* network byte order */
+        if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
+            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop failed)");
+    } else {
+        ogs_error("No sess->ipv4 present for this session; cannot send JSON to UE");
+        /* commit the PFCP transaction anyway (if that is the expected behaviour) */
+        ogs_pfcp_xact_commit(xact);
         return;
     }
-    ogs_info("Doesn't crash here 1");
-    char json[128];
-    snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%.*s\"}",
-         rsp->blockchain_node_id.len,
-         (char *)rsp->blockchain_node_id.data);
-         ogs_info("Doesn't crash here 2");
+
+    /* --- Get UPF source IP from global pfcp_advertise --- */
+    if (ogs_pfcp_self() && ogs_pfcp_self()->pfcp_advertise) {
+        src_ip_n = ogs_pfcp_self()->pfcp_advertise->sin.sin_addr.s_addr; /* network order */
+        if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
+            snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
+    } else {
+        ogs_error("pfcp_advertise not set in ogs_pfcp_self(); cannot determine source IP");
+        ogs_pfcp_xact_commit(xact);
+        return;
+    }
+
+    ogs_info("Sending JSON to UE %s (net=0x%08x) from UPF %s (net=0x%08x)",
+             ue_ip_str, ntohl(ue_ip_n), src_ip_str, ntohl(src_ip_n));
+
+    /* --- send JSON to UE via helper --- */
     upf_send_json_to_ue(sess,
-                        ue_ip,       // UE IP from session
-                        9500,        // destination TCP port
-                        ogs_pfcp_self()->pfcp_advertise->sin.sin_addr.s_addr, // UPF IP source
-                        12345,       // source TCP port
+                        ue_ip_n,   /* network byte order */
+                        9500,      /* destination TCP port at UE */
+                        src_ip_n,  /* source IP (network order) */
+                        12345,     /* source TCP port - choose appropriate ephemeral port */
                         json);
-     ogs_info("Doesn't crash here 5");               
+
     /* --- Commit the PFCP transaction --- */
     ogs_pfcp_xact_commit(xact);
 
-    ogs_info("Blockchain credentials PFCP exchange completed successfully.");
+    ogs_info("Blockchain credentials PFCP exchange completed successfully for SEID: %lu",
+             (unsigned long)sess->smf_n4_f_seid.seid);
 }
