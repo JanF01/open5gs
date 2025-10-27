@@ -797,37 +797,17 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_assert(far->sess);
                 sess = UPF_SESS(far->sess);
                 ogs_assert(sess);
-                ogs_info("==== Listing PDRs for session SEID=0x%lx ====",
-         (unsigned long)sess->smf_n4_f_seid.seid);
-
-            ogs_pfcp_pdr_t *dbg_pdr = NULL;
-            ogs_list_for_each(&sess->pfcp.pdr_list, dbg_pdr) {
-                char ip_str[64] = "(none)";
-                struct sockaddr_in *sa = (struct sockaddr_in *)&dbg_pdr->f_teid.addr;
-                if (sa->sin_addr.s_addr != 0) {
-                    inet_ntop(AF_INET, &sa->sin_addr, ip_str, sizeof(ip_str));
-                }
-                ogs_info("PDR id=%u src_if=%d dst_if=%d TEID=0x%x QFI=%u f_teid.ip=%s",
-                        dbg_pdr->pdr_id,
-                        dbg_pdr->src_if,
-                        dbg_pdr->far ? dbg_pdr->far->dst_if : -1,
-                        ntohl(dbg_pdr->f_teid.teid),
-                        dbg_pdr->qfi,
-                        ip_str);
-
-                if (dbg_pdr->far) {
-                    ogs_info("    FAR id=%u dst_if=%d, OHC(gtpu4=%u, ip4=%u, udp4=%u)",
-                            dbg_pdr->far->far_id,
-                            dbg_pdr->far->dst_if,
-                            dbg_pdr->far->outer_header_creation.gtpu4,
-                            dbg_pdr->far->outer_header_creation.ip4,
-                            dbg_pdr->far->outer_header_creation.udp4);
-                } else {
-                    ogs_info("    FAR: (none)");
-                }
-            }
-
-            ogs_info("=============================================");
+                ogs_pfcp_pdr_t *pdr_check;
+                ogs_list_for_each(&sess->pfcp.pdr_list, pdr_check) {
+        ogs_pfcp_far_t *far_check = pdr_check->far;
+        ogs_info("PDR check: id=%u src_if=%d dst_if=%d teid=0x%08x qfi=%u rules=%p",
+                 pdr_check->id,
+                 pdr_check->src_if,
+                 far_check ? far_check->dst_if : -1,
+                 pdr_check->f_teid.teid,
+                 pdr_check->qfi,
+                 (void*)ogs_list_first(&pdr_check->rule_list));
+        }
                 ogs_assert(OGS_OK ==
                            upf_pfcp_blockchain_credentials(sess, &blockchain));
             }
