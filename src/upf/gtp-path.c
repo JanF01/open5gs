@@ -930,78 +930,77 @@ void upf_send_json_to_ue(upf_sess_t *sess,
                          const char *json_payload)
 {
     if (!sess) {
-    ogs_error("upf_send_json_to_ue(): sess is NULL!");
-    return;
+        ogs_error("upf_send_json_to_ue(): sess is NULL!");
+        return;
     }
 
     if (!json_payload) {
         ogs_error("upf_send_json_to_ue(): json_payload is NULL!");
         return;
     }
+
     ogs_pfcp_pdr_t *pdr = NULL;
     uint32_t teid = 0;
     uint8_t qfi = 0;
+    ogs_sockaddr_t gnb_addr = {0};
 
-    ogs_list_for_each(&sess->pfcp.pdr_list, pdr)
-    {
-        if (pdr->f_teid.teid) {
+    /* Find the downlink PDR (CORE→ACCESS direction) */
+    ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
+        if (pdr->src_if == OGS_PFCP_INTERFACE_CORE &&
+            pdr->far &&
+            pdr->far->dst_if == OGS_PFCP_INTERFACE_ACCESS &&
+            pdr->f_teid.teid) {
+
             teid = pdr->f_teid.teid;
-            qfi = pdr->qfi;
+            qfi  = pdr->qfi;
+            memcpy(&gnb_addr, &pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
             break;
         }
     }
 
     if (teid == 0) {
-        ogs_error("upf_send_json_to_ue(): No TEID found for session!");
+        ogs_error("upf_send_json_to_ue(): No valid downlink TEID found!");
         return;
     }
 
-    ogs_info("Doesn't crash here 3");
-    /* Build the packet */
+    ogs_info("Building GTP-U packet: TEID=0x%x, QFI=%u", teid, qfi);
+
+    /* Build inner packet (JSON over UDP/IP, wrapped in GTP-U) */
     ogs_pkbuf_t *buf = ogs_gtpu_form_json_udp_packet(packet_pool,
                                                      teid, qfi,
                                                      src_ip, src_port,
                                                      ue_ip, ue_port,
                                                      json_payload);
     if (!buf) {
-        ogs_error("Failed to form JSON UDP packet");
+        ogs_error("upf_send_json_to_ue(): Failed to form JSON UDP packet");
         return;
     }
-    ogs_info("Doesn't crash here 4");
-ogs_info("Doesn't crash here 5");
-    /* Send it via GTP-U socket */
-    ogs_sock_t *sock = NULL;
-    ogs_sockaddr_t to = {0};
-    ssize_t sent;
 
-    if (ue_ip) { /* IPv4 */
-        sock = ogs_gtp_self()->gtpu_sock;
-        if (!sock) {
-            ogs_error("upf_send_json_to_ue(): IPv4 GTP-U socket not found!");
-            ogs_pkbuf_free(buf);
-            return;
-        }
-        to.ogs_sa_family = AF_INET;
-        to.sin.sin_addr.s_addr = htobe32(ue_ip);
-        to.ogs_sin_port = htobe16(ue_port);
-    } else { /* Assuming IPv6 if ue_ip is 0, need to handle IPv6 address explicitly if supported */
-        ogs_error("upf_send_json_to_ue(): IPv6 not yet supported for sending JSON to UE");
+    /* Prepare destination address (the gNB N3 interface) */
+    ogs_sock_t *sock = ogs_gtp_self()->gtpu_sock;
+    if (!sock) {
+        ogs_error("upf_send_json_to_ue(): No GTP-U socket available!");
         ogs_pkbuf_free(buf);
         return;
     }
 
-    sent = ogs_sendto(sock->fd, buf->data, buf->len, 0, &to);
+    ogs_sockaddr_t to = {0};
+    to.ogs_sa_family = AF_INET;
+    memcpy(&to.sin.sin_addr, &gnb_addr.sin.sin_addr, sizeof(struct in_addr));
+    to.ogs_sin_port = htons(2152);  /* Standard GTP-U port */
+
+    /* Send through UPF’s GTP-U socket */
+    ssize_t sent = ogs_sendto(sock->fd, buf->data, buf->len, 0, &to);
     if (sent < 0 || sent != buf->len) {
         ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
-                        "ogs_sendto() failed for JSON packet");
+                        "upf_send_json_to_ue(): ogs_sendto() failed");
     } else {
-        ogs_info("JSON packet sent to UE successfully");
+        ogs_info("JSON GTP-U packet sent to gNB (%s) for UE %s",
+                 inet_ntoa(to.sin.sin_addr), ogs_ipstr(ue_ip));
     }
 
-    /* Free buffer after sending */
     ogs_pkbuf_free(buf);
 }
-
 
 int upf_gtp_open(void)
 {
