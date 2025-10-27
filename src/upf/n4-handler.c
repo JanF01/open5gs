@@ -637,34 +637,12 @@ void upf_n4_handle_blockchain_credentials_response(
         return;
     }
 
-       if (ogs_pfcp_self()) {
-        ogs_pfcp_context_t *ctx = ogs_pfcp_self();
-
-        if (ctx->pfcp_advertise) {
-            src_ip_n = ctx->pfcp_advertise->sin.sin_addr.s_addr; /* network order */
-            if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
-                snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
-        }
-        else if (ctx->pfcp_addr) {
-            /* Fallback if pfcp_advertise is not set */
-            ogs_warn("pfcp_advertise not set; falling back to pfcp_addr");
-            src_ip_n = ctx->pfcp_addr->sin.sin_addr.s_addr;
-            if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
-                snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
-        }
-        else {
-            ogs_error("Neither pfcp_advertise nor pfcp_addr set in ogs_pfcp_self(); cannot determine source IP");
-            ogs_pfcp_xact_commit(xact);
-            return;
-        }
-    } else {
-        ogs_error("ogs_pfcp_self() returned NULL; cannot determine source IP");
-        ogs_pfcp_xact_commit(xact);
-        return;
-    }
+    src_ip_n = inet_addr("10.45.0.1"); /* network byte order */
+    strncpy(src_ip_str, "10.45.0.1", sizeof(src_ip_str) - 1);
+    src_ip_str[sizeof(src_ip_str) - 1] = '\0';
 
     ogs_info("Sending JSON to UE %s (net=0x%08x) from UPF %s (net=0x%08x)",
-             ue_ip_str, ntohl(ue_ip_n), src_ip_str, ntohl(src_ip_n));
+            ue_ip_str, ntohl(ue_ip_n), src_ip_str, ntohl(src_ip_n));
 
     /* --- send JSON to UE via helper --- */
     upf_send_json_to_ue(sess,
