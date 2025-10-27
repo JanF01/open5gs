@@ -942,7 +942,7 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
         /* search all sessions for matching UE IP */
         upf_sess_t *iter = NULL;
         ogs_list_for_each(&upf_self()->sess_list, iter) {
-            if (iter->ipv4 && iter->ipv4->addr) {
+            if (iter->ipv4) {
                 if (iter->ipv4->addr[0] == ue_ip) { /* ue_ip expected in network byte order */
                     sess = iter;
                     break;
