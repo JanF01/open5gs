@@ -958,7 +958,6 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
 
     /* --- Inspect PDR list and choose appropriate downlink PDR similar to receive path --- */
     ogs_pfcp_pdr_t *pdr = NULL;
-    ogs_pfcp_pdr_t *fallback_pdr = NULL;
     ogs_pfcp_pdr_t *chosen_pdr = NULL;
     ogs_pfcp_far_t *far = NULL;
     ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
