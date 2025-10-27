@@ -988,13 +988,13 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
             continue;
 
         /* Check Outer header creation flags (must create outer header for N3) */
-        if (far->outer_header_creation.ip4 == 0 &&
+        /*if (far->outer_header_creation.ip4 == 0 &&
             far->outer_header_creation.ip6 == 0 &&
             far->outer_header_creation.udp4 == 0 &&
             far->outer_header_creation.udp6 == 0 &&
             far->outer_header_creation.gtpu4 == 0 &&
             far->outer_header_creation.gtpu6 == 0)
-            continue;
+            continue;*/
 
         /* NOTE: the recv path optionally checks rule-list using the actual packet:
            if (ogs_list_first(&pdr->rule_list) && ogs_pfcp_pdr_rule_find_by_packet(pdr, recvbuf) == NULL) continue;
