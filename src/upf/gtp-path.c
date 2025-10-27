@@ -929,57 +929,124 @@ void upf_send_json_to_ue(upf_sess_t *sess,
                          uint16_t src_port,
                          const char *json_payload)
 {
-    if (!sess) {
-        ogs_error("upf_send_json_to_ue(): sess is NULL!");
-        return;
-    }
-
     if (!json_payload) {
         ogs_error("upf_send_json_to_ue(): json_payload is NULL!");
         return;
     }
 
-    ogs_pfcp_pdr_t *pdr = NULL;
-    uint32_t teid = 0;
-    uint8_t qfi = 0;
-    ogs_sockaddr_t gnb_addr = {0};
-
-    /* Find the downlink PDR (CORE→ACCESS direction) */
-    ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
-        if (pdr->src_if == OGS_PFCP_INTERFACE_CORE &&
-            pdr->far &&
-            pdr->far->dst_if == OGS_PFCP_INTERFACE_ACCESS &&
-            pdr->f_teid.teid) {
-
-            teid = pdr->f_teid.teid;
-            qfi  = pdr->qfi;
-            memcpy(&gnb_addr, &pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
-            break;
+    /* --- Find session by UE IP if sess_param is NULL or to ensure correct sess for ue_ip --- */
+    upf_sess_t *sess = NULL;
+    if (sess_param) {
+        sess = sess_param;
+    } else {
+        /* search all sessions for matching UE IP */
+        upf_sess_t *iter = NULL;
+        ogs_list_for_each(&upf_self()->sess_list, iter) {
+            if (iter->ipv4 && iter->ipv4->addr) {
+                if (iter->ipv4->addr[0] == ue_ip) { /* ue_ip expected in network byte order */
+                    sess = iter;
+                    break;
+                }
+            }
         }
     }
 
-    if (teid == 0) {
-        ogs_error("upf_send_json_to_ue(): No valid downlink TEID found!");
+    if (!sess) {
+        ogs_error("upf_send_json_to_ue(): cannot find session for UE IP %08x", ntohl(ue_ip));
         return;
     }
 
-    ogs_info("Building GTP-U packet: TEID=0x%x, QFI=%u", teid, qfi);
+    /* --- Inspect PDR list and choose appropriate downlink PDR similar to receive path --- */
+    ogs_pfcp_pdr_t *pdr = NULL;
+    ogs_pfcp_pdr_t *fallback_pdr = NULL;
+    ogs_pfcp_pdr_t *chosen_pdr = NULL;
+    ogs_pfcp_far_t *far = NULL;
+    ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
+        far = pdr->far;
+        ogs_info("PDR check: id=%u src_if=%d dst_if=%d teid=0x%08x qfi=%u rules=%p",
+                 pdr->id,
+                 pdr->src_if,
+                 far ? far->dst_if : -1,
+                 pdr->f_teid.teid,
+                 pdr->qfi,
+                 (void*)ogs_list_first(&pdr->rule_list));
 
-    /* Build inner packet (JSON over UDP/IP, wrapped in GTP-U) */
+        /* Only consider PDRs that have f_teid (we must have an N3 endpoint) */
+        if (!pdr->f_teid.teid)
+            continue;
+
+        /* Save as a fallback (lowest precedence downlink) */
+        if (!fallback_pdr && pdr->src_if == OGS_PFCP_INTERFACE_CORE)
+            fallback_pdr = pdr;
+
+        /* Check PDR is downlink (CORE -> ACCESS) */
+        if (pdr->src_if != OGS_PFCP_INTERFACE_CORE)
+            continue;
+
+        /* Check FAR points to ACCESS */
+        if (!far || far->dst_if != OGS_PFCP_INTERFACE_ACCESS)
+            continue;
+
+        /* Check Outer header creation flags (must create outer header for N3) */
+        if (far->outer_header_creation.ip4 == 0 &&
+            far->outer_header_creation.ip6 == 0 &&
+            far->outer_header_creation.udp4 == 0 &&
+            far->outer_header_creation.udp6 == 0 &&
+            far->outer_header_creation.gtpu4 == 0 &&
+            far->outer_header_creation.gtpu6 == 0)
+            continue;
+
+        /* NOTE: the recv path optionally checks rule-list using the actual packet:
+           if (ogs_list_first(&pdr->rule_list) && ogs_pfcp_pdr_rule_find_by_packet(pdr, recvbuf) == NULL) continue;
+           We don't have a recvbuf here. If you need rule matching you can synthesize a minimal pkbuf containing an IP header+UDP/whatever and call ogs_pfcp_pdr_rule_find_by_packet().
+           For now we accept the PDR when above conditions match.
+        */
+
+        /* Found a suitable PDR */
+        chosen_pdr = pdr;
+        break;
+    }
+
+    /* If no strict PDR found, use fallback if present */
+    if (!chosen_pdr)
+        chosen_pdr = fallback_pdr;
+
+    if (!chosen_pdr) {
+        ogs_error("upf_send_json_to_ue(): no downlink PDR available for UE %08x", ntohl(ue_ip));
+        return;
+    }
+
+    /* Prepare TEID, QFI and gNB address from chosen pdr */
+    uint32_t teid = chosen_pdr->f_teid.teid;
+    uint8_t qfi = chosen_pdr->qfi;
+    ogs_sockaddr_t gnb_addr = {0};
+    memcpy(&gnb_addr, &chosen_pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
+
+    if (teid == 0) {
+        ogs_error("upf_send_json_to_ue(): chosen PDR has no TEID");
+        return;
+    }
+
+    ogs_info("Selected PDR id=%u teid=0x%08x qfi=%u gNB=%s:%u",
+             chosen_pdr->id, teid, qfi,
+             inet_ntoa(gnb_addr.sin.sin_addr),
+             ntohs(gnb_addr.sin.sin_port) ? ntohs(gnb_addr.sin.sin_port) : 2152);
+
+    /* Build packet */
     ogs_pkbuf_t *buf = ogs_gtpu_form_json_udp_packet(packet_pool,
                                                      teid, qfi,
                                                      src_ip, src_port,
                                                      ue_ip, ue_port,
                                                      json_payload);
     if (!buf) {
-        ogs_error("upf_send_json_to_ue(): Failed to form JSON UDP packet");
+        ogs_error("upf_send_json_to_ue(): ogs_gtpu_form_json_udp_packet failed");
         return;
     }
 
-    /* Prepare destination address (the gNB N3 interface) */
+    /* Send to gNB via UPF GTP-U socket */
     ogs_sock_t *sock = ogs_gtp_self()->gtpu_sock;
     if (!sock) {
-        ogs_error("upf_send_json_to_ue(): No GTP-U socket available!");
+        ogs_error("upf_send_json_to_ue(): no GTP-U socket");
         ogs_pkbuf_free(buf);
         return;
     }
@@ -987,18 +1054,18 @@ void upf_send_json_to_ue(upf_sess_t *sess,
     ogs_sockaddr_t to = {0};
     to.ogs_sa_family = AF_INET;
     memcpy(&to.sin.sin_addr, &gnb_addr.sin.sin_addr, sizeof(struct in_addr));
-    to.ogs_sin_port = htons(2152);  /* Standard GTP-U port */
+    uint16_t gnb_port = ntohs(gnb_addr.sin.sin_port);
+    if (gnb_port == 0) gnb_port = 2152;
+    to.ogs_sin_port = htons(gnb_port);
 
-    /* Send through UPF’s GTP-U socket */
     ssize_t sent = ogs_sendto(sock->fd, buf->data, buf->len, 0, &to);
     if (sent < 0 || sent != buf->len) {
         ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
-                        "upf_send_json_to_ue(): ogs_sendto() failed");
+                        "upf_send_json_to_ue(): ogs_sendto failed");
     } else {
         struct in_addr ue_addr = { .s_addr = ue_ip };
-        ogs_info("JSON GTP-U packet sent to gNB (%s) for UE %s",
-                 inet_ntoa(to.sin.sin_addr),
-                 inet_ntoa(ue_addr));
+        ogs_info("JSON sent via GTP-U to gNB %s:%u for UE %s",
+                 inet_ntoa(to.sin.sin_addr), gnb_port, inet_ntoa(ue_addr));
     }
 
     ogs_pkbuf_free(buf);

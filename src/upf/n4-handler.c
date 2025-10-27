@@ -645,7 +645,7 @@ void upf_n4_handle_blockchain_credentials_response(
             ue_ip_str, ntohl(ue_ip_n), src_ip_str, ntohl(src_ip_n));
 
     /* --- send JSON to UE via helper --- */
-    upf_send_json_to_ue(sess,
+    upf_send_json_to_ue(NULL,
                         ue_ip_n,   /* network byte order */
                         9500,      /* destination TCP port at UE */
                         src_ip_n,  /* source IP (network order) */
