@@ -797,17 +797,6 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_assert(far->sess);
                 sess = UPF_SESS(far->sess);
                 ogs_assert(sess);
-                ogs_pfcp_pdr_t *pdr_check;
-                ogs_list_for_each(&sess->pfcp.pdr_list, pdr_check) {
-        ogs_pfcp_far_t *far_check = pdr_check->far;
-        ogs_info("PDR check: id=%u src_if=%d dst_if=%d teid=0x%08x qfi=%u rules=%p",
-                 pdr_check->id,
-                 pdr_check->src_if,
-                 far_check ? far_check->dst_if : -1,
-                 pdr_check->f_teid.teid,
-                 pdr_check->qfi,
-                 (void*)ogs_list_first(&pdr_check->rule_list));
-        }
                 ogs_assert(OGS_OK ==
                            upf_pfcp_blockchain_credentials(sess, &blockchain));
             }
@@ -991,21 +980,21 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
             fallback_pdr = pdr;
 
         /* Check PDR is downlink (CORE -> ACCESS) */
-        if (pdr->src_if != OGS_PFCP_INTERFACE_CORE)
+        if (pdr->src_if != OGS_PFCP_INTERFACE_ACCESS)
             continue;
 
         /* Check FAR points to ACCESS */
-        if (!far || far->dst_if != OGS_PFCP_INTERFACE_ACCESS)
+        if (!far || far->dst_if != OGS_PFCP_INTERFACE_CORE)
             continue;
 
         /* Check Outer header creation flags (must create outer header for N3) */
-        /*if (far->outer_header_creation.ip4 == 0 &&
+        if (far->outer_header_creation.ip4 == 0 &&
             far->outer_header_creation.ip6 == 0 &&
             far->outer_header_creation.udp4 == 0 &&
             far->outer_header_creation.udp6 == 0 &&
             far->outer_header_creation.gtpu4 == 0 &&
             far->outer_header_creation.gtpu6 == 0)
-            continue;*/
+            continue;
 
         /* NOTE: the recv path optionally checks rule-list using the actual packet:
            if (ogs_list_first(&pdr->rule_list) && ogs_pfcp_pdr_rule_find_by_packet(pdr, recvbuf) == NULL) continue;
