@@ -18,8 +18,6 @@
  */
 
 #include "ogs-pfcp.h"
-#include "gtp/v2/message.h"
-#include "gtp/v1/message.h"
 
 #if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
