@@ -995,8 +995,10 @@ void upf_send_json_to_ue(upf_sess_t *sess,
         ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
                         "upf_send_json_to_ue(): ogs_sendto() failed");
     } else {
+        struct in_addr ue_addr = { .s_addr = ue_ip };
         ogs_info("JSON GTP-U packet sent to gNB (%s) for UE %s",
-                 inet_ntoa(to.sin.sin_addr), ogs_ipstr(ue_ip));
+                 inet_ntoa(to.sin.sin_addr),
+                 inet_ntoa(ue_addr));
     }
 
     ogs_pkbuf_free(buf);
