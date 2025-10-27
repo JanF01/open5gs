@@ -637,13 +637,28 @@ void upf_n4_handle_blockchain_credentials_response(
         return;
     }
 
-    /* --- Get UPF source IP from global pfcp_advertise --- */
-    if (ogs_pfcp_self() && ogs_pfcp_self()->pfcp_advertise) {
-        src_ip_n = ogs_pfcp_self()->pfcp_advertise->sin.sin_addr.s_addr; /* network order */
-        if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
-            snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
+       if (ogs_pfcp_self()) {
+        ogs_pfcp_context_t *ctx = ogs_pfcp_self();
+
+        if (ctx->pfcp_advertise) {
+            src_ip_n = ctx->pfcp_advertise->sin.sin_addr.s_addr; /* network order */
+            if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
+                snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
+        }
+        else if (ctx->pfcp_addr) {
+            /* Fallback if pfcp_advertise is not set */
+            ogs_warn("pfcp_advertise not set; falling back to pfcp_addr");
+            src_ip_n = ctx->pfcp_addr->sin.sin_addr.s_addr;
+            if (inet_ntop(AF_INET, &src_ip_n, src_ip_str, sizeof(src_ip_str)) == NULL)
+                snprintf(src_ip_str, sizeof(src_ip_str), "(inet_ntop failed)");
+        }
+        else {
+            ogs_error("Neither pfcp_advertise nor pfcp_addr set in ogs_pfcp_self(); cannot determine source IP");
+            ogs_pfcp_xact_commit(xact);
+            return;
+        }
     } else {
-        ogs_error("pfcp_advertise not set in ogs_pfcp_self(); cannot determine source IP");
+        ogs_error("ogs_pfcp_self() returned NULL; cannot determine source IP");
         ogs_pfcp_xact_commit(xact);
         return;
     }
