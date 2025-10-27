@@ -958,7 +958,9 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
 
     /* --- Inspect PDR list and choose appropriate downlink PDR similar to receive path --- */
     ogs_pfcp_pdr_t *pdr = NULL;
-    ogs_pfcp_pdr_t *chosen_pdr = NULL;
+    ogs_pfcp_pdr_t *uplink_pdr = NULL;
+    ogs_pfcp_pdr_t *downlink_pdr = NULL;
+
     ogs_pfcp_far_t *far = NULL;
     ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
         far = pdr->far;
@@ -972,22 +974,25 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
 
         if (pdr->src_if == OGS_PFCP_INTERFACE_ACCESS && far && far->dst_if == OGS_PFCP_INTERFACE_CORE) {
         /* This is the uplink PDR (from gNB → UPF), TEID is valid */
-        chosen_pdr = pdr;
-        break;
+        downlink_pdr = pdr;
+        }
+        if (pdr->src_if == OGS_PFCP_INTERFACE_CORE && far && far->dst_if == OGS_PFCP_INTERFACE_ACCESS) {
+        /* This is the uplink PDR (from gNB → UPF), TEID is valid */
+        uplink_pdr = pdr;
         }
     }
 
 
-    if (!chosen_pdr) {
+    if (!downlink_pdr) {
         ogs_error("upf_send_json_to_ue(): no downlink PDR available for UE %08x", ntohl(ue_ip));
         return;
     }
 
     /* Prepare TEID, QFI and gNB address from chosen pdr */
-    uint32_t teid = chosen_pdr->f_teid.teid;
-    uint8_t qfi = chosen_pdr->qfi;
+    uint32_t teid = uplink_pdr->f_teid.teid;
+    uint8_t qfi = downlink_pdr->qfi;
     ogs_sockaddr_t gnb_addr = {0};
-    memcpy(&gnb_addr, &chosen_pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
+    memcpy(&gnb_addr, &uplink_pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
 
     if (teid == 0) {
         ogs_error("upf_send_json_to_ue(): chosen PDR has no TEID");
@@ -995,7 +1000,7 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     }
 
     ogs_info("Selected PDR id=%u teid=0x%08x qfi=%u gNB=%s:%u",
-             chosen_pdr->id, teid, qfi,
+             uplink_pdr->id, teid, qfi,
              inet_ntoa(gnb_addr.sin.sin_addr),
              ntohs(gnb_addr.sin.sin_port) ? ntohs(gnb_addr.sin.sin_port) : 2152);
 
@@ -1030,9 +1035,10 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
         ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
                         "upf_send_json_to_ue(): ogs_sendto failed");
     } else {
-        struct in_addr ue_addr = { .s_addr = ue_ip };
+        uint32_t ue_ip_final = ue_ip; /* keep the passed value */
+        struct in_addr ue_addr = { .s_addr = ue_ip_final };
         ogs_info("JSON sent via GTP-U to gNB %s:%u for UE %s",
-                 inet_ntoa(to.sin.sin_addr), gnb_port, inet_ntoa(ue_addr));
+                inet_ntoa(to.sin.sin_addr), gnb_port, inet_ntoa(ue_addr));
     }
 
     ogs_pkbuf_free(buf);
