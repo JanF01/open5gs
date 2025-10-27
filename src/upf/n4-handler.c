@@ -557,8 +557,8 @@ void upf_n4_handle_blockchain_credentials_response(
     ogs_pfcp_blockchain_credentials_response_t *rsp)
 {
     char json[256] = {0};
-    char ue_ip_str[INET_ADDRSTRLEN] = "(none)";
-    char src_ip_str[INET_ADDRSTRLEN] = "(none)";
+    char ue_ip_str[64] = "(none)";
+    char src_ip_str[64] = "(none)";
     uint32_t ue_ip_n = 0;   /* network byte order */
     uint32_t src_ip_n = 0;  /* network byte order */
 
@@ -626,7 +626,7 @@ void upf_n4_handle_blockchain_credentials_response(
     ogs_info("Prepared JSON to send to UE: %s", json);
 
     /* --- Get UE IPv4 address (network byte order) --- */
-    if (sess->ipv4 && sess->ipv4->addr) {
+    if (sess->ipv4) {
         ue_ip_n = sess->ipv4->addr[0]; /* network byte order */
         if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
             snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop failed)");
