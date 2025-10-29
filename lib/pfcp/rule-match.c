@@ -379,66 +379,6 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
     return false;
 }
 
-ogs_pkbuf_t *ogs_pfcp_form_json_tcp_packet(ogs_pkbuf_pool_t *pool,
-                                           uint32_t src_ip,
-                                           uint16_t src_port,
-                                           uint32_t dst_ip,
-                                           uint16_t dst_port,
-                                           const char *json_payload)
-{
-
-    size_t payload_len = strlen(json_payload);
-    size_t ip_hdr_len = sizeof(struct ip);
-    size_t tcp_hdr_len = sizeof(struct tcphdr);
-    size_t total_len = ip_hdr_len + tcp_hdr_len + payload_len;
-
-    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
-    if (!buf) {
-        ogs_error("Failed to allocate packet buffer");
-        return NULL;
-    }
-
-    ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
-    ogs_pkbuf_put(buf, total_len);
-    uint8_t *pkt = buf->data;
-
-    /* IPv4 header */
-    struct ip *ip_h = (struct ip *)pkt;
-    ip_h->ip_v = 4;
-    ip_h->ip_hl = ip_hdr_len / 4;
-    ip_h->ip_tos = 0;
-    ip_h->ip_len = htons(total_len);
-    ip_h->ip_id = htons(0);
-    ip_h->ip_off = 0;
-    ip_h->ip_ttl = 64;
-    ip_h->ip_p = IPPROTO_TCP;
-    ip_h->ip_src.s_addr = src_ip;
-    ip_h->ip_dst.s_addr = dst_ip;
-    ip_h->ip_sum = 0;
-    ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
-
-    /* TCP header */
-    struct tcphdr *tcp_h = (struct tcphdr *)(pkt + ip_hdr_len);
-    tcp_h->th_sport = htons(src_port);
-    tcp_h->th_dport = htons(dst_port);
-    tcp_h->th_seq = htonl(1);
-    tcp_h->th_ack = htonl(0);
-    tcp_h->th_off = tcp_hdr_len / 4;
-    tcp_h->th_flags = TH_PUSH | TH_ACK;
-    tcp_h->th_win = htons(65535);
-    tcp_h->th_sum = 0;
-    tcp_h->th_urp = 0;
-
-    /* Copy JSON payload */
-    memcpy((uint8_t *)(tcp_h + 1), json_payload, payload_len);
-
-    /* Compute TCP checksum */
-    tcp_h->th_sum = ogs_tcp_checksum(src_ip, dst_ip, (uint16_t *)tcp_h,
-                                     tcp_hdr_len + payload_len);
-
-    return buf;
-}
-
 ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
                                              uint32_t teid,
                                              uint8_t qfi,
@@ -448,15 +388,23 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
                                              uint16_t dst_port,
                                              const char *json_payload)
 {
+    // --- 1. Calculate Lengths and Offsets ---
     size_t json_payload_len = strlen(json_payload);
     size_t ip_hdr_len = sizeof(struct ip);
     size_t udp_hdr_len = sizeof(struct udphdr);
     size_t inner_packet_len = ip_hdr_len + udp_hdr_len + json_payload_len;
-
-    /* Only fixed GTP-U header (8 bytes) */
     size_t gtpu_hdr_len = sizeof(ogs_gtp1_header_t);
     size_t total_len = gtpu_hdr_len + inner_packet_len;
 
+    ogs_info("--- Packet Build Debug Start ---");
+    ogs_info("Payload Length: %zu", json_payload_len);
+    ogs_info("IP Header Size: %zu (Expected 20)", ip_hdr_len);
+    ogs_info("UDP Header Size: %zu (Expected 8)", udp_hdr_len);
+    ogs_info("GTP-U Header Size: %zu (Expected 8)", gtpu_hdr_len);
+    ogs_info("Inner Packet Length (IP+UDP+Data): %zu", inner_packet_len);
+    ogs_info("Total Packet Length (GTP-U+Inner): %zu", total_len);
+    
+    // ... (Allocation logic remains the same) ...
     ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
     if (!buf) {
         ogs_error("Failed to allocate packet buffer");
@@ -466,9 +414,10 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
     ogs_pkbuf_put(buf, total_len);
     uint8_t *pkt = buf->data;
+    uint8_t *current_ptr = pkt; // Start at the beginning of the buffer
 
-    /* ---------------- GTP-U Header ---------------- */
-    ogs_gtp1_header_t *gtp_h = (ogs_gtp1_header_t *)pkt;
+    /* ---------------- 2. GTP-U Header ---------------- */
+    ogs_gtp1_header_t *gtp_h = (ogs_gtp1_header_t *)current_ptr;
     memset(gtp_h, 0, sizeof(*gtp_h));
 
     gtp_h->version = OGS_GTP1_VERSION_1;
@@ -479,65 +428,70 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     gtp_h->type = OGS_GTP1U_MSGTYPE_GPDU;
     gtp_h->length = htons(inner_packet_len);
     gtp_h->teid = htonl(teid);
+    
+    ogs_info("GTP-U Header Constructed:");
+    ogs_info("  - Type: %u (G-PDU=255)", gtp_h->type);
+    ogs_info("  - Length: %u (H.B.)", inner_packet_len);
+    ogs_info("  - TEID: 0x%08x (N.B.)", teid);
 
-    uint8_t *current_ptr = pkt + gtpu_hdr_len;
+    current_ptr += gtpu_hdr_len;
 
-    /* ---------------- IPv4 Header ---------------- */
+    /* ---------------- 3. IPv4 Header ---------------- */
     struct ip *ip_h = (struct ip *)current_ptr;
     memset(ip_h, 0, sizeof(struct ip));
 
     // **CRITICAL FIX for ip_v and ip_hl**
     // Set Version (4) and IHL (5, for 20 bytes) in the first byte (network order)
-    uint8_t version_ihl = (4 << 4) | (ip_hdr_len / 4); // 4*16 + 5 = 69 (0x45)
+    uint8_t version_ihl = (4 << 4) | (ip_hdr_len / 4); // Should result in 0x45
     *((uint8_t *)ip_h) = version_ihl;
     
-    // Now set the rest of the fields using the struct, skipping the first byte
-    // which is already set
-    
-    // NOTE: On some BSD systems using struct ip, the actual fields for ip_v and ip_hl 
-    // are still part of the struct, but this manual byte-write is more robust 
-    // against bitfield-order issues.
-    
-    // Assuming struct ip is laid out sequentially from the second byte onwards:
-    // (This works for the rest of the fields regardless of the first byte's internal structure)
-    // ip_h->ip_v and ip_h->ip_hl are now effectively skipped/overwritten by the memset(0) and the byte write
-    
-    // The second byte is ip_tos (Type of Service)
-    // ip_h->ip_tos is typically the second byte of the struct ip
     ip_h->ip_tos = 0; 
-    
-    // The third and fourth bytes are ip_len (Total Length)
-    ip_h->ip_len = htons(inner_packet_len); // total length = IP + UDP + payload 
-    ip_h->ip_id = htons(0);
-    ip_h->ip_off = 0;
+    ip_h->ip_len = htons(inner_packet_len); 
+    ip_h->ip_id = htons(0); // Identification (can be 0)
+    ip_h->ip_off = 0; // Fragment offset and flags (no fragmentation)
     ip_h->ip_ttl = 64;
     ip_h->ip_p = IPPROTO_UDP;
-    
-    // Checksum must be calculated last
-    ip_h->ip_sum = 0; 
     ip_h->ip_src.s_addr = src_ip;
     ip_h->ip_dst.s_addr = dst_ip;
     
+    // Calculate Checksum
+    ip_h->ip_sum = 0; 
     ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+
+    ogs_info("IPv4 Header Constructed:");
+    ogs_info("  - Version/IHL (0x45): 0x%02x", *((uint8_t *)ip_h));
+    ogs_info("  - Total Length: %u (H.B.)", inner_packet_len);
+    ogs_info("  - Protocol: %u (UDP=17)", ip_h->ip_p);
+    ogs_info("  - Source IP: %s (N.B. 0x%08x)", IP_TO_STR(src_ip), src_ip);
+    ogs_info("  - Dest IP: %s (N.B. 0x%08x)", IP_TO_STR(dst_ip), dst_ip);
+    ogs_info("  - Checksum: 0x%04x", ip_h->ip_sum);
 
     current_ptr += ip_hdr_len;
 
-    /* ---------------- UDP Header ---------------- */
+    /* ---------------- 4. UDP Header ---------------- */
     struct udphdr *udp_h = (struct udphdr *)current_ptr;
     memset(udp_h, 0, sizeof(struct udphdr));
 
+    uint16_t udp_total_len = udp_hdr_len + json_payload_len;
+    
     udp_h->uh_sport = htons(src_port);
     udp_h->uh_dport = htons(dst_port);
-    udp_h->uh_ulen = htons(udp_hdr_len + json_payload_len);
-    
-    // Checksum set to 0 to indicate it's not present (optional for IPv4).
-    // The UPF logic implies the use of UDP/IPv4 tunnel, so this is typically acceptable.
-    udp_h->uh_sum = 0; 
+    udp_h->uh_ulen = htons(udp_total_len);
+    udp_h->uh_sum = 0; // Checksum set to 0 (optional for IPv4)
 
+    ogs_info("UDP Header Constructed:");
+    ogs_info("  - Src Port: %u (H.B.)", src_port);
+    ogs_info("  - Dst Port: %u (H.B.)", dst_port);
+    ogs_info("  - Length: %u (H.B.)", udp_total_len);
+    ogs_info("  - Checksum: 0x%04x (Set to 0)", udp_h->uh_sum);
+    
     current_ptr += udp_hdr_len;
 
-    /* ---------------- Payload ---------------- */
+    /* ---------------- 5. Payload ---------------- */
     memcpy(current_ptr, json_payload, json_payload_len);
+
+    ogs_info("Payload Copied: %s", json_payload);
+    ogs_info("--- Packet Build Debug End ---");
 
     return buf;
 }
