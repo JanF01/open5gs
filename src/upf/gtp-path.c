@@ -993,7 +993,7 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     }
 
     /* Prepare TEID, QFI and gNB address from chosen pdr */
-    uint32_t teid = uplink_pdr->f_teid.teid;
+    uint32_t teid = downlink_pdr->f_teid.teid;
     uint8_t qfi = downlink_pdr->qfi;
     ogs_sockaddr_t gnb_addr = {0};
     // Hardcode gnb_addr to 192.168.0.178
@@ -1051,9 +1051,14 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     } else {
         char gnb_ip_str[OGS_ADDRSTRLEN];
         char ue_ip_str[OGS_ADDRSTRLEN];
+        ogs_sockaddr_t ue_sockaddr = {0};
 
         ogs_inet_ntop(&to, gnb_ip_str, sizeof(gnb_ip_str));
-        ogs_inet_ntop(&ue_ip, ue_ip_str, sizeof(ue_ip_str));
+
+        // Populate ue_sockaddr for ogs_inet_ntop
+        ue_sockaddr.ogs_sa_family = AF_INET;
+        ue_sockaddr.sin.sin_addr.s_addr = ue_ip;
+        ogs_inet_ntop(&ue_sockaddr, ue_ip_str, sizeof(ue_ip_str));
 
         ogs_info("JSON sent via GTP-U to gNB %s:%u for UE %s",
                 gnb_ip_str, gnb_port, ue_ip_str);
