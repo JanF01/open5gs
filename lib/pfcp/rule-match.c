@@ -431,7 +431,7 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     
     ogs_info("GTP-U Header Constructed:");
     ogs_info("  - Type: %u (G-PDU=255)", gtp_h->type);
-    ogs_info("  - Length: %u (H.B.)", inner_packet_len);
+    ogs_info("  - Length: %zu (H.B.)", inner_packet_len);
     ogs_info("  - TEID: 0x%08x (N.B.)", teid);
 
     current_ptr += gtpu_hdr_len;
@@ -460,7 +460,7 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
 
     ogs_info("IPv4 Header Constructed:");
     ogs_info("  - Version/IHL (0x45): 0x%02x", *((uint8_t *)ip_h));
-    ogs_info("  - Total Length: %u (H.B.)", inner_packet_len);
+    ogs_info("  - Total Length: %zu (H.B.)", inner_packet_len);
     ogs_info("  - Protocol: %u (UDP=17)", ip_h->ip_p);
     ogs_info("  - Checksum: 0x%04x", ip_h->ip_sum);
 
