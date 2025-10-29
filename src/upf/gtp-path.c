@@ -801,6 +801,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_assert(far->sess);
                 sess = UPF_SESS(far->sess);
                 ogs_assert(sess);
+                sess->teid = header_desc.teid; // Save the TEID
                 ogs_assert(OGS_OK ==
                            upf_pfcp_blockchain_credentials(sess, &blockchain));
             }
@@ -993,7 +994,7 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     }
 
     /* Prepare TEID, QFI and gNB address from chosen pdr */
-    uint32_t teid = downlink_pdr->f_teid.teid;
+    uint32_t teid = sess->teid;
     uint8_t qfi = downlink_pdr->qfi;
     ogs_sockaddr_t gnb_addr = {0};
     // Hardcode gnb_addr to 192.168.0.178
