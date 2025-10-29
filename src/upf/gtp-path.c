@@ -992,7 +992,17 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     uint32_t teid = uplink_pdr->f_teid.teid;
     uint8_t qfi = downlink_pdr->qfi;
     ogs_sockaddr_t gnb_addr = {0};
-    memcpy(&gnb_addr, &uplink_pdr->f_teid.addr, sizeof(ogs_sockaddr_t));
+    if (uplink_pdr->f_teid.ipv4) {
+        gnb_addr.ogs_sa_family = AF_INET;
+        gnb_addr.sin.sin_addr.s_addr = uplink_pdr->f_teid.addr;
+    } else if (uplink_pdr->f_teid.ipv6) {
+        gnb_addr.ogs_sa_family = AF_INET6;
+        memcpy(&gnb_addr.sin6.sin6_addr, uplink_pdr->f_teid.addr6, OGS_IPV6_LEN);
+    } else {
+        ogs_error("upf_send_json_to_ue(): chosen PDR has no IP address in F-TEID");
+        return;
+    }
+    gnb_addr.ogs_sin_port = htons(OGS_GTPV1_U_UDP_PORT);
 
     if (teid == 0) {
         ogs_error("upf_send_json_to_ue(): chosen PDR has no TEID");
@@ -1023,22 +1033,22 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
         return;
     }
 
-    ogs_sockaddr_t to = {0};
-    to.ogs_sa_family = AF_INET;
-    memcpy(&to.sin.sin_addr, &gnb_addr.sin.sin_addr, sizeof(struct in_addr));
-    uint16_t gnb_port = ntohs(gnb_addr.sin.sin_port);
-    if (gnb_port == 0) gnb_port = 2152;
-    to.ogs_sin_port = htons(gnb_port);
+    ogs_sockaddr_t to = gnb_addr;
+    uint16_t gnb_port = ntohs(gnb_addr.ogs_sin_port);
 
     ssize_t sent = ogs_sendto(sock->fd, buf->data, buf->len, 0, &to);
     if (sent < 0 || sent != buf->len) {
         ogs_log_message(OGS_LOG_ERROR, ogs_socket_errno,
                         "upf_send_json_to_ue(): ogs_sendto failed");
     } else {
-        uint32_t ue_ip_final = ue_ip; /* keep the passed value */
-        struct in_addr ue_addr = { .s_addr = ue_ip_final };
+        char gnb_ip_str[OGS_ADDRSTRLEN];
+        char ue_ip_str[OGS_ADDRSTRLEN];
+
+        ogs_inet_ntop(&to, gnb_ip_str, sizeof(gnb_ip_str));
+        ogs_inet_ntop_v4(ue_ip, ue_ip_str, sizeof(ue_ip_str));
+
         ogs_info("JSON sent via GTP-U to gNB %s:%u for UE %s",
-                inet_ntoa(to.sin.sin_addr), gnb_port, inet_ntoa(ue_addr));
+                gnb_ip_str, gnb_port, ue_ip_str);
     }
 
     ogs_pkbuf_free(buf);
