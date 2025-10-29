@@ -462,8 +462,6 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     ogs_info("  - Version/IHL (0x45): 0x%02x", *((uint8_t *)ip_h));
     ogs_info("  - Total Length: %u (H.B.)", inner_packet_len);
     ogs_info("  - Protocol: %u (UDP=17)", ip_h->ip_p);
-    ogs_info("  - Source IP: %s (N.B. 0x%08x)", IP_TO_STR(src_ip), src_ip);
-    ogs_info("  - Dest IP: %s (N.B. 0x%08x)", IP_TO_STR(dst_ip), dst_ip);
     ogs_info("  - Checksum: 0x%04x", ip_h->ip_sum);
 
     current_ptr += ip_hdr_len;
