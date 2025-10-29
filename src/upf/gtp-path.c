@@ -1045,7 +1045,7 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
         char ue_ip_str[OGS_ADDRSTRLEN];
 
         ogs_inet_ntop(&to, gnb_ip_str, sizeof(gnb_ip_str));
-        ogs_inet_ntop(ue_ip, ue_ip_str, sizeof(ue_ip_str));
+        ogs_inet_ntop(&ue_ip, ue_ip_str, sizeof(ue_ip_str));
 
         ogs_info("JSON sent via GTP-U to gNB %s:%u for UE %s",
                 gnb_ip_str, gnb_port, ue_ip_str);
