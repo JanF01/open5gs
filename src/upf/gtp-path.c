@@ -992,12 +992,12 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     uint32_t teid = uplink_pdr->f_teid.teid;
     uint8_t qfi = downlink_pdr->qfi;
     ogs_sockaddr_t gnb_addr = {0};
-    if (uplink_pdr->f_teid.ipv4) {
+    if (downlink_pdr->f_teid.ipv4) {
         gnb_addr.ogs_sa_family = AF_INET;
-        gnb_addr.sin.sin_addr.s_addr = uplink_pdr->f_teid.addr;
-    } else if (uplink_pdr->f_teid.ipv6) {
+        gnb_addr.sin.sin_addr.s_addr = downlink_pdr->f_teid.addr;
+    } else if (downlink_pdr->f_teid.ipv6) {
         gnb_addr.ogs_sa_family = AF_INET6;
-        memcpy(&gnb_addr.sin6.sin6_addr, uplink_pdr->f_teid.addr6, OGS_IPV6_LEN);
+        memcpy(&gnb_addr.sin6.sin6_addr, downlink_pdr->f_teid.addr6, OGS_IPV6_LEN);
     } else {
         ogs_error("upf_send_json_to_ue(): chosen PDR has no IP address in F-TEID");
         return;
