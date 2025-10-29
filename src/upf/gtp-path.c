@@ -374,7 +374,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
         goto cleanup;
     }
 
-    ogs_trace("[RECV] GPU-U Type [%d] from [%s] : TEID[0x%x]",
+    ogs_info("[RECV] GPU-U Type [%d] from [%s] : TEID[0x%x]",
               header_desc.type, OGS_ADDR(&from, buf1), header_desc.teid);
 
     /* Remove GTP header and send packets to TUN interface */
@@ -798,6 +798,8 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 ogs_info("Intercepting blockchain login request from UE SUPI");
                 ogs_info("Login: %s, Password: %s",
                          blockchain.login, blockchain.password);
+                         ogs_info("Source IP-%d Spoofing APN:%s SrcIf:%d DstIf:%d TEID:0x%x",
+                              ip_h->ip_v, pdr->dnn, pdr->src_if, far->dst_if, header_desc.teid);
                 ogs_assert(far->sess);
                 sess = UPF_SESS(far->sess);
                 ogs_assert(sess);
