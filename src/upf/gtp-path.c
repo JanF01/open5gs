@@ -1012,11 +1012,6 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     //}
     gnb_addr.ogs_sin_port = htons(OGS_GTPV1_U_UDP_PORT);
 
-    if (teid == 0) {
-        ogs_error("upf_send_json_to_ue(): chosen PDR has no TEID");
-        return;
-    }
-
     ogs_info("Selected PDR id=%u teid=0x%08x qfi=%u gNB=%s:%u",
              uplink_pdr->id, teid, qfi,
              inet_ntoa(gnb_addr.sin.sin_addr),
