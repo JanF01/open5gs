@@ -453,73 +453,43 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     size_t udp_hdr_len = sizeof(struct udphdr);
     size_t inner_packet_len = ip_hdr_len + udp_hdr_len + json_payload_len;
 
-    // GTP-U header (8 bytes fixed) + Optional fields (4 bytes) + UDP Port Extension Header (4 bytes)
-    size_t gtpu_fixed_hdr_len = sizeof(ogs_gtp1_header_t); // 8 bytes
-    size_t gtpu_optional_fields_len = 4; // Sequence Number (2), N-PDU Number (1), Next Extension Header Type (1)
-    size_t gtpu_ext_hdr_len = 8; // UDP Port Extension Header (4 bytes) + PDU Session Container (4 bytes)
+    /* Only fixed GTP-U header (8 bytes) */
+    size_t gtpu_hdr_len = sizeof(ogs_gtp1_header_t);
+    size_t total_len = gtpu_hdr_len + inner_packet_len;
 
-    size_t total_gtpu_packet_len = gtpu_fixed_hdr_len + gtpu_optional_fields_len + gtpu_ext_hdr_len + inner_packet_len;
-
-    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_gtpu_packet_len + OGS_TLV_MAX_HEADROOM);
+    ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
     if (!buf) {
         ogs_error("Failed to allocate packet buffer");
         return NULL;
     }
 
     ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
-    ogs_pkbuf_put(buf, total_gtpu_packet_len);
+    ogs_pkbuf_put(buf, total_len);
     uint8_t *pkt = buf->data;
 
-    // GTP-U Header
+    /* ---------------- GTP-U Header ---------------- */
     ogs_gtp1_header_t *gtp_h = (ogs_gtp1_header_t *)pkt;
-    gtp_h->version = OGS_GTP1_VERSION_1;
-    gtp_h->pt = 1; // GTP' not implemented, so PT is 1 for GTP
-    gtp_h->spare1 = 0;
-    gtp_h->e = 1; // Extension Header present
-    gtp_h->s = 0; // Sequence Number not present
-    gtp_h->pn = 0; // N-PDU Number not present
+    memset(gtp_h, 0, sizeof(*gtp_h));
+
+    gtp_h->version = OGS_GTP1_VERSION_1;  // Version 1
+    gtp_h->pt = 1;                         // GTP, not GTP'
+    gtp_h->e = 0;                         // <-- No extension header
+    gtp_h->s = 0;
+    gtp_h->pn = 0;
     gtp_h->type = OGS_GTP1U_MSGTYPE_GPDU;
-    gtp_h->length = htons(total_gtpu_packet_len - gtpu_fixed_hdr_len); // Length of payload including optional fields and extension headers
+    gtp_h->length = htons(inner_packet_len); // length of payload (no optional fields)
     gtp_h->teid = htonl(teid);
 
-    uint8_t *current_ptr = pkt + gtpu_fixed_hdr_len;
+    uint8_t *current_ptr = pkt + gtpu_hdr_len;
 
-    // Optional fields (Sequence Number, N-PDU Number, Next Extension Header Type)
-    // UERANSIM proto.cpp expects 4 bytes if any of E, S, PN are set.
-    // Sequence Number (2 bytes)
-    *(uint16_t *)current_ptr = htons(0);
-    current_ptr += 2;
-    // N-PDU Number (1 byte)
-    *current_ptr = 0;
-    current_ptr += 1;
-    // Next Extension Header Type (1 byte) - PDU Session Container type (0b00000101)
-    *current_ptr = 0x85; // PDU Session Container
-    current_ptr += 1;
-
-    // PDU Session Container Extension Header
-    *current_ptr = 1; // Length (1 means 4 octets total)
-    current_ptr += 1;
-    *current_ptr = qfi; // QFI
-    current_ptr += 1;
-    *current_ptr = 0; // PDU Type (0 for IPv4, 1 for IPv6, 2 for Ethernet)
-    current_ptr += 1;
-    *current_ptr = 0b01000000; // Next Extension Header Type - UDP Port Extension Header
-    current_ptr += 1;
-
-    // UDP Port Extension Header
-    *current_ptr = 1; // Length (1 means 4 octets total)
-    current_ptr += 1;
-    *(uint16_t *)current_ptr = htons(dst_port); // UDP Port
-    current_ptr += 2;
-    *current_ptr = 0; // No more extension headers
-    current_ptr += 1;
-
-    /* IPv4 header */
+    /* ---------------- IPv4 Header ---------------- */
     struct ip *ip_h = (struct ip *)current_ptr;
+    memset(ip_h, 0, sizeof(struct ip));
+
     ip_h->ip_v = 4;
     ip_h->ip_hl = ip_hdr_len / 4;
     ip_h->ip_tos = 0;
-    ip_h->ip_len = htons(inner_packet_len);
+    ip_h->ip_len = htons(inner_packet_len); // total length = IP + UDP + payload
     ip_h->ip_id = htons(0);
     ip_h->ip_off = 0;
     ip_h->ip_ttl = 64;
@@ -528,18 +498,116 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     ip_h->ip_dst.s_addr = dst_ip;
     ip_h->ip_sum = 0;
     ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+
     current_ptr += ip_hdr_len;
 
-    /* UDP header */
+    /* ---------------- UDP Header ---------------- */
     struct udphdr *udp_h = (struct udphdr *)current_ptr;
+    memset(udp_h, 0, sizeof(struct udphdr));
+
     udp_h->uh_sport = htons(src_port);
     udp_h->uh_dport = htons(dst_port);
     udp_h->uh_ulen = htons(udp_hdr_len + json_payload_len);
-    udp_h->uh_sum = 0; /* UDP checksum is optional for IPv4, set to 0 */
+    udp_h->uh_sum = 0; // checksum optional for IPv4
+
     current_ptr += udp_hdr_len;
 
-    /* Copy JSON payload */
+    /* ---------------- Payload ---------------- */
     memcpy(current_ptr, json_payload, json_payload_len);
 
     return buf;
+    // size_t json_payload_len = strlen(json_payload);
+    // size_t ip_hdr_len = sizeof(struct ip);
+    // size_t udp_hdr_len = sizeof(struct udphdr);
+    // size_t inner_packet_len = ip_hdr_len + udp_hdr_len + json_payload_len;
+
+    // // GTP-U header (8 bytes fixed) + Optional fields (4 bytes) + UDP Port Extension Header (4 bytes)
+    // size_t gtpu_fixed_hdr_len = sizeof(ogs_gtp1_header_t); // 8 bytes
+    // size_t gtpu_optional_fields_len = 4; // Sequence Number (2), N-PDU Number (1), Next Extension Header Type (1)
+    // size_t gtpu_ext_hdr_len = 8; // UDP Port Extension Header (4 bytes) + PDU Session Container (4 bytes)
+
+    // size_t total_gtpu_packet_len = gtpu_fixed_hdr_len + gtpu_optional_fields_len + gtpu_ext_hdr_len + inner_packet_len;
+
+    // ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_gtpu_packet_len + OGS_TLV_MAX_HEADROOM);
+    // if (!buf) {
+    //     ogs_error("Failed to allocate packet buffer");
+    //     return NULL;
+    // }
+
+    // ogs_pkbuf_reserve(buf, OGS_TLV_MAX_HEADROOM);
+    // ogs_pkbuf_put(buf, total_gtpu_packet_len);
+    // uint8_t *pkt = buf->data;
+
+    // // GTP-U Header
+    // ogs_gtp1_header_t *gtp_h = (ogs_gtp1_header_t *)pkt;
+    // gtp_h->version = OGS_GTP1_VERSION_1;
+    // gtp_h->pt = 1; // GTP' not implemented, so PT is 1 for GTP
+    // gtp_h->spare1 = 0;
+    // gtp_h->e = 0; // Extension Header present
+    // gtp_h->s = 0; // Sequence Number not present
+    // gtp_h->pn = 0; // N-PDU Number not present
+    // gtp_h->type = OGS_GTP1U_MSGTYPE_GPDU;
+    // gtp_h->length = htons(total_gtpu_packet_len - gtpu_fixed_hdr_len); // Length of payload including optional fields and extension headers
+    // gtp_h->teid = htonl(teid);
+
+    // uint8_t *current_ptr = pkt + gtpu_fixed_hdr_len;
+
+    // // // Optional fields (Sequence Number, N-PDU Number, Next Extension Header Type)
+    // // // UERANSIM proto.cpp expects 4 bytes if any of E, S, PN are set.
+    // // // Sequence Number (2 bytes)
+    // // *(uint16_t *)current_ptr = htons(0);
+    // // current_ptr += 2;
+    // // // N-PDU Number (1 byte)
+    // // *current_ptr = 0;
+    // // current_ptr += 1;
+    // // // Next Extension Header Type (1 byte) - PDU Session Container type (0b00000101)
+    // // *current_ptr = 0x85; // PDU Session Container
+    // // current_ptr += 1;
+
+    // // // PDU Session Container Extension Header
+    // // *current_ptr = 1; // Length (1 means 4 octets total)
+    // // current_ptr += 1;
+    // // *current_ptr = qfi; // QFI
+    // // current_ptr += 1;
+    // // *current_ptr = 0; // PDU Type (0 for IPv4, 1 for IPv6, 2 for Ethernet)
+    // // current_ptr += 1;
+    // // *current_ptr = 0b01000000; // Next Extension Header Type - UDP Port Extension Header
+    // // current_ptr += 1;
+
+    // // // UDP Port Extension Header
+    // // *current_ptr = 1; // Length (1 means 4 octets total)
+    // // current_ptr += 1;
+    // // *(uint16_t *)current_ptr = htons(dst_port); // UDP Port
+    // // current_ptr += 2;
+    // // *current_ptr = 0; // No more extension headers
+    // // current_ptr += 1;
+
+    // /* IPv4 header */
+    // struct ip *ip_h = (struct ip *)current_ptr;
+    // ip_h->ip_v = 4;
+    // ip_h->ip_hl = ip_hdr_len / 4;
+    // ip_h->ip_tos = 0;
+    // ip_h->ip_len = htons(inner_packet_len);
+    // ip_h->ip_id = htons(0);
+    // ip_h->ip_off = 0;
+    // ip_h->ip_ttl = 64;
+    // ip_h->ip_p = IPPROTO_UDP;
+    // ip_h->ip_src.s_addr = src_ip;
+    // ip_h->ip_dst.s_addr = dst_ip;
+    // ip_h->ip_sum = 0;
+    // ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
+    // current_ptr += ip_hdr_len;
+
+    // /* UDP header */
+    // struct udphdr *udp_h = (struct udphdr *)current_ptr;
+    // udp_h->uh_sport = htons(src_port);
+    // udp_h->uh_dport = htons(dst_port);
+    // udp_h->uh_ulen = htons(udp_hdr_len + json_payload_len);
+    // udp_h->uh_sum = 0; /* UDP checksum is optional for IPv4, set to 0 */
+    // current_ptr += udp_hdr_len;
+
+    // /* Copy JSON payload */
+    // memcpy(current_ptr, json_payload, json_payload_len);
+
+    // return buf;
 }

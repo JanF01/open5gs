@@ -19,7 +19,7 @@
 /* Standard Internet Checksum (RFC 1071) */
 uint16_t ogs_checksum(uint16_t *addr, int len)
 {
-    int sum = 0;
+    uint32_t sum = 0;
     uint16_t *w = addr;
     int nleft = len;
 
@@ -29,13 +29,14 @@ uint16_t ogs_checksum(uint16_t *addr, int len)
     }
 
     if (nleft == 1) {
-    uint16_t tmp = 0;
-    *((unsigned char *)&tmp) = *(unsigned char *)w;
-    sum += tmp;
+        uint16_t tmp = 0;
+        *(uint8_t *)&tmp = *(uint8_t *)w;
+        sum += tmp;
     }
 
-    sum = (sum >> 16) + (sum & 0xffff);
-    sum += (sum >> 16);
+    // Fold 32-bit sum to 16 bits
+    while (sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
 
     return (uint16_t)(~sum);
 }
@@ -47,7 +48,7 @@ uint16_t ogs_tcp_checksum(uint32_t saddr, uint32_t daddr, uint16_t *buf, int len
     uint16_t *w = buf;
     int nleft = len;
 
-    // Add pseudo-header
+    // Pseudo-header
     sum += (saddr >> 16) & 0xFFFF;
     sum += saddr & 0xFFFF;
     sum += (daddr >> 16) & 0xFFFF;
@@ -55,17 +56,22 @@ uint16_t ogs_tcp_checksum(uint32_t saddr, uint32_t daddr, uint16_t *buf, int len
     sum += htons(IPPROTO_TCP);
     sum += htons(len);
 
+    // Data
     while (nleft > 1) {
         sum += *w++;
         nleft -= 2;
     }
 
+    // Handle any odd byte
     if (nleft == 1) {
-        *(unsigned char *)(&sum) += *(unsigned char *)w;
+        uint16_t tmp = 0;
+        *(uint8_t *)&tmp = *(uint8_t *)w;
+        sum += tmp;
     }
 
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
+    // Fold
+    while (sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
 
     return (uint16_t)(~sum);
 }
