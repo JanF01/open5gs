@@ -1007,9 +1007,9 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     //     gnb_addr.ogs_sa_family = AF_INET6;
     //     memcpy(&gnb_addr.sin6.sin6_addr, downlink_pdr->f_teid.addr6, OGS_IPV6_LEN);
     // } else {
-        ogs_error("upf_send_json_to_ue(): chosen PDR has no IP address in F-TEID");
-        return;
-    }
+    //    ogs_error("upf_send_json_to_ue(): chosen PDR has no IP address in F-TEID");
+    //    return;
+    //}
     gnb_addr.ogs_sin_port = htons(OGS_GTPV1_U_UDP_PORT);
 
     if (teid == 0) {
