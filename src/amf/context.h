@@ -919,6 +919,9 @@ typedef struct amf_sess_s {
     char *dnn;
     bool lbo_roaming_allowed;
 
+    /* Blockchain related Context */
+    OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
+
 } amf_sess_t;
 
 void amf_context_init(void);

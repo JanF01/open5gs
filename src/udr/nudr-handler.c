@@ -500,6 +500,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
     OpenAPI_list_t *DefaultSingleNssaiList = NULL;
     OpenAPI_list_t *SingleNssaiList = NULL;
     OpenAPI_snssai_t *Snssai = NULL;
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id = NULL;
 
     OpenAPI_lnode_t *node = NULL;
 
@@ -564,6 +565,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
             &SubscribedUeAmbr;
     }
 
+
     if (processNssai)
     {
         DefaultSingleNssaiList = OpenAPI_list_create();
@@ -622,6 +624,9 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
         if (DefaultSingleNssaiList->count)
             AccessAndMobilitySubscriptionData.nssai = &NSSAI;
+
+        blockchain_node_id->blockchain_node_id = &subscription_data.blockchain_node_id;    
+        AccessAndMobilitySubscriptionData.blockchain_node_id = blockchain_node_id;    
     }
 
     memset(&sendmsg, 0, sizeof(sendmsg));

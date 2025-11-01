@@ -16,6 +16,7 @@
 #include "ambr_rm.h"
 #include "area.h"
 #include "cag_data.h"
+#include "sdm_blockchain_node_id.h"
 #include "core_network_type.h"
 #include "ec_restriction_data_wb.h"
 #include "edrx_parameters.h"
@@ -45,6 +46,7 @@ extern "C" {
 typedef struct OpenAPI_access_and_mobility_subscription_data_s OpenAPI_access_and_mobility_subscription_data_t;
 typedef struct OpenAPI_access_and_mobility_subscription_data_s {
     char *supported_features;
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id;
     OpenAPI_list_t *gpsis;
     char *hss_group_id;
     OpenAPI_list_t *internal_group_ids;
@@ -120,6 +122,7 @@ typedef struct OpenAPI_access_and_mobility_subscription_data_s {
 
 OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_subscription_data_create(
     char *supported_features,
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
     OpenAPI_list_t *gpsis,
     char *hss_group_id,
     OpenAPI_list_t *internal_group_ids,

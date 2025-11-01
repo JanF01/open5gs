@@ -872,6 +872,7 @@ typedef struct ogs_subscription_data_s {
     char *mme_host;
     char *mme_realm;
     bool purge_flag;
+    char *blockchain_node_id;
 } ogs_subscription_data_t;
 
 void ogs_subscription_data_free(ogs_subscription_data_t *subscription_data);

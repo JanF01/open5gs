@@ -42,6 +42,8 @@ int amf_nudm_sdm_handle_provisioned(
                 recvmsg->AccessAndMobilitySubscriptionData->nssai;
             OpenAPI_list_t *RatRestrictions =
                 recvmsg->AccessAndMobilitySubscriptionData->rat_restrictions;
+            OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id =
+                recvmsg->AccessAndMobilitySubscriptionData->blockchain_node_id;    
 
             OpenAPI_lnode_t *node = NULL;
 
@@ -131,6 +133,16 @@ int amf_nudm_sdm_handle_provisioned(
                         }
                     }
                 }
+            }
+
+            if (BlockchainNodeId) {
+                if (amf_ue->blockchain_node_id) {
+                    ogs_free(amf_ue->blockchain_node_id);
+                }
+                
+                amf_ue->blockchain_node_id = ogs_strdup(BlockchainNodeId);
+                ogs_debug("Stored Blockchain Node ID [%s] for UE [%s]", 
+                          amf_ue->blockchain_node_id, amf_ue->supi);
             }
 
             OpenAPI_list_clear(amf_ue->rat_restrictions);

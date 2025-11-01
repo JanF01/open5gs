@@ -7,6 +7,9 @@
         "stdbool.h": "c",
         "nudr-build.h": "c",
         "context.h": "c",
-        "sbi-path.h": "c"
+        "sbi-path.h": "c",
+        "dnn_selection_mode.h": "c",
+        "pcf_ue_callback_info.h": "c",
+        "wireline_service_area_restriction_1.h": "c"
     }
 }

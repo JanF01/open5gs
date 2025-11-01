@@ -960,6 +960,22 @@ int ogs_dbi_subscription_data(char *supi,
         {
             subscription_data->purge_flag = bson_iter_bool(&iter);
         }
+        else if (!strcmp(key, "blockchain") &&
+                 BSON_ITER_HOLDS_DOCUMENT(&iter))
+        {
+            bson_iter_recurse(&iter, &child1_iter);
+            while (bson_iter_next(&child1_iter))
+            {
+                const char *child1_key = bson_iter_key(&child1_iter);
+                if (!strcmp(child1_key, "blockchain_node_id") &&
+                    BSON_ITER_HOLDS_UTF8(&child1_iter))
+                {
+                    utf8 = bson_iter_utf8(&child1_iter, &length);
+                    subscription_data->blockchain_node_id = ogs_strndup(utf8, length);
+                    ogs_assert(subscription_data->blockchain_node_id);
+                }
+            }
+        }
     }
 
 out:

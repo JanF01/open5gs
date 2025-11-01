@@ -13,6 +13,7 @@
 #include "../include/keyValuePair.h"
 #include "../include/binary.h"
 #include "access_type.h"
+#include "sdm_blockchain_node_id.h"
 #include "apn_rate_status.h"
 #include "backup_amf_info.h"
 #include "ddn_failure_subs.h"
@@ -59,6 +60,7 @@ typedef struct OpenAPI_sm_context_create_data_s {
     struct OpenAPI_snssai_s *hplmn_snssai;
     char *serving_nf_id;
     struct OpenAPI_guami_s *guami;
+    OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
     char *service_name;
     struct OpenAPI_plmn_id_nid_s *serving_network;
     OpenAPI_request_type_e request_type;

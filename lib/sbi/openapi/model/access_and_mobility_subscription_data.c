@@ -6,6 +6,7 @@
 
 OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_subscription_data_create(
     char *supported_features,
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
     OpenAPI_list_t *gpsis,
     char *hss_group_id,
     OpenAPI_list_t *internal_group_ids,
@@ -83,6 +84,7 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
     ogs_assert(access_and_mobility_subscription_data_local_var);
 
     access_and_mobility_subscription_data_local_var->supported_features = supported_features;
+    access_and_mobility_subscription_data_local_var->blockchain_node_id = blockchain_node_id;
     access_and_mobility_subscription_data_local_var->gpsis = gpsis;
     access_and_mobility_subscription_data_local_var->hss_group_id = hss_group_id;
     access_and_mobility_subscription_data_local_var->internal_group_ids = internal_group_ids;
@@ -165,9 +167,13 @@ void OpenAPI_access_and_mobility_subscription_data_free(OpenAPI_access_and_mobil
     if (NULL == access_and_mobility_subscription_data) {
         return;
     }
-    if (access_and_mobility_subscription_data->supported_features) {
+if (access_and_mobility_subscription_data->supported_features) {
         ogs_free(access_and_mobility_subscription_data->supported_features);
         access_and_mobility_subscription_data->supported_features = NULL;
+    }
+    if (access_and_mobility_subscription_data->blockchain_node_id) {
+        OpenAPI_sdm_blockchain_node_id_free(access_and_mobility_subscription_data->blockchain_node_id);
+        access_and_mobility_subscription_data->blockchain_node_id = NULL;
     }
     if (access_and_mobility_subscription_data->gpsis) {
         OpenAPI_list_for_each(access_and_mobility_subscription_data->gpsis, node) {
@@ -362,6 +368,19 @@ cJSON *OpenAPI_access_and_mobility_subscription_data_convertToJSON(OpenAPI_acces
     if (cJSON_AddStringToObject(item, "supportedFeatures", access_and_mobility_subscription_data->supported_features) == NULL) {
         ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [supported_features]");
         goto end;
+    }
+
+    if (access_and_mobility_subscription_data->blockchain_node_id) {
+    cJSON *blockchain_node_id_local_JSON = OpenAPI_sdm_blockchain_node_id_convertToJSON(access_and_mobility_subscription_data->blockchain_node_id);
+    if (blockchain_node_id_local_JSON == NULL) {
+        ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [blockchain_node_id]");
+        goto end;
+    }
+    cJSON_AddItemToObject(item, "blockchainNodeId", blockchain_node_id_local_JSON);
+    if (item->child == NULL) {
+        ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [blockchain_node_id]");
+        goto end;
+    }
     }
     }
 
@@ -984,6 +1003,8 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
     OpenAPI_access_and_mobility_subscription_data_t *access_and_mobility_subscription_data_local_var = NULL;
     OpenAPI_lnode_t *node = NULL;
     cJSON *supported_features = NULL;
+    cJSON *blockchain_node_id = NULL;
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id_local_nonprim = NULL;
     cJSON *gpsis = NULL;
     OpenAPI_list_t *gpsisList = NULL;
     cJSON *hss_group_id = NULL;
@@ -1070,6 +1091,15 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
     if (supported_features) {
     if (!cJSON_IsString(supported_features) && !cJSON_IsNull(supported_features)) {
         ogs_error("OpenAPI_access_and_mobility_subscription_data_parseFromJSON() failed [supported_features]");
+        goto end;
+    }
+    }
+
+    blockchain_node_id = cJSON_GetObjectItemCaseSensitive(access_and_mobility_subscription_dataJSON, "blockchainNodeId");
+    if (blockchain_node_id) {
+    blockchain_node_id_local_nonprim = OpenAPI_sdm_blockchain_node_id_parseFromJSON(blockchain_node_id);
+    if (!blockchain_node_id_local_nonprim) {
+        ogs_error("OpenAPI_sdm_blockchain_node_id_parseFromJSON failed [blockchain_node_id]");
         goto end;
     }
     }
@@ -1785,6 +1815,7 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
 
     access_and_mobility_subscription_data_local_var = OpenAPI_access_and_mobility_subscription_data_create (
         supported_features && !cJSON_IsNull(supported_features) ? ogs_strdup(supported_features->valuestring) : NULL,
+        blockchain_node_id ? blockchain_node_id_local_nonprim : NULL,
         gpsis ? gpsisList : NULL,
         hss_group_id && !cJSON_IsNull(hss_group_id) ? ogs_strdup(hss_group_id->valuestring) : NULL,
         internal_group_ids ? internal_group_idsList : NULL,
@@ -1866,6 +1897,10 @@ end:
         }
         OpenAPI_list_free(gpsisList);
         gpsisList = NULL;
+    }
+    if (blockchain_node_id_local_nonprim) {
+        OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id_local_nonprim);
+        blockchain_node_id_local_nonprim = NULL;
     }
     if (internal_group_idsList) {
         OpenAPI_list_for_each(internal_group_idsList, node) {
