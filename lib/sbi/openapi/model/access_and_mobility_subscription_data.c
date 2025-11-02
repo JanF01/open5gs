@@ -369,6 +369,9 @@ cJSON *OpenAPI_access_and_mobility_subscription_data_convertToJSON(OpenAPI_acces
         ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [supported_features]");
         goto end;
     }
+    }
+
+    }
 
     if (access_and_mobility_subscription_data->blockchain_node_id) {
     cJSON *blockchain_node_id_local_JSON = OpenAPI_sdm_blockchain_node_id_convertToJSON(access_and_mobility_subscription_data->blockchain_node_id);
@@ -380,7 +383,6 @@ cJSON *OpenAPI_access_and_mobility_subscription_data_convertToJSON(OpenAPI_acces
     if (item->child == NULL) {
         ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [blockchain_node_id]");
         goto end;
-    }
     }
     }
 

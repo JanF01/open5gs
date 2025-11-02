@@ -500,8 +500,6 @@ bool udr_nudr_dr_handle_subscription_provisioned(
     OpenAPI_list_t *DefaultSingleNssaiList = NULL;
     OpenAPI_list_t *SingleNssaiList = NULL;
     OpenAPI_snssai_t *Snssai = NULL;
-    static OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
-
     OpenAPI_lnode_t *node = NULL;
 
     memset(&AccessAndMobilitySubscriptionData, 0,
@@ -509,7 +507,6 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
     memset(&SubscribedUeAmbr, 0, sizeof(SubscribedUeAmbr));
     memset(&NSSAI, 0, sizeof(NSSAI));
-    memset(&blockchain_node_id, 0, sizeof(blockchain_node_id));
 
     /* Apply filtering based on fields query parameter */
     if (recvmsg->param.num_of_fields)
@@ -628,13 +625,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
         if (subscription_data.blockchain_node_id) {
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",subscription_data.blockchain_node_id);
-            OpenAPI_sdm_blockchain_node_id_t *tmp =
-                OpenAPI_sdm_blockchain_node_id_create(subscription_data.blockchain_node_id);
-
-            blockchain_node_id = *tmp;  // copy the struct contents into the static variable
-            free(tmp);                  // free the temporary heap allocation
-
-            AccessAndMobilitySubscriptionData.blockchain_node_id = &blockchain_node_id;
+            AccessAndMobilitySubscriptionData.blockchain_node_id = OpenAPI_sdm_blockchain_node_id_create(subscription_data.blockchain_node_id);
          }
 
     }
