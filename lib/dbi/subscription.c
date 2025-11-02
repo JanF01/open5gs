@@ -357,7 +357,9 @@ int ogs_dbi_subscription_data(char *supi,
     ogs_assert(subscription_data);
     ogs_assert(supi);
 
-    memset(subscription_data, 0, sizeof(*subscription_data));
+memset(subscription_data, 0, sizeof(*subscription_data));
+    subscription_data->blockchain_node_id = ogs_strdup("000000000000");
+    ogs_assert(subscription_data->blockchain_node_id);
 
     supi_type = ogs_id_get_type(supi);
     ogs_assert(supi_type);
@@ -974,10 +976,6 @@ int ogs_dbi_subscription_data(char *supi,
                     subscription_data->blockchain_node_id = ogs_strndup(utf8, length);
                     ogs_assert(subscription_data->blockchain_node_id);
                 }
-            }
-            if (!subscription_data->blockchain_node_id) {
-                subscription_data->blockchain_node_id = ogs_strdup("000000000000");
-                ogs_assert(subscription_data->blockchain_node_id);
             }
         }
     }

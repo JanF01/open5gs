@@ -632,7 +632,8 @@ bool udr_nudr_dr_handle_subscription_provisioned(
             ogs_assert(blockchain_node_id);
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",blockchain_node_id->blockchain_node_id);
             AccessAndMobilitySubscriptionData.blockchain_node_id = blockchain_node_id;
-        }
+    }
+
     }
 
     memset(&sendmsg, 0, sizeof(sendmsg));
