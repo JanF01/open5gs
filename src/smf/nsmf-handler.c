@@ -283,8 +283,8 @@ bool smf_nsmf_handle_create_sm_context(
 
     sess->request_type = SmContextCreateData->request_type;
 
-    if (SmContextCreateData->blockchain_node_id) {
-        ogs_info("blockchain_node_id: %s", SmContextCreateData->blockchain_node_id.blockchain_node_id;
+    if (SmContextCreateData->blockchain_node_id.blockchain_node_id) {
+        ogs_info("blockchain_node_id: %s", SmContextCreateData->blockchain_node_id.blockchain_node_id);
         if (sess->blockchain_node_id) ogs_free(sess->blockchain_node_id);
         sess->blockchain_node_id = ogs_strdup(SmContextCreateData->blockchain_node_id.blockchain_node_id);
         ogs_assert(sess->blockchain_node_id);
