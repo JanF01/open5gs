@@ -137,16 +137,26 @@ int amf_nudm_sdm_handle_provisioned(
                     }
                 }
             }
-
-            if (blockchain_node_id) {
-                if (amf_ue->blockchain_node_id) {
-                    ogs_free(amf_ue->blockchain_node_id);
-                }
-                
-                amf_ue->blockchain_node_id->blockchain_node_id = ogs_strdup(blockchain_node_id->blockchain_node_id);
-                ogs_info("Stored Blockchain Node ID [%s] for UE [%s]", 
-                          amf_ue->blockchain_node_id->blockchain_node_id, amf_ue->supi);
+        if (blockchain_node_id) {
+            // Free existing one if present
+            if (amf_ue->blockchain_node_id) {
+                OpenAPI_sdm_blockchain_node_id_free(amf_ue->blockchain_node_id);
+                amf_ue->blockchain_node_id = NULL;
             }
+
+            // Allocate a new structure
+            amf_ue->blockchain_node_id = OpenAPI_sdm_blockchain_node_id_create(
+                ogs_strdup(blockchain_node_id->blockchain_node_id)
+            );
+
+            if (amf_ue->blockchain_node_id && amf_ue->blockchain_node_id->blockchain_node_id) {
+                ogs_info("Stored Blockchain Node ID [%s] for UE [%s]",
+                        amf_ue->blockchain_node_id->blockchain_node_id,
+                        amf_ue->supi);
+            } else {
+                ogs_error("Failed to store Blockchain Node ID for UE [%s]", amf_ue->supi);
+            }
+        }
 
             OpenAPI_list_clear(amf_ue->rat_restrictions);
             if (RatRestrictions) {
