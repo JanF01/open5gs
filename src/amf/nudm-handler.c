@@ -43,7 +43,8 @@ int amf_nudm_sdm_handle_provisioned(
             OpenAPI_list_t *RatRestrictions =
                 recvmsg->AccessAndMobilitySubscriptionData->rat_restrictions;
             OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id =
-                recvmsg->AccessAndMobilitySubscriptionData->blockchain_node_id;    
+                recvmsg->AccessAndMobilitySubscriptionData->blockchain_node_id;   
+                ogs_info("ANYTHING WORKS"); 
             if(blockchain_node_id){    
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",blockchain_node_id->blockchain_node_id);
             }
