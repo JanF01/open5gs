@@ -371,8 +371,6 @@ cJSON *OpenAPI_access_and_mobility_subscription_data_convertToJSON(OpenAPI_acces
     }
     }
 
-    }
-
     if (access_and_mobility_subscription_data->blockchain_node_id) {
     cJSON *blockchain_node_id_local_JSON = OpenAPI_sdm_blockchain_node_id_convertToJSON(access_and_mobility_subscription_data->blockchain_node_id);
     if (blockchain_node_id_local_JSON == NULL) {
