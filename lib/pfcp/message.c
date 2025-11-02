@@ -2946,6 +2946,17 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request =
         {&ogs_pfcp_tlv_desc_blockchain_credentials,  
          NULL}};
 
+ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_node_id_request =
+    {
+        OGS_TLV_MESSAGE,
+        "Blockchain Node Id Request",
+        OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE,
+        0,
+        0,
+        0,
+        {&ogs_pfcp_tlv_desc_blockchain_node_id,  
+         NULL}};
+
 ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
     {
         OGS_TLV_MESSAGE,
@@ -2959,6 +2970,20 @@ ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response =
          &ogs_pfcp_tlv_desc_blockchain_credentials,
          &ogs_pfcp_tlv_desc_blockchain_node_id,
          NULL}};
+
+ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_node_id_response =
+    {
+        OGS_TLV_MESSAGE,
+        "Blockchain Node Id Response",
+        OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE,
+        0,
+        0,
+        0,
+        {&ogs_pfcp_tlv_desc_cause, 
+         &ogs_pfcp_tlv_desc_offending_ie,
+         &ogs_pfcp_tlv_desc_blockchain_node_id,
+         &ogs_pfcp_tlv_desc_ue_ip_address,
+         NULL}};         
 
 ogs_tlv_desc_t ogs_pfcp_tlv_desc_update_pdr =
     {
@@ -4707,6 +4732,16 @@ ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf)
                                &ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response, pkbuf, OGS_TLV_MODE_T2_L2);
         ogs_expect(rv == OGS_OK);
         break;
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE:
+        rv = ogs_tlv_parse_msg(&pfcp_message->pfcp_blockchain_node_id_request,
+                               &ogs_pfcp_msg_desc_pfcp_blockchain_node_id_request, pkbuf, OGS_TLV_MODE_T2_L2);
+        ogs_expect(rv == OGS_OK);
+        break; 
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE:
+        rv = ogs_tlv_parse_msg(&pfcp_message->pfcp_blockchain_node_id_response,
+                               &ogs_pfcp_msg_desc_pfcp_blockchain_node_id_response, pkbuf, OGS_TLV_MODE_T2_L2);
+        ogs_expect(rv == OGS_OK);
+        break;      
     default:
         ogs_warn("Not implemented(type:%d)", pfcp_message->h.type);
         break;
@@ -4842,6 +4877,14 @@ ogs_pkbuf_t *ogs_pfcp_build_msg(ogs_pfcp_message_t *pfcp_message)
         pkbuf = ogs_tlv_build_msg(&ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response,
                                   &pfcp_message->pfcp_blockchain_credentials_response, OGS_TLV_MODE_T2_L2);
         break;
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE:
+        pkbuf = ogs_tlv_build_msg(&ogs_pfcp_msg_desc_pfcp_blockchain_node_id_request,
+                                  &pfcp_message->pfcp_blockchain_node_id_request, OGS_TLV_MODE_T2_L2);
+        break;
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE:
+        pkbuf = ogs_tlv_build_msg(&ogs_pfcp_msg_desc_pfcp_blockchain_node_id_response,
+                                  &pfcp_message->pfcp_blockchain_node_id_response, OGS_TLV_MODE_T2_L2);
+        break;    
     default:
         ogs_warn("Not implemented(type:%d)", pfcp_message->h.type);
         break;

@@ -2039,6 +2039,28 @@ smf_sess_t *smf_sess_find_by_ipv6(uint32_t *addr6)
             self.ipv6_hash, addr6, OGS_IPV6_DEFAULT_PREFIX_LEN >> 3);
 }
 
+smf_sess_t *smf_sess_find_by_blockchain_node_id(char *blockchain_node_id)
+{
+    smf_ue_t *smf_ue = NULL;
+    smf_sess_t *sess = NULL;
+
+    ogs_assert(blockchain_node_id);
+
+    ogs_list_for_each(&self.smf_ue_list, smf_ue) {
+        ogs_list_for_each(&smf_ue->sess_list, sess) {
+            if (sess->blockchain_node_id &&
+                strcmp(sess->blockchain_node_id, blockchain_node_id) == 0) {
+                ogs_info("Found session with blockchain_node_id [%s] for UE [%s]",
+                         blockchain_node_id, smf_ue->supi);
+                return sess;
+            }
+        }
+    }
+
+    ogs_info("No session found with blockchain_node_id [%s]", blockchain_node_id);
+    return NULL;
+}
+
 smf_sess_t *smf_sess_find_by_paging_n1n2message_location(
         char *n1n2message_location)
 {

@@ -658,3 +658,60 @@ void upf_n4_handle_blockchain_credentials_response(
     ogs_info("Blockchain credentials PFCP exchange completed successfully for SEID: %lu",
              (unsigned long)sess->smf_n4_f_seid.seid);
 }
+
+oid upf_n4_handle_blockchain_node_id_response(
+    upf_sess_t *sess, ogs_pfcp_xact_t *xact,
+    ogs_pfcp_blockchain_node_id_response_t *rsp)
+{
+    char ue_ip_str[INET_ADDRSTRLEN] = "(none)";
+    uint32_t ue_ip_n = 0;
+
+    /* --- Validate pointers --- */
+    if (!sess) {
+        ogs_error("upf_n4_handle_blockchain_node_id_response: sess == NULL");
+        return;
+    }
+    if (!xact) {
+        ogs_error("upf_n4_handle_blockchain_node_id_response: xact == NULL");
+        return;
+    }
+    if (!rsp) {
+        ogs_error("upf_n4_handle_blockchain_node_id_response: rsp == NULL");
+        return;
+    }
+
+    ogs_info("Received PFCP Blockchain Node ID Response for SEID [%lu]",
+             (unsigned long)sess->smf_n4_f_seid.seid);
+
+    /* --- Show PFCP Cause IE if present --- */
+    if (rsp->cause.presence)
+        ogs_info("PFCP Cause: %u", rsp->cause.u8);
+    else
+        ogs_warn("PFCP Cause IE not present");
+
+    /* --- Extract and display UE IPv4 from response --- */
+    if (rsp->ue_ip_address.presence && rsp->ue_ip_address.data) {
+        /* PFCP encodes IPv4 address in network byte order */
+        memcpy(&ue_ip_n, rsp->ue_ip_address.data, sizeof(ue_ip_n));
+        if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
+            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop failed)");
+        ogs_info("UE IPv4 from PFCP response: %s", ue_ip_str);
+    } else {
+        ogs_warn("UE IPv4 address not present in PFCP Blockchain Node ID Response");
+    }
+
+    /* --- Display blockchain_node_id if present --- */
+    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data) {
+        ogs_info("Blockchain Node ID: %.*s",
+                 rsp->blockchain_node_id.len,
+                 (char *)rsp->blockchain_node_id.data);
+    } else {
+        ogs_info("Blockchain Node ID not present in response");
+    }
+
+    /* --- Commit the PFCP transaction --- */
+    ogs_pfcp_xact_commit(xact);
+
+    ogs_info("Handled PFCP Blockchain Node ID Response successfully for SEID [%lu]",
+             (unsigned long)sess->smf_n4_f_seid.seid);
+}

@@ -303,6 +303,10 @@ void upf_pfcp_state_associated(ogs_fsm_t *s, upf_event_t *e)
             upf_n4_handle_blockchain_credentials_response(
                 sess, xact, &message->pfcp_blockchain_credentials_response);
             break;
+        case OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE:
+            upf_n4_handle_blockchain_node_id_response(
+                sess, xact, &message->pfcp_blockchain_node_id_response);
+            break;    
         default:
             ogs_error("Not implemented PFCP message type[%d]",
                       message->h.type);

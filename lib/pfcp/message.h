@@ -99,6 +99,8 @@ extern "C"
 #define OGS_PFCP_SESSION_REPORT_RESPONSE_TYPE 57
 #define OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE 58
 #define OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE 59
+#define OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE 58
+#define OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE 59
 
 #define OGS_PFCP_CREATE_PDR_TYPE 1
 #define OGS_PFCP_PDI_TYPE 2
@@ -780,6 +782,8 @@ extern "C"
     extern ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_session_report_response;
     extern ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_request;
     extern ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_credentials_response;
+    extern ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_node_id_request;
+    extern ogs_tlv_desc_t ogs_pfcp_msg_desc_pfcp_blockchain_node_id_response;
 
     /* Structure for Information Element */
     typedef ogs_tlv_uint8_t ogs_pfcp_tlv_cause_t;
@@ -2037,6 +2041,11 @@ extern "C"
         ogs_pfcp_tlv_blockchain_credentials_t credentials;
     } ogs_pfcp_blockchain_credentials_request_t;
 
+    typedef struct ogs_pfcp_blockchain_node_id_request_s
+    {
+        ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id;
+    } ogs_pfcp_blockchain_node_id_request_t;
+
     typedef struct ogs_pfcp_blockchain_credentials_response_s
     {
         ogs_pfcp_tlv_cause_t cause;
@@ -2044,6 +2053,15 @@ extern "C"
         ogs_pfcp_tlv_blockchain_credentials_t credentials;
         ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id;
     } ogs_pfcp_blockchain_credentials_response_t;
+    
+    typedef struct ogs_pfcp_blockchain_node_id_response_s
+    {
+        ogs_pfcp_tlv_cause_t cause;
+        ogs_pfcp_tlv_offending_ie_t offending_ie;
+        ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id;
+        ogs_pfcp_tlv_ue_ip_address_t ue_ip_address;
+    } ogs_pfcp_blockchain_node_id_response_t;
+
 
     typedef struct ogs_pfcp_association_update_request_s
     {
@@ -2345,20 +2363,11 @@ extern "C"
             ogs_pfcp_session_report_response_t pfcp_session_report_response;
             ogs_pfcp_blockchain_credentials_request_t pfcp_blockchain_credentials_request;
             ogs_pfcp_blockchain_credentials_response_t pfcp_blockchain_credentials_response;
+            ogs_pfcp_blockchain_node_id_request_t pfcp_blockchain_node_id_request;
+            ogs_pfcp_blockchain_node_id_response_t pfcp_blockchain_node_id_response;
         };
     } ogs_pfcp_message_t;
 
-    typedef struct ogs_pfcp_blockchain_login_request_s
-    {
-        ogs_pfcp_tlv_ue_ip_address_t ue_ip_address;
-        // Add other relevant IEs for blockchain login, e.g., credentials
-    } ogs_pfcp_blockchain_login_request_t;
-
-    typedef struct ogs_pfcp_blockchain_login_response_s
-    {
-        ogs_pfcp_tlv_cause_t cause;
-        // Add other relevant IEs for blockchain login response, e.g., status
-    } ogs_pfcp_blockchain_login_response_t;
 
     ogs_pfcp_message_t *ogs_pfcp_parse_msg(ogs_pkbuf_t *pkbuf);
     void ogs_pfcp_message_free(ogs_pfcp_message_t *pfcp_message);

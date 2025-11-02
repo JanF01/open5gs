@@ -498,8 +498,7 @@ bool smf_nudm_handle_blockchain_node_id(
     ogs_assert(sess);
 
     if (recvmsg->res_status != OGS_SBI_HTTP_STATUS_CREATED) {
-        ogs_error("HTTP response error [%d]",
-                  recvmsg->res_status);
+        ogs_error("HTTP response error [%d]", recvmsg->res_status);
         ogs_assert(true == ogs_sbi_server_send_error(
             stream, recvmsg->res_status, recvmsg,
             "HTTP response error from UDR", recvmsg->h.resource.component[0], NULL));
@@ -511,12 +510,43 @@ bool smf_nudm_handle_blockchain_node_id(
         recvmsg->SdmBlockchainCredentialsResponse;
 
     if (!resp || !resp->node_id || !resp->node_id->blockchain_node_id) {
-        ogs_error("[%s] Missing blockchain node_id in response", recvmsg->h.resource.component[0]);
+        ogs_error("[%s] Missing blockchain node_id in response",
+                  recvmsg->h.resource.component[0]);
         return false;
     }
 
-    ogs_info("Received blockchain node_id from UDM: %s",
-             resp->node_id->blockchain_node_id);
+    const char *new_node_id = resp->node_id->blockchain_node_id;
+    ogs_info("Received blockchain node_id from UDM: %s", new_node_id);
+
+    // 🧩 Check current sess blockchain_node_id and replace if it's "000000000000"
+    if (sess->blockchain_node_id) {
+        if (strcmp(sess->blockchain_node_id, "000000000000") == 0) {
+            ogs_info("Blockchain Node ID for session [%s] is placeholder. Updating to [%s]",
+                     sess->sm_context_id, new_node_id);
+
+            // Free old one safely before replacing
+            ogs_free(sess->blockchain_node_id);
+            sess->blockchain_node_id = ogs_strdup(new_node_id);
+
+            if (!sess->blockchain_node_id) {
+                ogs_error("Failed to allocate memory for new blockchain_node_id");
+                return false;
+            }
+        } else {
+            ogs_info("Blockchain Node ID for session [%s] already set to [%s], keeping existing value",
+                     sess->sm_context_id, sess->blockchain_node_id);
+        }
+    } else {
+        // If sess->blockchain_node_id is NULL, store it directly
+        sess->blockchain_node_id = ogs_strdup(new_node_id);
+        if (!sess->blockchain_node_id) {
+            ogs_error("Failed to allocate memory for blockchain_node_id");
+            return false;
+        }
+        ogs_info("Stored blockchain_node_id [%s] for new session [%s]",
+                 sess->blockchain_node_id, sess->sm_context_id);
+    }
+
     // Build PFCP response
     ogs_pfcp_blockchain_credentials_response_t pfcp_rsp;
     memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
@@ -524,10 +554,10 @@ bool smf_nudm_handle_blockchain_node_id(
     pfcp_rsp.cause.presence = 1;
     pfcp_rsp.cause.u8 = OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
 
-    if (resp->node_id && resp->node_id->blockchain_node_id) {
+    if (new_node_id) {
         pfcp_rsp.blockchain_node_id.presence = 1;
-        pfcp_rsp.blockchain_node_id.data = resp->node_id->blockchain_node_id;
-        pfcp_rsp.blockchain_node_id.len = strlen(resp->node_id->blockchain_node_id);
+        pfcp_rsp.blockchain_node_id.data = new_node_id;
+        pfcp_rsp.blockchain_node_id.len = strlen(new_node_id);
     }
 
     smf_pfcp_send_blockchain_credentials_response(

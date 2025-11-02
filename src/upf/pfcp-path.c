@@ -479,3 +479,60 @@ int upf_pfcp_blockchain_credentials(
 
     return rv;
 }
+int upf_pfcp_blockchain_node_id(
+    upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain)
+{
+    int rv;
+    ogs_pkbuf_t *n4buf = NULL;
+    ogs_pfcp_header_t h;
+    ogs_pfcp_xact_t *xact = NULL;
+    ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id_tlv;
+
+    ogs_assert(sess);
+    ogs_assert(blockchain);
+
+    // Increment metric counter
+    upf_metrics_inst_global_inc(UPF_METR_GLOB_CTR_SM_N4BLOCKCHAINNODEID);
+
+    // Prepare PFCP header
+    memset(&h, 0, sizeof(h));
+    h.type = OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE;
+    h.seid = sess->smf_n4_f_seid.seid;
+
+    // Prepare TLV for blockchain_node_id
+    blockchain_node_id_tlv.presence = 1;
+    blockchain_node_id_tlv.len = 13;
+    blockchain_node_id_tlv.data = blockchain->blockchain_node_id;
+
+    // Create a local PFCP transaction
+    xact = ogs_pfcp_xact_local_create(
+        sess->pfcp_node, sess_timeout, OGS_UINT_TO_POINTER(sess->id));
+    if (!xact)
+    {
+        ogs_error("ogs_pfcp_xact_local_create() failed");
+        return OGS_ERROR;
+    }
+
+    // Build the blockchain credentials request buffer
+    n4buf = ogs_pfcp_build_blockchain_node_id_request(
+        h.type, &blockchain_node_id_tlv);
+    if (!n4buf)
+    {
+        ogs_error("ogs_pfcp_build_blockchain_node_id_request() failed");
+        return OGS_ERROR;
+    }
+
+    // Attach buffer to the transaction
+    rv = ogs_pfcp_xact_update_tx(xact, &h, n4buf);
+    if (rv != OGS_OK)
+    {
+        ogs_error("ogs_pfcp_xact_update_tx() failed");
+        return OGS_ERROR;
+    }
+
+    // Commit transaction
+    rv = ogs_pfcp_xact_commit(xact);
+    ogs_expect(rv == OGS_OK);
+
+    return rv;
+}

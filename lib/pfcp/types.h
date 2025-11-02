@@ -1546,6 +1546,7 @@ typedef struct ogs_pfcp_user_plane_report_s {
 typedef struct ogs_pfcp_blockchain_data_s {
     uint8_t login[OGS_PFCP_MAX_LOGIN_LEN];
     uint8_t password[OGS_PFCP_MAX_PASSWORD_LEN];
+    uint8_t blockchain_node_id[13];
     uint8_t login_len;
     uint8_t password_len;
 } ogs_pfcp_blockchain_data_t;

@@ -94,6 +94,11 @@ upf_metrics_spec_def_t upf_metrics_spec_def_global[_UPF_METR_GLOB_MAX] = {
         .name = "fivegs_upffunction_sm_n4blockchaincredentials",
         .description = "Node Blockchain credentials",
     },
+     [UPF_METR_GLOB_CTR_SM_N4BLOCKCHAINNODEID] = {
+        .type = OGS_METRICS_METRIC_TYPE_COUNTER,
+        .name = "fivegs_upffunction_sm_n4blockchainnodeid",
+        .description = "Node Blockchain Id",
+    },
 };
 int upf_metrics_init_inst_global(void)
 {

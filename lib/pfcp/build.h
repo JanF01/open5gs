@@ -82,6 +82,11 @@ extern "C"
     ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_response(
         uint8_t type, ogs_pfcp_blockchain_credentials_response_t *rsp);
 
+    ogs_pkbuf_t *ogs_pfcp_build_blockchain_node_id_request(
+        uint8_t type, ogs_pfcp_tlv_blockchain_node_id_t *blockchain_node_id);
+        ogs_pkbuf_t *ogs_pfcp_build_blockchain_node_id_response(
+        uint8_t type, ogs_pfcp_blockchain_node_id_response_t *rsp);
+
 
 #ifdef __cplusplus
 }

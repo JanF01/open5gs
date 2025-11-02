@@ -1020,7 +1020,14 @@ void smf_gsm_state_operational(ogs_fsm_t *s, smf_event_t *e)
                 ogs_assert(r != OGS_ERROR);
             }
             break;
+        case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
+            pfcp_cause = smf_n4_handle_blockchain_node_id(sess, pfcp_xact,
+                            &pfcp_message->pfcp_blockchain_node_id_request);
 
+            if (pfcp_cause != OGS_PFCP_CAUSE_REQUEST_ACCEPTED) {
+                OGS_FSM_TRAN(s, smf_gsm_state_wait_pfcp_deletion);
+            }
+            break;    
         default:
             ogs_error("cannot handle PFCP message type[%d]",
                     pfcp_message->h.type);

@@ -541,7 +541,11 @@ void ogs_pfcp_send_error_message(
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
         cause = &errmsg.pfcp_blockchain_credentials_response.cause;
         offending_ie = &errmsg.pfcp_blockchain_credentials_response.offending_ie;
-        break;    
+        break;
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE:
+        cause = &errmsg.pfcp_blockchain_credentials_response.cause;
+        offending_ie = &errmsg.pfcp_blockchain_credentials_response.offending_ie;
+        break;        
     default:
         ogs_assert_if_reached();
         return;

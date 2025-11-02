@@ -795,6 +795,7 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
 
             if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
             {
+                //make it so that this can read either the node_id or the login and password
                 ogs_info("Intercepting blockchain login request from UE SUPI");
                 ogs_info("Login: %s, Password: %s",
                          blockchain.login, blockchain.password);
@@ -806,6 +807,8 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
                 sess->teid = header_desc.teid; // Save the TEID
                 ogs_assert(OGS_OK ==
                            upf_pfcp_blockchain_credentials(sess, &blockchain));
+                //ogs_assert(OGS_OK ==
+                //           upf_pfcp_blockchain_node_id(sess, &blockchain));           
             }
             else
             {

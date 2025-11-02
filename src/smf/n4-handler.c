@@ -2081,3 +2081,67 @@ uint8_t smf_n4_handle_blockchain_credentials(
     /* do not call ogs_pfcp_xact_commit(pfcp_xact) here */
     return OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
 }
+
+
+uint8_t smf_n4_handle_blockchain_credentials(
+    smf_sess_t *sess, ogs_pfcp_xact_t *pfcp_xact,
+    ogs_pfcp_blockchain_node_id_request_t *pfcp_req)
+{
+    o ogs_pfcp_tlv_blockchain_node_id_t *blockchain_node_id = NULL;
+    smf_sess_t *target_sess = NULL;
+
+    ogs_assert(sess);
+    ogs_assert(pfcp_xact);
+    ogs_assert(pfcp_req);
+
+    blockchain_node_id = &pfcp_req->blockchain_node_id;
+    if (!blockchain_node_id || !blockchain_node_id->data) {
+        ogs_error("No Blockchain Node ID in PFCP request");
+        return OGS_PFCP_CAUSE_MANDATORY_IE_MISSING;
+    }
+
+    char *req_blockchain_id = (char *)blockchain_node_id->data;
+    ogs_info("Received Blockchain Node ID Request [%s] from SEID [%lu]",
+             req_blockchain_id, sess->smf_n4_seid);
+
+    // 🔍 Find the session corresponding to this blockchain node ID
+    target_sess = smf_sess_find_by_blockchain_node_id(req_blockchain_id);
+    if (!target_sess) {
+        ogs_warn("No session found for Blockchain Node ID [%s]", req_blockchain_id);
+        return OGS_PFCP_CAUSE_CONTEXT_NOT_FOUND;
+    }
+
+    // 🧩 Extract UE IPv4 address from the found session
+    uint32_t ipv4_addr = 0;
+    if (target_sess->pdr_downlink) {
+        ipv4_addr = target_sess->pdr_downlink->ue_ip.u.v4;
+    } else if (target_sess->pdr_uplink) {
+        ipv4_addr = target_sess->pdr_uplink->ue_ip.u.v4;
+    } else {
+        ogs_warn("No valid UE IP found for Blockchain Node ID [%s]", req_blockchain_id);
+        return OGS_PFCP_CAUSE_CONTEXT_NOT_FOUND;
+    }
+
+    // Convert to dotted string for logging
+    char ipv4_str[OGS_ADDRSTRLEN];
+    inet_ntop(AF_INET, &ipv4_addr, ipv4_str, sizeof(ipv4_str));
+
+    ogs_info("Matched Blockchain Node ID [%s] -> UE IPv4 [%s]", req_blockchain_id, ipv4_str);
+
+    ogs_pfcp_blockchain_node_id_response_t pfcp_rsp;
+    memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
+
+    pfcp_rsp.cause.presence = 1;
+    pfcp_rsp.cause.u8 = OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
+
+    pfcp_rsp.blockchain_node_id.presence = 1;
+    pfcp_rsp.blockchain_node_id.data = req_blockchain_id;
+    pfcp_rsp.blockchain_node_id.len = strlen(req_blockchain_id);
+
+    pfcp_rsp.ue_ip_address.presence = 1;
+    pfcp_rsp.ue_ip_address.data = ipv4_addr;
+
+    smf_pfcp_send_blockchain_node_id_response(pfcp_xact, sess, &pfcp_rsp);
+
+    return OGS_PFCP_CAUSE_REQUEST_ACCEPTED;
+}
