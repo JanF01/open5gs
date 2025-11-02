@@ -500,7 +500,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
     OpenAPI_list_t *DefaultSingleNssaiList = NULL;
     OpenAPI_list_t *SingleNssaiList = NULL;
     OpenAPI_snssai_t *Snssai = NULL;
-    OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
+    static OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
 
     OpenAPI_lnode_t *node = NULL;
 
@@ -628,10 +628,14 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
         if (subscription_data.blockchain_node_id) {
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",subscription_data.blockchain_node_id);
-            blockchain_node_id = *OpenAPI_sdm_blockchain_node_id_create(subscription_data.blockchain_node_id);
-            ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",blockchain_node_id.blockchain_node_id);
+            OpenAPI_sdm_blockchain_node_id_t *tmp =
+                OpenAPI_sdm_blockchain_node_id_create(subscription_data.blockchain_node_id);
+
+            blockchain_node_id = *tmp;  // copy the struct contents into the static variable
+            free(tmp);                  // free the temporary heap allocation
+
             AccessAndMobilitySubscriptionData.blockchain_node_id = &blockchain_node_id;
-    }
+         }
 
     }
 
