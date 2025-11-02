@@ -1477,6 +1477,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_parseFromJSON(c
     cJSON *serving_nf_id = NULL;
     cJSON *guami = NULL;
     OpenAPI_guami_t *guami_local_nonprim = NULL;
+    cJSON *blockchain_node_id = NULL;
     OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id_local_nonprim = NULL;
     cJSON *service_name = NULL;
     cJSON *serving_network = NULL;
