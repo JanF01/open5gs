@@ -135,12 +135,12 @@ int amf_nudm_sdm_handle_provisioned(
                 }
             }
 
-            if (BlockchainNodeId) {
+            if (blockchain_node_id) {
                 if (amf_ue->blockchain_node_id) {
                     ogs_free(amf_ue->blockchain_node_id);
                 }
                 
-                amf_ue->blockchain_node_id = ogs_strdup(BlockchainNodeId);
+                amf_ue->blockchain_node_id->blockchain_node_id = ogs_strdup(blockchain_node_id->blockchain_node_id);
                 ogs_debug("Stored Blockchain Node ID [%s] for UE [%s]", 
                           amf_ue->blockchain_node_id, amf_ue->supi);
             }

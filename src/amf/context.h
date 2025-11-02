@@ -302,6 +302,9 @@ struct amf_ue_s {
     ogs_sbi_object_t sbi;
     ogs_pool_id_t id;
 
+    /* Blockchain related Context */
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id;
+
     ogs_fsm_t sm;
 
     struct {
@@ -918,9 +921,6 @@ typedef struct amf_sess_s {
     bool mapped_hplmn_presence;
     char *dnn;
     bool lbo_roaming_allowed;
-
-    /* Blockchain related Context */
-    OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
 
 } amf_sess_t;
 
