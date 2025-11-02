@@ -60,7 +60,7 @@ typedef struct OpenAPI_sm_context_create_data_s {
     struct OpenAPI_snssai_s *hplmn_snssai;
     char *serving_nf_id;
     struct OpenAPI_guami_s *guami;
-    OpenAPI_sdm_blockchain_node_id_t blockchain_node_id;
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id;
     char *service_name;
     struct OpenAPI_plmn_id_nid_s *serving_network;
     OpenAPI_request_type_e request_type;
@@ -186,6 +186,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_create(
     OpenAPI_snssai_t *hplmn_snssai,
     char *serving_nf_id,
     OpenAPI_guami_t *guami,
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
     char *service_name,
     OpenAPI_plmn_id_nid_t *serving_network,
     OpenAPI_request_type_e request_type,

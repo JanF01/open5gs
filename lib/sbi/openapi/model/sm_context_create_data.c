@@ -18,6 +18,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_create(
     OpenAPI_snssai_t *hplmn_snssai,
     char *serving_nf_id,
     OpenAPI_guami_t *guami,
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
     char *service_name,
     OpenAPI_plmn_id_nid_t *serving_network,
     OpenAPI_request_type_e request_type,
@@ -145,6 +146,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_create(
     sm_context_create_data_local_var->hplmn_snssai = hplmn_snssai;
     sm_context_create_data_local_var->serving_nf_id = serving_nf_id;
     sm_context_create_data_local_var->guami = guami;
+    sm_context_create_data_local_var->blockchain_node_id = blockchain_node_id;
     sm_context_create_data_local_var->service_name = service_name;
     sm_context_create_data_local_var->serving_network = serving_network;
     sm_context_create_data_local_var->request_type = request_type;
@@ -300,6 +302,10 @@ void OpenAPI_sm_context_create_data_free(OpenAPI_sm_context_create_data_t *sm_co
     if (sm_context_create_data->guami) {
         OpenAPI_guami_free(sm_context_create_data->guami);
         sm_context_create_data->guami = NULL;
+    }
+    if (sm_context_create_data->blockchain_node_id) {
+        OpenAPI_sdm_blockchain_node_id_free(sm_context_create_data->blockchain_node_id);
+        sm_context_create_data->blockchain_node_id = NULL;
     }
     if (sm_context_create_data->service_name) {
         ogs_free(sm_context_create_data->service_name);
@@ -646,7 +652,19 @@ cJSON *OpenAPI_sm_context_create_data_convertToJSON(OpenAPI_sm_context_create_da
         goto end;
     }
     }
-
+ 
+    if (sm_context_create_data->blockchain_node_id) {
+    cJSON *blockchain_node_id_local_JSON = OpenAPI_sdm_blockchain_node_id_convertToJSON(sm_context_create_data->blockchain_node_id);
+    if (blockchain_node_id_local_JSON == NULL) {
+        ogs_error("OpenAPI_sm_context_create_data_convertToJSON() failed [blockchain_node_id]");
+        goto end;
+    }
+    cJSON_AddItemToObject(item, "blockchainNodeId", blockchain_node_id_local_JSON);
+    if (item->child == NULL) {
+        ogs_error("OpenAPI_sm_context_create_data_convertToJSON() failed [blockchain_node_id]");
+        goto end;
+    }
+    }
     if (sm_context_create_data->service_name) {
     if (cJSON_AddStringToObject(item, "serviceName", sm_context_create_data->service_name) == NULL) {
         ogs_error("OpenAPI_sm_context_create_data_convertToJSON() failed [service_name]");
@@ -1674,6 +1692,15 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_parseFromJSON(c
         goto end;
     }
     }
+ 
+    cJSON *blockchain_node_id = cJSON_GetObjectItemCaseSensitive(sm_context_create_dataJSON, "blockchainNodeId");
+    if (blockchain_node_id) {
+    blockchain_node_id_local_nonprim = OpenAPI_sdm_blockchain_node_id_parseFromJSON(blockchain_node_id);
+    if (!blockchain_node_id_local_nonprim) {
+        ogs_error("OpenAPI_sdm_blockchain_node_id_parseFromJSON failed [blockchain_node_id]");
+        goto end;
+    }
+    }
 
     service_name = cJSON_GetObjectItemCaseSensitive(sm_context_create_dataJSON, "serviceName");
     if (service_name) {
@@ -2541,6 +2568,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_parseFromJSON(c
         hplmn_snssai ? hplmn_snssai_local_nonprim : NULL,
         ogs_strdup(serving_nf_id->valuestring),
         guami ? guami_local_nonprim : NULL,
+        blockchain_node_id ? blockchain_node_id_local_nonprim : NULL,
         service_name && !cJSON_IsNull(service_name) ? ogs_strdup(service_name->valuestring) : NULL,
         serving_network_local_nonprim,
         request_type ? request_typeVariable : 0,
@@ -2665,6 +2693,10 @@ end:
     if (guami_local_nonprim) {
         OpenAPI_guami_free(guami_local_nonprim);
         guami_local_nonprim = NULL;
+    }
+    if (blockchain_node_id_local_nonprim) {
+        OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id_local_nonprim);
+        blockchain_node_id_local_nonprim = NULL;
     }
     if (serving_network_local_nonprim) {
         OpenAPI_plmn_id_nid_free(serving_network_local_nonprim);
