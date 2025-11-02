@@ -46,7 +46,9 @@ extern "C" {
 typedef struct OpenAPI_access_and_mobility_subscription_data_s OpenAPI_access_and_mobility_subscription_data_t;
 typedef struct OpenAPI_access_and_mobility_subscription_data_s {
     char *supported_features;
-    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id;
+    struct OpenAPI_sdm_blockchain_node_id_s *blockchain_node_id;
+    bool is_blockchain_node_id_null,
+    bool is_blockchain_node_id,
     OpenAPI_list_t *gpsis;
     char *hss_group_id;
     OpenAPI_list_t *internal_group_ids;
@@ -123,6 +125,8 @@ typedef struct OpenAPI_access_and_mobility_subscription_data_s {
 OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_subscription_data_create(
     char *supported_features,
     OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
+    bool is_blockchain_node_id_null,
+    bool is_blockchain_node_id,
     OpenAPI_list_t *gpsis,
     char *hss_group_id,
     OpenAPI_list_t *internal_group_ids,

@@ -7,6 +7,8 @@
 OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_subscription_data_create(
     char *supported_features,
     OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id,
+    bool is_blockchain_node_id_null,
+    bool is_blockchain_node_id,
     OpenAPI_list_t *gpsis,
     char *hss_group_id,
     OpenAPI_list_t *internal_group_ids,
@@ -85,6 +87,8 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
 
     access_and_mobility_subscription_data_local_var->supported_features = supported_features;
     access_and_mobility_subscription_data_local_var->blockchain_node_id = blockchain_node_id;
+    access_and_mobility_subscription_data_local_var->is_blockchain_node_id_null = is_blockchain_node_id_null;
+    access_and_mobility_subscription_data_local_var->is_blockchain_node_id = is_blockchain_node_id;
     access_and_mobility_subscription_data_local_var->gpsis = gpsis;
     access_and_mobility_subscription_data_local_var->hss_group_id = hss_group_id;
     access_and_mobility_subscription_data_local_var->internal_group_ids = internal_group_ids;
@@ -381,6 +385,11 @@ cJSON *OpenAPI_access_and_mobility_subscription_data_convertToJSON(OpenAPI_acces
         ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [blockchain_node_id]");
         goto end;
     }
+    } else if (access_and_mobility_subscription_data->is_blockchain_node_id_null) {
+        if (cJSON_AddNullToObject(item, "blockchainNodeId") == NULL) {
+            ogs_error("OpenAPI_access_and_mobility_subscription_data_convertToJSON() failed [blockchain_node_id]");
+            goto end;
+        }
     }
     }
 
@@ -1097,10 +1106,12 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
 
     blockchain_node_id = cJSON_GetObjectItemCaseSensitive(access_and_mobility_subscription_dataJSON, "blockchainNodeId");
     if (blockchain_node_id) {
+    if (!cJSON_IsNull(blockchain_node_id)) {
     blockchain_node_id_local_nonprim = OpenAPI_sdm_blockchain_node_id_parseFromJSON(blockchain_node_id);
     if (!blockchain_node_id_local_nonprim) {
         ogs_error("OpenAPI_sdm_blockchain_node_id_parseFromJSON failed [blockchain_node_id]");
         goto end;
+    }
     }
     }
 
@@ -1816,6 +1827,8 @@ OpenAPI_access_and_mobility_subscription_data_t *OpenAPI_access_and_mobility_sub
     access_and_mobility_subscription_data_local_var = OpenAPI_access_and_mobility_subscription_data_create (
         supported_features && !cJSON_IsNull(supported_features) ? ogs_strdup(supported_features->valuestring) : NULL,
         blockchain_node_id ? blockchain_node_id_local_nonprim : NULL,
+        blockchain_node_id && cJSON_IsNull(blockchain_node_id) ? true : false,
+        blockchain_node_id ? true : false,
         gpsis ? gpsisList : NULL,
         hss_group_id && !cJSON_IsNull(hss_group_id) ? ogs_strdup(hss_group_id->valuestring) : NULL,
         internal_group_ids ? internal_group_idsList : NULL,
