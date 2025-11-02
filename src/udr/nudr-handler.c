@@ -639,6 +639,17 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
     }
 
+    cJSON *test_json =
+        OpenAPI_access_and_mobility_subscription_data_convertToJSON(&AccessAndMobilitySubscriptionData);
+    if (test_json) {
+        char *dump = cJSON_Print(test_json);
+        ogs_info("UDR sending AccessAndMobilitySubscriptionData JSON:\n%s", dump);
+        free(dump);
+        cJSON_Delete(test_json);
+    } else {
+        ogs_error("convertToJSON returned NULL!");
+    }
+
     memset(&sendmsg, 0, sizeof(sendmsg));
     sendmsg.AccessAndMobilitySubscriptionData =
         &AccessAndMobilitySubscriptionData;
