@@ -122,7 +122,7 @@ ogs_sbi_request_t *amf_nsmf_pdusession_build_create_sm_context(
         SmContextCreateData.hplmn_snssai = &hplmnSnssai;
     }
 
-    SmContextCreateData.blockchain_node_id = &amf_ue->blockchain_node_id;
+    SmContextCreateData.blockchain_node_id = *amf_ue->blockchain_node_id;
 
     SmContextCreateData.serving_nf_id =
         NF_INSTANCE_ID(ogs_sbi_self()->nf_instance);
