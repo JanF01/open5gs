@@ -642,8 +642,10 @@ bool udm_nudr_dr_handle_subscription_provisioned(
 
         memset(&sendmsg, 0, sizeof(sendmsg));
         
-        if(AccessAndMobilitySubscriptionData->blockchain_node_id){
-        ogs_info("WE SEE THIS MESSAGE on UDM the blockchain_node_id:%s",AccessAndMobilitySubscriptionData->blockchain_node_id->blockchain_node_id);
+        OpenAPI_sdm_blockchain_node_id_t * blockchain_node_id = NULL;
+        blockchain_node_id = AccessAndMobilitySubscriptionData->blockchain_node_id;
+        if(blockchain_node_id){
+        ogs_info("WE SEE THIS MESSAGE on UDM the blockchain_node_id:%s",blockchain_node_id->blockchain_node_id);
         }
         /* Check if original request was for /nudm-sdm/v2/{supi}/nssai */
         if (state == UDM_SBI_UE_PROVISIONED_NSSAI_ONLY) {
