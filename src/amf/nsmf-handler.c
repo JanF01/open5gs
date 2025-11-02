@@ -54,7 +54,7 @@ int amf_nsmf_pdusession_handle_create_sm_context(
     if (recvmsg->res_status == OGS_SBI_HTTP_STATUS_CREATED) {
         ogs_sbi_message_t message;
         ogs_sbi_header_t header;
-
+        
         bool rc;
         ogs_sbi_client_t *client = NULL;
         OpenAPI_uri_scheme_e scheme = OpenAPI_uri_scheme_NULL;

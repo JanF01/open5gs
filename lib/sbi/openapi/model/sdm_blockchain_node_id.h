@@ -15,7 +15,7 @@ extern "C"
     typedef struct OpenAPI_sdm_blockchain_node_id_s OpenAPI_sdm_blockchain_node_id_t;
     typedef struct OpenAPI_sdm_blockchain_node_id_s
     {
-        char *blockchain_node_id; // 12 characters
+        char *blockchain_node_id; // 13 characters
     } OpenAPI_sdm_blockchain_node_id_t;
 
     OpenAPI_sdm_blockchain_node_id_t *OpenAPI_sdm_blockchain_node_id_create(char *blockchain_node_id);
