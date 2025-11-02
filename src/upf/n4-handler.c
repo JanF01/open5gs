@@ -659,7 +659,7 @@ void upf_n4_handle_blockchain_credentials_response(
              (unsigned long)sess->smf_n4_f_seid.seid);
 }
 
-oid upf_n4_handle_blockchain_node_id_response(
+void upf_n4_handle_blockchain_node_id_response(
     upf_sess_t *sess, ogs_pfcp_xact_t *xact,
     ogs_pfcp_blockchain_node_id_response_t *rsp)
 {
