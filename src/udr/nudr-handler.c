@@ -627,11 +627,8 @@ bool udr_nudr_dr_handle_subscription_provisioned(
 
         if (subscription_data.blockchain_node_id) {
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",subscription_data.blockchain_node_id);
-            blockchain_node_id = OpenAPI_sdm_blockchain_node_id_create(
+            AccessAndMobilitySubscriptionData.blockchain_node_id = OpenAPI_sdm_blockchain_node_id_create(
                 subscription_data.blockchain_node_id);
-            ogs_assert(blockchain_node_id);
-            ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",blockchain_node_id->blockchain_node_id);
-            AccessAndMobilitySubscriptionData.blockchain_node_id = blockchain_node_id;
     }
 
     }
@@ -678,9 +675,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         }
     }
     OpenAPI_list_free(SingleNssaiList);
-    if (blockchain_node_id) {
-        OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id);
-    }
+    OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id);
     break;
 
     CASE(OGS_SBI_RESOURCE_NAME_SMF_SELECTION_SUBSCRIPTION_DATA)
