@@ -44,7 +44,9 @@ int amf_nudm_sdm_handle_provisioned(
                 recvmsg->AccessAndMobilitySubscriptionData->rat_restrictions;
             OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id =
                 recvmsg->AccessAndMobilitySubscriptionData->blockchain_node_id;    
+            if(blockchain_node_id){    
             ogs_info("WE SEE THIS MESSAGE and the blockchain_node_id:%s",blockchain_node_id->blockchain_node_id);
+            }
             OpenAPI_lnode_t *node = NULL;
 
             /* Clear MSISDN */

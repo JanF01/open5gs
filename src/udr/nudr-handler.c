@@ -652,7 +652,10 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         ogs_free(SubscribedUeAmbr.uplink);
     if (SubscribedUeAmbr.downlink)
         ogs_free(SubscribedUeAmbr.downlink);
-
+    if(blockchain_node_id){
+    OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id);
+    AccessAndMobilitySubscriptionData.blockchain_node_id = NULL;    
+    }
     OpenAPI_list_for_each(DefaultSingleNssaiList, node)
     {
         OpenAPI_snssai_t *Snssai = node->data;
@@ -675,7 +678,6 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         }
     }
     OpenAPI_list_free(SingleNssaiList);
-    OpenAPI_sdm_blockchain_node_id_free(blockchain_node_id);
     break;
 
     CASE(OGS_SBI_RESOURCE_NAME_SMF_SELECTION_SUBSCRIPTION_DATA)
