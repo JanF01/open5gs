@@ -500,7 +500,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
     OpenAPI_list_t *DefaultSingleNssaiList = NULL;
     OpenAPI_list_t *SingleNssaiList = NULL;
     OpenAPI_snssai_t *Snssai = NULL;
-    OpenAPI_sdm_blockchain_node_id_t * blockchain_node_id = NULL;
+    OpenAPI_sdm_blockchain_node_id_t *blockchain_node_id = NULL;
 
     OpenAPI_lnode_t *node = NULL;
 

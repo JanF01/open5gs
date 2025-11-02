@@ -973,6 +973,9 @@ memset(subscription_data, 0, sizeof(*subscription_data));
                     BSON_ITER_HOLDS_UTF8(&child1_iter))
                 {
                     utf8 = bson_iter_utf8(&child1_iter, &length);
+                    if (subscription_data->blockchain_node_id) {
+                        ogs_free(subscription_data->blockchain_node_id);
+                    }
                     subscription_data->blockchain_node_id = ogs_strndup(utf8, length);
                     ogs_assert(subscription_data->blockchain_node_id);
                 }
