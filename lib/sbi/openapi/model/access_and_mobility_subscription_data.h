@@ -47,8 +47,8 @@ typedef struct OpenAPI_access_and_mobility_subscription_data_s OpenAPI_access_an
 typedef struct OpenAPI_access_and_mobility_subscription_data_s {
     char *supported_features;
     struct OpenAPI_sdm_blockchain_node_id_s *blockchain_node_id;
-    bool is_blockchain_node_id_null,
-    bool is_blockchain_node_id,
+    bool is_blockchain_node_id_null;
+    bool is_blockchain_node_id;
     OpenAPI_list_t *gpsis;
     char *hss_group_id;
     OpenAPI_list_t *internal_group_ids;
