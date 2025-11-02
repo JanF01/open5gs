@@ -625,7 +625,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         if (DefaultSingleNssaiList->count)
             AccessAndMobilitySubscriptionData.nssai = &NSSAI;
 
-        blockchain_node_id->blockchain_node_id = &subscription_data.blockchain_node_id;    
+        blockchain_node_id->blockchain_node_id = subscription_data.blockchain_node_id;    
         AccessAndMobilitySubscriptionData.blockchain_node_id = blockchain_node_id;    
     }
 

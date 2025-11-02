@@ -975,6 +975,10 @@ int ogs_dbi_subscription_data(char *supi,
                     ogs_assert(subscription_data->blockchain_node_id);
                 }
             }
+            if (!subscription_data->blockchain_node_id) {
+                subscription_data->blockchain_node_id = ogs_strdup("000000000000");
+                ogs_assert(subscription_data->blockchain_node_id);
+            }
         }
     }
 
@@ -1123,8 +1127,16 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
 
         if (existing_login && strcmp(existing_login, clean_login) == 0 &&
             existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK &&
-            existing_id) {
+            existing_id)
+        {
             strncpy(out_blockchain_node_id, existing_id, id_size);
+            out_blockchain_node_id[id_size - 1] = '\0';
+            rv = OGS_OK;
+            bson_destroy(&subdoc);
+            goto cleanup;
+        } else {
+            // If no blockchain_node_id or wrong password, return 12 zeros
+            strncpy(out_blockchain_node_id, "000000000000", id_size);
             out_blockchain_node_id[id_size - 1] = '\0';
             rv = OGS_OK;
             bson_destroy(&subdoc);
@@ -1140,10 +1152,14 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     bson_destroy(query);
     query = NULL;
 
-    // --- Step 2: Generate new blockchain_node_id ---
-    ogs_init_rand();
-    ogs_generate_random_string(out_blockchain_node_id, id_size - 1);
+    // If no document found, or if the existing document didn't match login/password,
+    // then generate a new blockchain_node_id or return 12 zeros as per requirement.
+    // The previous block handles the case where a document is found but credentials don't match.
+    // This block handles the case where no document is found at all.
+    strncpy(out_blockchain_node_id, "000000000000", id_size);
     out_blockchain_node_id[id_size - 1] = '\0';
+    rv = OGS_OK;
+    goto cleanup;
 
     supi_type = ogs_id_get_type(supi);
     if (!supi_type)
