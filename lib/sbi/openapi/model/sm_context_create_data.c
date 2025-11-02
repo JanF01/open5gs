@@ -1695,7 +1695,7 @@ OpenAPI_sm_context_create_data_t *OpenAPI_sm_context_create_data_parseFromJSON(c
     }
     }
  
-    blockchain_node_id = cJSON_GetObjectItemCaseSensitive(sm_context_create_dataJSON, "blockchainNodeId");
+    cJSON *blockchain_node_id = cJSON_GetObjectItemCaseSensitive(sm_context_create_dataJSON, "blockchainNodeId");
     if (blockchain_node_id) {
     blockchain_node_id_local_nonprim = OpenAPI_sdm_blockchain_node_id_parseFromJSON(blockchain_node_id);
     if (!blockchain_node_id_local_nonprim) {
