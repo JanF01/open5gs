@@ -142,7 +142,7 @@ int amf_nudm_sdm_handle_provisioned(
                 
                 amf_ue->blockchain_node_id->blockchain_node_id = ogs_strdup(blockchain_node_id->blockchain_node_id);
                 ogs_debug("Stored Blockchain Node ID [%s] for UE [%s]", 
-                          amf_ue->blockchain_node_id, amf_ue->supi);
+                          amf_ue->blockchain_node_id->blockchain_node_id, amf_ue->supi);
             }
 
             OpenAPI_list_clear(amf_ue->rat_restrictions);
