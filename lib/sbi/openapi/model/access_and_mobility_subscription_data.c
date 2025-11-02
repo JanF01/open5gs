@@ -167,7 +167,7 @@ void OpenAPI_access_and_mobility_subscription_data_free(OpenAPI_access_and_mobil
     if (NULL == access_and_mobility_subscription_data) {
         return;
     }
-if (access_and_mobility_subscription_data->supported_features) {
+    if (access_and_mobility_subscription_data->supported_features) {
         ogs_free(access_and_mobility_subscription_data->supported_features);
         access_and_mobility_subscription_data->supported_features = NULL;
     }
