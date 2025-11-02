@@ -1224,7 +1224,7 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_credentials_response(
 
 ogs_pkbuf_t *ogs_pfcp_build_blockchain_node_id_response(
     uint8_t type,
-    ogs_pfcp_blockchain_credentials_response_t *rsp)
+    ogs_pfcp_blockchain_node_id_response_t *rsp)
 {
     ogs_pfcp_message_t *pfcp_message = NULL;
     ogs_pkbuf_t *pkbuf = NULL;
