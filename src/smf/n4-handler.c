@@ -2087,7 +2087,7 @@ uint8_t smf_n4_handle_blockchain_node_id(
     smf_sess_t *sess, ogs_pfcp_xact_t *pfcp_xact,
     ogs_pfcp_blockchain_node_id_request_t *pfcp_req)
 {
-    o ogs_pfcp_tlv_blockchain_node_id_t *blockchain_node_id = NULL;
+    ogs_pfcp_tlv_blockchain_node_id_t *blockchain_node_id = NULL;
     smf_sess_t *target_sess = NULL;
 
     ogs_assert(sess);
