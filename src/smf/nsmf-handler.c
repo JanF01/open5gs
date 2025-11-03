@@ -287,7 +287,7 @@ bool smf_nsmf_handle_create_sm_context(
     SmContextCreateData->blockchain_node_id->blockchain_node_id) {
 
         const char *new_id = SmContextCreateData->blockchain_node_id->blockchain_node_id;
-        ogs_info("Received Blockchain Node ID [%s] for session [%s]", new_id, sess->sm_context_id);
+        ogs_info("Received Blockchain Node ID [%s] for session", new_id);
 
         if (sess->blockchain_node_id) {
             ogs_free(sess->blockchain_node_id);
