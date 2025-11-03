@@ -44,6 +44,9 @@ int upf_pfcp_send_session_report_request(
 int upf_pfcp_blockchain_credentials(
         upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain);
 
+int upf_pfcp_blockchain_node_id(
+        upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain);
+
 #ifdef __cplusplus
 }
 #endif

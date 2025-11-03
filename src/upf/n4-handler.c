@@ -694,7 +694,7 @@ void upf_n4_handle_blockchain_node_id_response(
         /* PFCP encodes IPv4 address in network byte order */
         memcpy(&ue_ip_n, rsp->ue_ip_address.data, sizeof(ue_ip_n));
         if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
-            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop failed)");
+            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop fail");
         ogs_info("UE IPv4 from PFCP response: %s", ue_ip_str);
     } else {
         ogs_warn("UE IPv4 address not present in PFCP Blockchain Node ID Response");

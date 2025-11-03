@@ -479,6 +479,7 @@ int upf_pfcp_blockchain_credentials(
 
     return rv;
 }
+
 int upf_pfcp_blockchain_node_id(
     upf_sess_t *sess, ogs_pfcp_blockchain_data_t *blockchain)
 {
