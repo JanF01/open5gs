@@ -2107,19 +2107,17 @@ uint8_t smf_n4_handle_blockchain_node_id(
     // 🔍 Find the session corresponding to this blockchain node ID
     target_sess = smf_sess_find_by_blockchain_node_id(req_blockchain_id);
     if (!target_sess) {
-        ogs_warn("No session found for Blockchain Node ID [%s]", req_blockchain_id);
-        return OGS_PFCP_CAUSE_CONTEXT_NOT_FOUND;
+        ogs_info("No session found for Blockchain Node ID [%s]", req_blockchain_id);
+        return OGS_PFCP_CAUSE_SESSION_CONTEXT_NOT_FOUND;
     }
 
     // 🧩 Extract UE IPv4 address from the found session
     uint32_t ipv4_addr = 0;
-    if (target_sess->pdr_downlink) {
-        ipv4_addr = target_sess->pdr_downlink->ue_ip.u.v4;
-    } else if (target_sess->pdr_uplink) {
-        ipv4_addr = target_sess->pdr_uplink->ue_ip.u.v4;
+    if (target_sess->ipv4) {
+       ipv4_addr = target_sess->ipv4->addr[0];
     } else {
-        ogs_warn("No valid UE IP found for Blockchain Node ID [%s]", req_blockchain_id);
-        return OGS_PFCP_CAUSE_CONTEXT_NOT_FOUND;
+        ogs_info("No valid UE IP found for Blockchain Node ID [%s]", req_blockchain_id);
+        return OGS_PFCP_CAUSE_SESSION_CONTEXT_NOT_FOUND;
     }
 
     // Convert to dotted string for logging
@@ -2139,7 +2137,7 @@ uint8_t smf_n4_handle_blockchain_node_id(
     pfcp_rsp.blockchain_node_id.len = strlen(req_blockchain_id);
 
     pfcp_rsp.ue_ip_address.presence = 1;
-    pfcp_rsp.ue_ip_address.data = ipv4_addr;
+    pfcp_rsp.ue_ip_address.data = &ipv4_addr;
 
     smf_pfcp_send_blockchain_node_id_response(pfcp_xact, sess, &pfcp_rsp);
 
