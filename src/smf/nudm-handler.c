@@ -515,14 +515,14 @@ bool smf_nudm_handle_blockchain_node_id(
         return false;
     }
 
-    const char *new_node_id = resp->node_id->blockchain_node_id;
+    char *new_node_id = resp->node_id->blockchain_node_id;
     ogs_info("Received blockchain node_id from UDM: %s", new_node_id);
 
     // 🧩 Check current sess blockchain_node_id and replace if it's "000000000000"
     if (sess->blockchain_node_id) {
         if (strcmp(sess->blockchain_node_id, "000000000000") == 0) {
-            ogs_info("Blockchain Node ID for session [%s] is placeholder. Updating to [%s]",
-                     sess->sm_context_id, new_node_id);
+            ogs_info("Blockchain Node ID for session is placeholder. Updating to [%s]",
+                      new_node_id);
 
             // Free old one safely before replacing
             ogs_free(sess->blockchain_node_id);
@@ -533,8 +533,8 @@ bool smf_nudm_handle_blockchain_node_id(
                 return false;
             }
         } else {
-            ogs_info("Blockchain Node ID for session [%s] already set to [%s], keeping existing value",
-                     sess->sm_context_id, sess->blockchain_node_id);
+            ogs_info("Blockchain Node ID for session already set to [%s], keeping existing value",
+                    sess->blockchain_node_id);
         }
     } else {
         // If sess->blockchain_node_id is NULL, store it directly
@@ -543,8 +543,8 @@ bool smf_nudm_handle_blockchain_node_id(
             ogs_error("Failed to allocate memory for blockchain_node_id");
             return false;
         }
-        ogs_info("Stored blockchain_node_id [%s] for new session [%s]",
-                 sess->blockchain_node_id, sess->sm_context_id);
+        ogs_info("Stored blockchain_node_id [%s] for new session",
+                 sess->blockchain_node_id);
     }
 
     // Build PFCP response
