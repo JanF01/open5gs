@@ -795,20 +795,18 @@ static void _gtpv1_u_recv_cb(short when, ogs_socket_t fd, void *data)
 
             if (ogs_pfcp_blockchain_json_find_by_packet(pkbuf, &blockchain))
             {
-                //make it so that this can read either the node_id or the login and password
-                ogs_info("Intercepting blockchain login request from UE SUPI");
-                ogs_info("Login: %s, Password: %s",
-                         blockchain.login, blockchain.password);
-                         ogs_info("Source IP-%d Spoofing APN:%s SrcIf:%d DstIf:%d TEID:0x%x",
-                              ip_h->ip_v, pdr->dnn, pdr->src_if, far->dst_if, header_desc.teid);
-                ogs_assert(far->sess);
+                if (blockchain.blockchain_node_id[0]) {
+                ogs_info("Blockchain Node ID: %s", blockchain.blockchain_node_id);
                 sess = UPF_SESS(far->sess);
-                ogs_assert(sess);
-                sess->teid = header_desc.teid; // Save the TEID
-                ogs_assert(OGS_OK ==
-                           upf_pfcp_blockchain_credentials(sess, &blockchain));
-                //ogs_assert(OGS_OK ==
-                //           upf_pfcp_blockchain_node_id(sess, &blockchain));           
+                sess->teid = header_desc.teid;
+                ogs_assert(OGS_OK == upf_pfcp_blockchain_node_id(sess, &blockchain));
+            }
+            else if (blockchain.login_len && blockchain.password_len) {
+                ogs_info("Login: %s, Password: %s", blockchain.login, blockchain.password);
+                sess = UPF_SESS(far->sess);
+                sess->teid = header_desc.teid;
+                ogs_assert(OGS_OK == upf_pfcp_blockchain_credentials(sess, &blockchain));
+            }
             }
             else
             {

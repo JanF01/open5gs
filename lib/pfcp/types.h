@@ -1549,6 +1549,7 @@ typedef struct ogs_pfcp_blockchain_data_s {
     uint8_t blockchain_node_id[13];
     uint8_t login_len;
     uint8_t password_len;
+    uint8_t blockchain_node_id_len;
 } ogs_pfcp_blockchain_data_t;
 
 int16_t ogs_pfcp_build_volume_measurement(ogs_tlv_octet_t *octet,

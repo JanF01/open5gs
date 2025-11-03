@@ -302,7 +302,6 @@ ogs_pfcp_rule_t *ogs_pfcp_pdr_rule_find_by_packet(
     return NULL;
 }
 
-/* new */
 bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                                              ogs_pfcp_blockchain_data_t *blockchain)
 {
@@ -353,7 +352,24 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
 
                 ogs_info("JSON body: %s", json_start);
 
-                /* Parse login and password */
+                /* First, try blockchain_node_id (most common) */
+                char node_id[sizeof(blockchain->blockchain_node_id)];
+
+                if (sscanf(json_start,
+                           "{\"blockchain_node_id\":\"%[^\"]\"}",
+                           node_id) == 1)
+                {
+                    strncpy((char *)blockchain->blockchain_node_id, node_id,
+                            sizeof(blockchain->blockchain_node_id) - 1);
+                    blockchain->blockchain_node_id[sizeof(blockchain->blockchain_node_id) - 1] = '\0';
+                    blockchain->login[0] = '\0';
+                    blockchain->password[0] = '\0';
+                    blockchain->login_len = 0;
+                    blockchain->password_len = 0;
+                    return true;
+                }
+
+                /* Otherwise, try login/password */
                 char login[OGS_PFCP_MAX_LOGIN_LEN];
                 char password[OGS_PFCP_MAX_PASSWORD_LEN];
 
@@ -362,13 +378,14 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                            login, password) == 2)
                 {
                     strncpy((char *)blockchain->login, login, sizeof(blockchain->login) - 1);
-                    ((char *)blockchain->login)[sizeof(blockchain->login) - 1] = '\0';
+                    blockchain->login[sizeof(blockchain->login) - 1] = '\0';
 
                     strncpy((char *)blockchain->password, password, sizeof(blockchain->password) - 1);
-                    ((char *)blockchain->password)[sizeof(blockchain->password) - 1] = '\0';
+                    blockchain->password[sizeof(blockchain->password) - 1] = '\0';
 
                     blockchain->login_len = strlen((char *)blockchain->login);
                     blockchain->password_len = strlen((char *)blockchain->password);
+                    blockchain->blockchain_node_id[0] = '\0';
 
                     return true;
                 }
