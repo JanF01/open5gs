@@ -359,6 +359,9 @@ static void sess_timeout(ogs_pfcp_xact_t *xact, void *data)
 
     switch (type)
     {
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE:
+        ogs_error("No PFCP blockchain node id response");
+        break;    
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
         ogs_error("No PFCP blockchain credentials response");
         break;

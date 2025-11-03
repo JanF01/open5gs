@@ -663,8 +663,11 @@ void upf_n4_handle_blockchain_node_id_response(
     upf_sess_t *sess, ogs_pfcp_xact_t *xact,
     ogs_pfcp_blockchain_node_id_response_t *rsp)
 {
+    char json[256] = {0};
     char ue_ip_str[INET_ADDRSTRLEN] = "(none)";
+    char src_ip_str[64] = "(none)";
     uint32_t ue_ip_n = 0;
+    uint32_t src_ip_n = 0;
 
     /* --- Validate pointers --- */
     if (!sess) {
@@ -689,25 +692,55 @@ void upf_n4_handle_blockchain_node_id_response(
     else
         ogs_warn("PFCP Cause IE not present");
 
-    /* --- Extract and display UE IPv4 from response --- */
+    /* --- Extract UE IPv4 from response --- */
     if (rsp->ue_ip_address.presence && rsp->ue_ip_address.data) {
         /* PFCP encodes IPv4 address in network byte order */
         memcpy(&ue_ip_n, rsp->ue_ip_address.data, sizeof(ue_ip_n));
         if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
-            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop fail");
+            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop fail)");
         ogs_info("UE IPv4 from PFCP response: %s", ue_ip_str);
     } else {
-        ogs_warn("UE IPv4 address not present in PFCP Blockchain Node ID Response");
+        ogs_warn("UE IPv4 address not present in PFCP Blockchain Node ID Response; cannot send JSON to UE");
+        ogs_pfcp_xact_commit(xact);
+        return;
     }
 
-    /* --- Display blockchain_node_id if present --- */
-    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data) {
-        ogs_info("Blockchain Node ID: %.*s",
-                 rsp->blockchain_node_id.len,
-                 (char *)rsp->blockchain_node_id.data);
-    } else {
-        ogs_info("Blockchain Node ID not present in response");
+    /* --- Extract blockchain_node_id and build JSON --- */
+    const char *node_data = NULL;
+    int node_len = 0;
+
+    if (rsp->blockchain_node_id.presence && rsp->blockchain_node_id.data && rsp->blockchain_node_id.len > 0) {
+        node_data = (const char *)rsp->blockchain_node_id.data;
+        node_len = (int)rsp->blockchain_node_id.len;
     }
+
+    if (!node_data || node_len <= 0) {
+        ogs_warn("No blockchain_node_id found in PFCP response; will send 'unknown' JSON to UE");
+        snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"unknown\", \"ue_ip\":\"%s\"}", ue_ip_str);
+    } else {
+        /* clamp node_len so snprintf stays safe */
+        int max_node_len = (int)sizeof(json) - (32 + INET_ADDRSTRLEN); /* room for JSON wrapper and UE IP */
+        if (node_len > max_node_len) node_len = max_node_len;
+        /* use precision to handle not-terminated binary-safe data */
+        snprintf(json, sizeof(json), "{\"blockchain_node_id\":\"%.*s\", \"ue_ip\":\"%s\"}", node_len, node_data, ue_ip_str);
+    }
+
+    ogs_info("Prepared JSON to send to UE: %s", json);
+
+    src_ip_n = inet_addr("10.45.0.1"); /* network byte order */
+    strncpy(src_ip_str, "10.45.0.1", sizeof(src_ip_str) - 1);
+    src_ip_str[sizeof(src_ip_str) - 1] = '\0';
+
+    ogs_info("Sending JSON to UE %s (net=0x%08x) from UPF %s (net=0x%08x)",
+            ue_ip_str, ntohl(ue_ip_n), src_ip_str, ntohl(src_ip_n));
+
+    /* --- send JSON to UE via helper --- */
+    upf_send_json_to_ue(NULL,
+                        ue_ip_n,   /* network byte order */
+                        9500,      /* destination TCP port at UE */
+                        src_ip_n,  /* source IP (network order) */
+                        12345,     /* source TCP port - choose appropriate ephemeral port */
+                        json);
 
     /* --- Commit the PFCP transaction --- */
     ogs_pfcp_xact_commit(xact);
