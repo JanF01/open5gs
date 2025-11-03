@@ -496,7 +496,7 @@ int upf_pfcp_blockchain_node_id(
 
     // Prepare PFCP header
     memset(&h, 0, sizeof(h));
-    h.type = OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE;
+    h.type = OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE;
     h.seid = sess->smf_n4_f_seid.seid;
 
     // Prepare TLV for blockchain_node_id
