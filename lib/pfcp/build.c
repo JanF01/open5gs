@@ -1381,7 +1381,7 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_node_id_request(
     ogs_pfcp_blockchain_node_id_request_t *req = NULL;
     ogs_pkbuf_t *pkbuf = NULL;
 
-    ogs_debug("PFCP Blockchain Login Request");
+    ogs_debug("PFCP Blockchain Node Id Request");
 
     pfcp_message = ogs_calloc(1, sizeof(*pfcp_message));
     if (!pfcp_message)
@@ -1394,7 +1394,6 @@ ogs_pkbuf_t *ogs_pfcp_build_blockchain_node_id_request(
 
     if (blockchain_node_id)
     {
-        req->blockchain_node_id.presence = 1;
         req->blockchain_node_id = *blockchain_node_id;
     }
 

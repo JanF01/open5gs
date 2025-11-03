@@ -502,7 +502,7 @@ int upf_pfcp_blockchain_node_id(
 
     // Prepare TLV for blockchain_node_id
     blockchain_node_id_tlv.presence = 1;
-    blockchain_node_id_tlv.len = 13;
+    blockchain_node_id_tlv.len = blockchain->blockchain_node_id_len;
     blockchain_node_id_tlv.data = blockchain->blockchain_node_id;
 
     // Create a local PFCP transaction
