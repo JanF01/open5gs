@@ -664,7 +664,7 @@ void upf_n4_handle_blockchain_node_id_response(
     ogs_pfcp_blockchain_node_id_response_t *rsp)
 {
     char json[256] = {0};
-    char ue_ip_str[INET_ADDRSTRLEN] = "(none)";
+    char ue_ip_str[64] = "(none)";
     char src_ip_str[64] = "(none)";
     uint32_t ue_ip_n = 0;
     uint32_t src_ip_n = 0;
