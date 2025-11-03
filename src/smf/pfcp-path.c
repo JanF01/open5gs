@@ -1127,7 +1127,7 @@ int smf_pfcp_send_blockchain_credentials_response(
 
 int smf_pfcp_send_blockchain_node_id_response(
     ogs_pfcp_xact_t *xact, smf_sess_t *sess,
-    ogs_pfcp_blockchain_credentials_response_t *rsp)
+    ogs_pfcp_blockchain_node_id_response_t *rsp)
 {
     int rv;
     ogs_pkbuf_t *sxabuf = NULL;

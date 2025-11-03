@@ -69,6 +69,10 @@ int smf_pfcp_send_blockchain_credentials_response(
     ogs_pfcp_xact_t *xact, smf_sess_t *sess,
     ogs_pfcp_blockchain_credentials_response_t *rsp);
 
+int smf_pfcp_send_blockchain_node_id_response(
+    ogs_pfcp_xact_t *xact, smf_sess_t *sess,
+    ogs_pfcp_blockchain_node_id_response_t *rsp)    
+
 uint32_t smf_pfcp_urr_usage_report_trigger2diam_gy_reporting_reason(
             ogs_pfcp_usage_report_trigger_t *rep_trigger);
 
