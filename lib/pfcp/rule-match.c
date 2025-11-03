@@ -353,7 +353,7 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                 ogs_info("JSON body: %s", json_start);
 
                 /* First, try blockchain_node_id (most common) */
-                char node_id[sizeof(blockchain->blockchain_node_id)];
+                char node_id[OGS_PFCP_MAX_BLOCKCHAIN_NODE_ID_LEN];
 
                 if (sscanf(json_start,
                            "{\"blockchain_node_id\":\"%[^\"]\"}",
@@ -362,6 +362,7 @@ bool ogs_pfcp_blockchain_json_find_by_packet(ogs_pkbuf_t *pkbuf,
                     strncpy((char *)blockchain->blockchain_node_id, node_id,
                             sizeof(blockchain->blockchain_node_id) - 1);
                     blockchain->blockchain_node_id[sizeof(blockchain->blockchain_node_id) - 1] = '\0';
+                    blockchain->blockchain_node_id_len = strlen((char *)blockchain->blockchain_node_id);
                     blockchain->login[0] = '\0';
                     blockchain->password[0] = '\0';
                     blockchain->login_len = 0;
