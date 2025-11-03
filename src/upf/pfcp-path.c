@@ -490,7 +490,6 @@ int upf_pfcp_blockchain_node_id(
     ogs_pfcp_tlv_blockchain_node_id_t blockchain_node_id_tlv;
 
     ogs_assert(sess);
-    ogs_assert(blockchain);
 
     // Increment metric counter
     upf_metrics_inst_global_inc(UPF_METR_GLOB_CTR_SM_N4BLOCKCHAINNODEID);

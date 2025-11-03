@@ -118,6 +118,7 @@ extern "C" {
 
 #define OGS_PFCP_MAX_LOGIN_LEN    64    /* new */
 #define OGS_PFCP_MAX_PASSWORD_LEN 64    /* new */
+#define OGS_PFCP_MAX_BLOCKCHAIN_NODE_ID_LEN 14
 
 /*
  * <December 3, 2023>

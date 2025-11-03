@@ -152,6 +152,8 @@ ogs_pfcp_extract_node_id(ogs_pfcp_message_t *message,
     case OGS_PFCP_SESSION_REPORT_RESPONSE_TYPE:
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
     case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_RESPONSE_TYPE:
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE:
+    case OGS_PFCP_BLOCKCHAIN_NODE_ID_RESPONSE_TYPE:
         /* Node ID must not be present for these messages */
         requirement = OGS_PFCP_NODE_ID_NONE;
         break;
