@@ -1020,7 +1020,7 @@ void smf_gsm_state_operational(ogs_fsm_t *s, smf_event_t *e)
                 ogs_assert(r != OGS_ERROR);
             }
             break;
-        case OGS_PFCP_BLOCKCHAIN_CREDENTIALS_REQUEST_TYPE:
+        case OGS_PFCP_BLOCKCHAIN_NODE_ID_REQUEST_TYPE:
             pfcp_cause = smf_n4_handle_blockchain_node_id(sess, pfcp_xact,
                             &pfcp_message->pfcp_blockchain_node_id_request);
 
