@@ -2138,6 +2138,7 @@ uint8_t smf_n4_handle_blockchain_node_id(
 
     pfcp_rsp.ue_ip_address.presence = 1;
     pfcp_rsp.ue_ip_address.data = &ipv4_addr;
+    pfcp_rsp.ue_ip_address.len = strlen((*char)ipv4_addr);
 
     smf_pfcp_send_blockchain_node_id_response(pfcp_xact, sess, &pfcp_rsp);
 
