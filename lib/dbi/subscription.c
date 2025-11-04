@@ -1093,119 +1093,98 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     // Hash the provided password
     ogs_crypt_hash_password(password, hashed_password, sizeof(hashed_password));
 
-    // --- Step 1: Check if login + hashed password already exists ---
+    // Sanitize login
     char clean_login[128];
     strncpy(clean_login, login, sizeof(clean_login) - 1);
     clean_login[sizeof(clean_login) - 1] = '\0';
+    sanitize_login_for_db(clean_login);
 
     supi_type = ogs_id_get_type(supi);
     ogs_assert(supi_type);
     supi_id = ogs_id_get_value(supi);
     ogs_assert(supi_id);
 
-    // Find document by SUPI (IMSI)
+    // Step 1: Find document by SUPI
     query = BCON_NEW(supi_type, BCON_UTF8(supi_id));
-
-    cursor = mongoc_collection_find_with_opts(
-    ogs_mongoc()->collection.subscriber, query, NULL, NULL);
+    cursor = mongoc_collection_find_with_opts(ogs_mongoc()->collection.subscriber, query, NULL, NULL);
 
     if (mongoc_cursor_next(cursor, &doc)) {
-    bson_iter_t iter, sub_iter;
+        bson_iter_t iter;
+        bool has_blockchain = false;
 
-    if (bson_iter_init_find(&iter, doc, "blockchain") &&
-        BSON_ITER_HOLDS_DOCUMENT(&iter)) {
+        if (bson_iter_init_find(&iter, doc, "blockchain") && BSON_ITER_HOLDS_DOCUMENT(&iter)) {
+            has_blockchain = true;
+            const uint8_t *subdoc_buf = NULL;
+            uint32_t subdoc_len = 0;
+            bson_iter_document(&iter, &subdoc_len, &subdoc_buf);
 
-        const uint8_t *subdoc_buf = NULL;
-        uint32_t subdoc_len = 0;
-        bson_iter_document(&iter, &subdoc_len, &subdoc_buf);
+            bson_t subdoc;
+            bson_init_static(&subdoc, subdoc_buf, subdoc_len);
 
-        bson_t subdoc;
-        bson_init_static(&subdoc, subdoc_buf, subdoc_len);
+            const char *existing_login = bson_lookup_utf8(&subdoc, "login");
+            const char *existing_hash  = bson_lookup_utf8(&subdoc, "password_hash");
+            const char *existing_id    = bson_lookup_utf8(&subdoc, "blockchain_node_id");
 
-        const char *existing_login = bson_lookup_utf8(&subdoc, "login");
-        const char *existing_hash = bson_lookup_utf8(&subdoc, "password_hash");
-        const char *existing_id   = bson_lookup_utf8(&subdoc, "blockchain_node_id");
-
-        if (existing_login && strcmp(existing_login, clean_login) == 0 &&
-            existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK &&
-            existing_id)
-        {
-            strncpy(out_blockchain_node_id, existing_id, id_size);
-            out_blockchain_node_id[id_size - 1] = '\0';
-            rv = OGS_OK;
-            bson_destroy(&subdoc);
-            goto cleanup;
-        } else {
-            // If no blockchain_node_id or wrong password, return 12 zeros
-            strncpy(out_blockchain_node_id, "000000000000", id_size);
-            out_blockchain_node_id[id_size - 1] = '\0';
-            rv = OGS_OK;
-            bson_destroy(&subdoc);
-            goto cleanup;
+            if (existing_login && strcmp(existing_login, clean_login) == 0 &&
+                existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK &&
+                existing_id)
+            {
+                // ✅ Correct login & password
+                strncpy(out_blockchain_node_id, existing_id, id_size);
+                out_blockchain_node_id[id_size - 1] = '\0';
+                bson_destroy(&subdoc);
+                rv = OGS_OK;
+                goto cleanup;
+            } else {
+                // ❌ Wrong login or password
+                strncpy(out_blockchain_node_id, "000000000000", id_size);
+                out_blockchain_node_id[id_size - 1] = '\0';
+                bson_destroy(&subdoc);
+                rv = OGS_OK;
+                goto cleanup;
+            }
         }
 
-        bson_destroy(&subdoc);
+        // ✅ If blockchain structure does not exist — create new
+        if (!has_blockchain) {
+            char new_node_id[13];
+            ogs_generate_random_string(new_node_id, 12);
+
+            blockchain_doc = BCON_NEW(
+                "blockchain_node_id", BCON_UTF8(new_node_id),
+                "login", BCON_UTF8(clean_login),
+                "password_hash", BCON_UTF8(hashed_password));
+
+            update = BCON_NEW("$set", "{", "blockchain", BCON_DOCUMENT(blockchain_doc), "}");
+            opts = BCON_NEW("upsert", BCON_BOOL(true));
+
+            if (!mongoc_collection_update_one(
+                    ogs_mongoc()->collection.subscriber, query, update, opts, NULL, &error))
+            {
+                ogs_error("Failed to insert blockchain data: %s", error.message);
+                rv = OGS_ERROR;
+                goto cleanup;
+            }
+
+            strncpy(out_blockchain_node_id, new_node_id, id_size);
+            out_blockchain_node_id[id_size - 1] = '\0';
+            rv = OGS_OK;
+            goto cleanup;
         }
-    }
-
-    mongoc_cursor_destroy(cursor);
-    cursor = NULL;
-    bson_destroy(query);
-    query = NULL;
-
-    // If no document found, or if the existing document didn't match login/password,
-    // then generate a new blockchain_node_id or return 12 zeros as per requirement.
-    // The previous block handles the case where a document is found but credentials don't match.
-    // This block handles the case where no document is found at all.
-    strncpy(out_blockchain_node_id, "000000000000", id_size);
-    out_blockchain_node_id[id_size - 1] = '\0';
-    rv = OGS_OK;
-    goto cleanup;
-
-    supi_type = ogs_id_get_type(supi);
-    if (!supi_type)
-    {
-        ogs_error("Invalid supi_type for supi=%s", supi);
-        rv = OGS_ERROR;
-        goto cleanup;
-    }
-    supi_id = ogs_id_get_value(supi);
-    if (!supi_id)
-    {
-        ogs_error("Invalid supi_id for supi=%s", supi);
-        rv = OGS_ERROR;
-        goto cleanup;
-    }
-
-    query = BCON_NEW(supi_type, BCON_UTF8(supi_id));
-
-    blockchain_doc = BCON_NEW(
-        "blockchain_node_id", BCON_UTF8(out_blockchain_node_id),
-        "login", BCON_UTF8(clean_login),
-        "password_hash", BCON_UTF8(hashed_password));
-
-    update = BCON_NEW("$set", "{", "blockchain", BCON_DOCUMENT(blockchain_doc), "}");
-    opts = BCON_NEW("upsert", BCON_BOOL(true));
-
-    if (!mongoc_collection_update_one(
-            ogs_mongoc()->collection.subscriber, query, update, opts, NULL, &error))
-    {
-        ogs_error("Failed to insert/update blockchain data: %s", error.message);
-        rv = OGS_ERROR;
+    } else {
+        // ❌ No subscriber found for SUPI
+        strncpy(out_blockchain_node_id, "000000000000", id_size);
+        out_blockchain_node_id[id_size - 1] = '\0';
+        rv = OGS_OK;
         goto cleanup;
     }
 
 cleanup:
-    if (query)
-        bson_destroy(query);
-    if (update)
-        bson_destroy(update);
-    if (blockchain_doc)
-        bson_destroy(blockchain_doc);
-    if (opts)
-        bson_destroy(opts);
-    if (cursor)
-        mongoc_cursor_destroy(cursor);
+    if (query) bson_destroy(query);
+    if (update) bson_destroy(update);
+    if (blockchain_doc) bson_destroy(blockchain_doc);
+    if (opts) bson_destroy(opts);
+    if (cursor) mongoc_cursor_destroy(cursor);
     ogs_free(supi_type);
     ogs_free(supi_id);
 
