@@ -1026,21 +1026,46 @@ int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex)
     return (strcmp(hashed_password, stored_hash_hex) == 0) ? OGS_OK : OGS_ERROR;
 }
 
-void ogs_init_rand(void)
-{
-    srand((unsigned int)time(NULL));
-}
-
 // Random alphanumeric string generator
 void ogs_generate_random_string(char *buf, size_t len)
 {
     static const char charset[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    size_t i; // declare before the for loop (C89 style)
-    for (i = 0; i < len; i++)
-    {
-        buf[i] = charset[rand() % (sizeof(charset) - 1)];
+    const size_t charset_size = sizeof(charset) - 1;
+    size_t i;
+    
+    // Use /dev/urandom for high-quality random data
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd == -1) {
+        // Fallback to less secure rand() if /dev/urandom fails (e.g., non-Unix environment)
+        // This is necessary if OGS_OK must be returned, but it should be logged as an error
+        perror("WARNING: Failed to open /dev/urandom. Falling back to rand().");
+        for (i = 0; i < len; i++)
+        {
+            // Use the classic (but flawed) rand() fallback
+            buf[i] = charset[rand() % charset_size];
+        }
+    } else {
+        unsigned char random_bytes[len];
+        if (read(fd, random_bytes, len) != len) {
+            // Handle read error if necessary, maybe log and fallback
+            perror("ERROR: Failed to read enough bytes from /dev/urandom.");
+            close(fd);
+            // Fallback (or handle error return)
+            for (i = 0; i < len; i++) {
+                buf[i] = charset[rand() % charset_size];
+            }
+        } else {
+            // Map the secure random bytes to the character set
+            for (i = 0; i < len; i++)
+            {
+                // Use modulo operation with the random byte to select a character
+                buf[i] = charset[random_bytes[i] % charset_size];
+            }
+        }
+        close(fd);
     }
+    
     buf[len] = '\0';
 }
 
