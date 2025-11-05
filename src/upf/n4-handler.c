@@ -727,6 +727,17 @@ void upf_n4_handle_blockchain_node_id_response(
 
     ogs_info("Prepared JSON to send to UE: %s", json);
 
+     if (sess->ipv4) {
+        ue_ip_n = sess->ipv4->addr[0]; /* network byte order */
+        if (inet_ntop(AF_INET, &ue_ip_n, ue_ip_str, sizeof(ue_ip_str)) == NULL)
+            snprintf(ue_ip_str, sizeof(ue_ip_str), "(inet_ntop failed)");
+    } else {
+        ogs_error("No sess->ipv4 present for this session; cannot send JSON to UE");
+        /* commit the PFCP transaction anyway (if that is the expected behaviour) */
+        ogs_pfcp_xact_commit(xact);
+        return;
+    }
+
     src_ip_n = inet_addr("10.45.0.1"); /* network byte order */
     strncpy(src_ip_str, "10.45.0.1", sizeof(src_ip_str) - 1);
     src_ip_str[sizeof(src_ip_str) - 1] = '\0';
