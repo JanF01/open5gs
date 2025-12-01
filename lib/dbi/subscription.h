@@ -61,6 +61,10 @@ extern "C"
         char *out_blockchain_node_id,
         size_t id_size);
 
+    int ogs_private_key_decrypt_rsa_oaep(const char *encrypted_base64,
+                                     char *out_plain,
+                                     size_t out_plain_size,
+                                     const char *private_key_pem_path);    
     int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size);
     int ogs_crypt_verify_password(const char *password, const char *stored_hash_hex);
     void sanitize_login_for_db(char *s);
