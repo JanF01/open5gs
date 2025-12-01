@@ -21,6 +21,13 @@
 #define OGS_DBI_H
 
 #include "crypt/ogs-crypt.h"
+#include <openssl/crypto.h>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>   
+#include <openssl/err.h>
+#include <openssl/bio.h>   
+#include <openssl/evp.h>
+
 #include "app/ogs-app.h"
 
 #define OGS_DBI_INSIDE
