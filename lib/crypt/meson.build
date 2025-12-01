@@ -53,16 +53,17 @@ libcrypt_sources = files('''
 '''.split())
 
 libcrypt_inc = include_directories('.')
+openssl_dep = dependency('openssl', required : true)
 
 libcrypt = library('ogscrypt',
     sources : libcrypt_sources,
     version : libogslib_version,
     c_args : '-DOGS_CRYPT_COMPILATION',
     include_directories : [libcrypt_inc, libinc],
-    dependencies : libproto_dep,
+    dependencies : [libproto_dep, openssl_dep],
     install : true)
 
 libcrypt_dep = declare_dependency(
     link_with : libcrypt,
     include_directories : [libcrypt_inc, libinc],
-    dependencies : libproto_dep)
+    dependencies : [libproto_dep, openssl_dep])
