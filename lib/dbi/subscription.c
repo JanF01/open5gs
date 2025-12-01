@@ -995,6 +995,142 @@ out:
     return rv;
 }
 
+static RSA *g_rsa_private = NULL;
+static pthread_mutex_t g_rsa_lock = PTHREAD_MUTEX_INITIALIZER;
+
+/* Load RSA private key from PEM file (call once at startup or lazy-load). */
+static int ogs_load_rsa_private_key_from_file(const char *pem_path)
+{
+    if (g_rsa_private) return 1; /* already loaded */
+
+    FILE *fp = fopen(pem_path, "r");
+    if (!fp) {
+        ogs_error("ogs_load_rsa_private_key_from_file: fopen(%s) failed", pem_path);
+        return 0;
+    }
+
+    RSA *rsa = PEM_read_RSAPrivateKey(fp, NULL, NULL, NULL);
+    fclose(fp);
+
+    if (!rsa) {
+        unsigned long err = ERR_get_error();
+        ogs_error("ogs_load_rsa_private_key_from_file: PEM_read_RSAPrivateKey failed: %s",
+                  ERR_error_string(err, NULL));
+        return 0;
+    }
+
+    /* swap in */
+    g_rsa_private = rsa;
+    return 1;
+}
+
+/* Base64 decode using OpenSSL BIOs. Returns decoded length on success, -1 on error. */
+static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out_max)
+{
+    if (!b64_in || !out) return -1;
+
+    BIO *bio_mem = BIO_new_mem_buf(b64_in, -1);
+    if (!bio_mem) return -1;
+
+    BIO *b64 = BIO_new(BIO_f_base64());
+    if (!b64) {
+        BIO_free(bio_mem);
+        return -1;
+    }
+
+    /* Don't require newlines */
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO *bio = BIO_push(b64, bio_mem);
+
+    int decoded_len = BIO_read(bio, out, out_max);
+    /* BIO_read returns -1 on error, otherwise number of bytes read */
+    BIO_free_all(bio);
+
+    if (decoded_len <= 0) return -1;
+    return decoded_len;
+}
+
+/* Decrypt base64-encoded RSA-OAEP ciphertext -> plaintext buffer.
+ * Returns OGS_OK on success (plaintext nul-terminated), OGS_ERROR otherwise.
+ *
+ * NOTE: caller must provide out_plain_size >= expected plaintext + 1.
+ */
+int ogs_private_key_decrypt_rsa_oaep(const char *encrypted_base64,
+                                     char *out_plain,
+                                     size_t out_plain_size,
+                                     const char *private_key_pem_path /* path to PEM */)
+{
+    unsigned char enc_buf[512]; /* big enough for RSA-4096; adjust if needed */
+    int enc_len = 0;
+    int ret = OGS_ERROR;
+
+    ogs_assert(encrypted_base64 && out_plain && out_plain_size);
+
+    /* Load private key lazily if not loaded */
+    if (!g_rsa_private) {
+        if (!ogs_load_rsa_private_key_from_file(private_key_pem_path)) {
+            ogs_error("ogs_private_key_decrypt_rsa_oaep: failed to load private key");
+            return OGS_ERROR;
+        }
+    }
+
+    enc_len = ogs_base64_decode_bio(encrypted_base64, enc_buf, (int)sizeof(enc_buf));
+    if (enc_len <= 0) {
+        ogs_error("ogs_private_key_decrypt_rsa_oaep: base64 decode failed");
+        return OGS_ERROR;
+    }
+
+    /* RSA_private_decrypt requires locking if RSA object shared across threads */
+    if (pthread_mutex_lock(&g_rsa_lock) != 0) {
+        ogs_error("ogs_private_key_decrypt_rsa_oaep: mutex lock failed");
+        return OGS_ERROR;
+    }
+
+    /* RSA_private_decrypt returns plaintext length or -1 on error.
+     * Use RSA_PKCS1_OAEP_PADDING for OAEP.
+     */
+    int plain_len = RSA_private_decrypt(enc_len,
+                                        enc_buf,
+                                        (unsigned char*)out_plain,
+                                        g_rsa_private,
+                                        RSA_PKCS1_OAEP_PADDING);
+
+    if (plain_len <= 0) {
+        unsigned long err = ERR_get_error();
+        ogs_error("ogs_private_key_decrypt_rsa_oaep: RSA_private_decrypt failed: %s",
+                  ERR_error_string(err, NULL));
+        ret = OGS_ERROR;
+    } else {
+        if ((size_t)plain_len >= out_plain_size) {
+            ogs_error("ogs_private_key_decrypt_rsa_oaep: plaintext too large for buffer");
+            ret = OGS_ERROR;
+        } else {
+            out_plain[plain_len] = '\0';
+            ret = OGS_OK;
+        }
+    }
+
+    /* clear sensitive data in enc_buf */
+    OPENSSL_cleanse(enc_buf, sizeof(enc_buf));
+
+    pthread_mutex_unlock(&g_rsa_lock);
+
+    return ret;
+}
+
+/* Securely wipe a buffer (portable fallback) */
+static void ogs_secure_zero(void *v, size_t n)
+{
+#if defined(HAVE_EXPLICIT_BZERO)
+    explicit_bzero(v, n);
+#elif defined(HAVE_MEMSET_S)
+    memset_s(v, n, 0, n);
+#else
+    volatile unsigned char *p = (volatile unsigned char *)v;
+    while (n--) *p++ = 0;
+#endif
+}
+
 int ogs_crypt_hash_password(const char *password, char *output_hash_hex, size_t output_size)
 {
     ogs_sha256_ctx ctx;
@@ -1102,6 +1238,9 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
 {
     ogs_assert(supi && login && password && out_blockchain_node_id && id_size >= 13);
 
+    char decrypted_password[256];
+    const char *rsa_private_key_path = "/etc/open5gs/ssl/server_rsa_priv.pem"; 
+
     bson_t *query = NULL;
     bson_t *update = NULL;
     bson_t *blockchain_doc = NULL;
@@ -1111,12 +1250,21 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     const bson_t *doc = NULL;
     int rv = OGS_OK;
 
+    
+    if (ogs_private_key_decrypt_rsa_oaep(password,
+                                        decrypted_password,
+                                        sizeof(decrypted_password),
+                                        rsa_private_key_path) != OGS_OK) {
+        ogs_error("Password decryption failed");
+        return OGS_ERROR;
+    }
+
     char hashed_password[OGS_HASH_HEX_LEN] = {0};
     char *supi_type = NULL;
     char *supi_id = NULL;
 
     // Hash the provided password
-    ogs_crypt_hash_password(password, hashed_password, sizeof(hashed_password));
+    ogs_crypt_hash_password(decrypted_password, hashed_password, sizeof(hashed_password));
 
     // Sanitize login
     char clean_login[128];
@@ -1151,7 +1299,7 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
             const char *existing_id    = bson_lookup_utf8(&subdoc, "blockchain_node_id");
 
             if (existing_login && strcmp(existing_login, clean_login) == 0 &&
-                existing_hash && ogs_crypt_verify_password(password, existing_hash) == OGS_OK &&
+                existing_hash && ogs_crypt_verify_password(decrypted_password, existing_hash) == OGS_OK &&
                 existing_id)
             {
                 // ✅ Correct login & password
@@ -1210,6 +1358,7 @@ cleanup:
     if (blockchain_doc) bson_destroy(blockchain_doc);
     if (opts) bson_destroy(opts);
     if (cursor) mongoc_cursor_destroy(cursor);
+    ogs_secure_zero(decrypted_password, sizeof(decrypted_password));
     ogs_free(supi_type);
     ogs_free(supi_id);
 
