@@ -1027,6 +1027,7 @@ static int ogs_load_rsa_private_key_from_file(const char *pem_path)
 /* Base64 decode using OpenSSL BIOs. Returns decoded length on success, -1 on error. */
 static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out_max)
 {
+    size_t i = 0; /* Declared at the beginning of the function scope */
     size_t len = 0;
     size_t padded_len = 0;
     char *padded_b64_in = NULL;
@@ -1048,7 +1049,7 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
             return -1;
         }
         memcpy(padded_b64_in, b64_in, len);
-        for (size_t i = len; i < padded_len; i++) {
+        for (i = len; i < padded_len; i++) {
             padded_b64_in[i] = '=';
         }
         padded_b64_in[padded_len] = '\0';
