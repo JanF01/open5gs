@@ -1032,7 +1032,7 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
         return -1;
     }
 
-    ogs_debug("ogs_base64_decode_bio: input string length = %zu, content = [%s]", strlen(b64_in), b64_in);
+    ogs_info("ogs_base64_decode_bio: input string length = %zu, content = [%s]", strlen(b64_in), b64_in);
 
     BIO *bio_mem = BIO_new_mem_buf(b64_in, -1);
     if (!bio_mem) {
@@ -1092,7 +1092,7 @@ int ogs_private_key_decrypt_rsa_oaep(const char *encrypted_base64,
         }
     }
 
-    ogs_debug("Input encrypted_base64 length: %zu", strlen(encrypted_base64));
+    ogs_info("Input encrypted_base64 length: %zu", strlen(encrypted_base64));
     enc_len = ogs_base64_decode_bio(encrypted_base64, enc_buf, (int)sizeof(enc_buf));
     if (enc_len <= 0) {
         ogs_error("ogs_private_key_decrypt_rsa_oaep: base64 decode failed [enc_len=%d]", enc_len);
@@ -1257,7 +1257,7 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
 {
     ogs_assert(supi && login && password && out_blockchain_node_id && id_size >= 13);
 
-    char decrypted_password[256];
+    char decrypted_password[512];
     const char *rsa_private_key_path = "/home/jan/open5gs/open5gs/install/etc/open5gs/ssl/server_rsa_priv.pem"; 
 
     bson_t *query = NULL;
