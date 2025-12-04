@@ -1027,16 +1027,43 @@ static int ogs_load_rsa_private_key_from_file(const char *pem_path)
 /* Base64 decode using OpenSSL BIOs. Returns decoded length on success, -1 on error. */
 static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out_max)
 {
+    size_t len = 0;
+    size_t padded_len = 0;
+    char *padded_b64_in = NULL;
+
     if (!b64_in || !out) {
         ogs_error("ogs_base64_decode_bio: invalid input (b64_in=%p, out=%p)", b64_in, out);
         return -1;
     }
 
-    ogs_info("ogs_base64_decode_bio: input string length = %zu, content = [%s]", strlen(b64_in), b64_in);
+    len = strlen(b64_in);
+    padded_len = len;
 
-    BIO *bio_mem = BIO_new_mem_buf(b64_in, -1);
+    // Add padding if length is not a multiple of 4
+    if (len % 4 != 0) {
+        padded_len = ((len / 4) + 1) * 4;
+        padded_b64_in = ogs_calloc(1, padded_len + 1);
+        if (!padded_b64_in) {
+            ogs_error("ogs_base64_decode_bio: ogs_calloc failed for padded_b64_in");
+            return -1;
+        }
+        memcpy(padded_b64_in, b64_in, len);
+        for (size_t i = len; i < padded_len; i++) {
+            padded_b64_in[i] = '=';
+        }
+        padded_b64_in[padded_len] = '\0';
+        ogs_info("ogs_base64_decode_bio: Padded input string length = %zu, content = [%s]", padded_len, padded_b64_in);
+    } else {
+        padded_b64_in = (char *)b64_in; // No padding needed, use original
+        ogs_info("ogs_base64_decode_bio: input string length = %zu, content = [%s]", len, b64_in);
+    }
+
+    BIO *bio_mem = BIO_new_mem_buf(padded_b64_in, -1);
     if (!bio_mem) {
         ogs_error("ogs_base64_decode_bio: BIO_new_mem_buf failed");
+        if (padded_b64_in != b64_in) {
+            ogs_free(padded_b64_in);
+        }
         return -1;
     }
 
@@ -1062,9 +1089,16 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
         } else {
             ogs_error("ogs_base64_decode_bio: BIO_read failed or returned no data (decoded_len=%d)", decoded_len);
         }
+        if (padded_b64_in != b64_in) {
+            ogs_free(padded_b64_in);
+        }
         return -1;
     }
     ogs_debug("ogs_base64_decode_bio: successfully decoded %d bytes", decoded_len);
+
+    if (padded_b64_in != b64_in) {
+        ogs_free(padded_b64_in);
+    }
     return decoded_len;
 }
 
