@@ -1099,6 +1099,12 @@ int ogs_private_key_decrypt_rsa_oaep(const char *encrypted_base64,
         return OGS_ERROR;
     }
 
+    int rsa_key_size = RSA_size(g_rsa_private);
+    if (enc_len != rsa_key_size) {
+        ogs_error("ogs_private_key_decrypt_rsa_oaep: Decoded ciphertext length (%d) does not match RSA key size (%d).", enc_len, rsa_key_size);
+        return OGS_ERROR;
+    }
+
     /* RSA_private_decrypt requires locking if RSA object shared across threads */
     if (pthread_mutex_lock(&g_rsa_lock) != 0) {
         ogs_error("ogs_private_key_decrypt_rsa_oaep: mutex lock failed");
@@ -1236,11 +1242,22 @@ const char *bson_lookup_utf8(const bson_t *doc, const char *key)
 void sanitize_login_for_db(char *s)
 {
     char *src = s, *dst = s;
+    char *control_char_pos = NULL;
+
+    // First, find the position of the control character 0x01
+    control_char_pos = strchr(s, 0x01);
+
     while (*src)
     {
-        unsigned char c = *src++;
-        if (c <= 0x1F || c == 0x7F)
+        // If we found 0x01 and we reached or passed it, stop copying
+        if (control_char_pos && src >= control_char_pos) {
             break;
+        }
+
+        unsigned char c = *src++;
+        if (c <= 0x1F || c == 0x7F) { // Existing control character check
+            break;
+        }
         *dst++ = c;
     }
     while (dst > s && (*(dst - 1) == ' ' || *(dst - 1) == '\t'))
