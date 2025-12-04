@@ -1027,13 +1027,22 @@ static int ogs_load_rsa_private_key_from_file(const char *pem_path)
 /* Base64 decode using OpenSSL BIOs. Returns decoded length on success, -1 on error. */
 static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out_max)
 {
-    if (!b64_in || !out) return -1;
+    if (!b64_in || !out) {
+        ogs_error("ogs_base64_decode_bio: invalid input (b64_in=%p, out=%p)", b64_in, out);
+        return -1;
+    }
+
+    ogs_debug("ogs_base64_decode_bio: input string length = %zu, content = [%s]", strlen(b64_in), b64_in);
 
     BIO *bio_mem = BIO_new_mem_buf(b64_in, -1);
-    if (!bio_mem) return -1;
+    if (!bio_mem) {
+        ogs_error("ogs_base64_decode_bio: BIO_new_mem_buf failed");
+        return -1;
+    }
 
     BIO *b64 = BIO_new(BIO_f_base64());
     if (!b64) {
+        ogs_error("ogs_base64_decode_bio: BIO_new(BIO_f_base64) failed");
         BIO_free(bio_mem);
         return -1;
     }
@@ -1046,7 +1055,16 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
     /* BIO_read returns -1 on error, otherwise number of bytes read */
     BIO_free_all(bio);
 
-    if (decoded_len <= 0) return -1;
+    if (decoded_len <= 0) {
+        unsigned long err = ERR_get_error();
+        if (err) {
+            ogs_error("ogs_base64_decode_bio: BIO_read failed with OpenSSL error: %s", ERR_error_string(err, NULL));
+        } else {
+            ogs_error("ogs_base64_decode_bio: BIO_read failed or returned no data (decoded_len=%d)", decoded_len);
+        }
+        return -1;
+    }
+    ogs_debug("ogs_base64_decode_bio: successfully decoded %d bytes", decoded_len);
     return decoded_len;
 }
 
@@ -1074,9 +1092,10 @@ int ogs_private_key_decrypt_rsa_oaep(const char *encrypted_base64,
         }
     }
 
+    ogs_debug("Input encrypted_base64 length: %zu", strlen(encrypted_base64));
     enc_len = ogs_base64_decode_bio(encrypted_base64, enc_buf, (int)sizeof(enc_buf));
     if (enc_len <= 0) {
-        ogs_error("ogs_private_key_decrypt_rsa_oaep: base64 decode failed");
+        ogs_error("ogs_private_key_decrypt_rsa_oaep: base64 decode failed [enc_len=%d]", enc_len);
         return OGS_ERROR;
     }
 
@@ -1239,7 +1258,7 @@ int ogs_dbi_get_or_insert_subscriber_blockchain(
     ogs_assert(supi && login && password && out_blockchain_node_id && id_size >= 13);
 
     char decrypted_password[256];
-    const char *rsa_private_key_path = "/etc/open5gs/ssl/server_rsa_priv.pem"; 
+    const char *rsa_private_key_path = "/home/jan/open5gs/open5gs/install/etc/open5gs/ssl/server_rsa_priv.pem"; 
 
     bson_t *query = NULL;
     bson_t *update = NULL;
