@@ -1031,6 +1031,7 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
     size_t len = 0;
     size_t padded_len = 0;
     char *padded_b64_in = NULL;
+    int rv = -1; /* Declare rv here */
 
     if (!b64_in || !out) {
         ogs_error("ogs_base64_decode_bio: invalid input (b64_in=%p, out=%p)", b64_in, out);
@@ -1060,17 +1061,16 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
     BIO *bio_mem = BIO_new_mem_buf(padded_b64_in, -1);
     if (!bio_mem) {
         ogs_error("ogs_base64_decode_bio: BIO_new_mem_buf failed");
-        if (padded_b64_in != b64_in) {
-            ogs_free(padded_b64_in);
-        }
-        return -1;
+        rv = -1;
+        goto cleanup;
     }
 
     BIO *b64 = BIO_new(BIO_f_base64());
     if (!b64) {
         ogs_error("ogs_base64_decode_bio: BIO_new(BIO_f_base64) failed");
         BIO_free(bio_mem);
-        return -1;
+        rv = -1;
+        goto cleanup;
     }
 
     /* Don't require newlines */
@@ -1088,18 +1088,16 @@ static int ogs_base64_decode_bio(const char *b64_in, unsigned char *out, int out
         } else {
             ogs_error("ogs_base64_decode_bio: BIO_read failed or returned no data (decoded_len=%d)", decoded_len);
         }
-        if (padded_b64_in != b64_in) {
-            ogs_free(padded_b64_in);
-        }
-        if (padded_b64_in != b64_in) {
-            ogs_free(padded_b64_in);
-        }
-        return -1;
+        rv = -1;
+        goto cleanup;
     }
+    rv = decoded_len;
+
+cleanup:
     if (padded_b64_in != b64_in) {
         ogs_free(padded_b64_in);
     }
-    return decoded_len;
+    return rv;
 }
 
 /* Decrypt base64-encoded RSA-OAEP ciphertext -> plaintext buffer.

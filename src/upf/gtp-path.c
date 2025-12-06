@@ -972,13 +972,6 @@ void upf_send_json_to_ue(upf_sess_t *sess_param,
     ogs_pfcp_far_t *far = NULL;
     ogs_list_for_each(&sess->pfcp.pdr_list, pdr) {
         far = pdr->far;
-        ogs_info("PDR check: id=%u src_if=%d dst_if=%d teid=0x%08x qfi=%u rules=%p",
-                 pdr->id,
-                 pdr->src_if,
-                 far ? far->dst_if : -1,
-                 pdr->f_teid.teid,
-                 pdr->qfi,
-                 (void*)ogs_list_first(&pdr->rule_list));
 
         if (pdr->src_if == OGS_PFCP_INTERFACE_ACCESS && far && far->dst_if == OGS_PFCP_INTERFACE_CORE) {
        
