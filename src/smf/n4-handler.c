@@ -2058,8 +2058,6 @@ uint8_t smf_n4_handle_blockchain_credentials(
     }
 
     ogs_info("Received Blockchain Credentials Request for UE [SEID: %lu]", sess->smf_n4_seid);
-    ogs_info("Login: %s", (char *)credentials->login.data);
-    ogs_info("Password: %s", (char *)credentials->password.data);
 
     /*
      * IMPORTANT:

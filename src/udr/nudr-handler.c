@@ -1478,7 +1478,6 @@ bool udr_nudr_dr_handle_blockchain_credentials(
     }
 
     ogs_info("Received Blockchain Credentials for SUPI[%s]", supi);
-    ogs_info("Login: %s, Password: %s", cred->login, cred->password);
 
     /* --- Perform DB insert/retrieve operation --- */
     char blockchain_node_id[13] = {0};

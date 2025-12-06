@@ -423,14 +423,14 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     size_t total_len = gtpu_hdr_len + inner_packet_len;
 
     // --- Debug Logging (using %zu for size_t) ---
-    ogs_info("--- Packet Build Debug Start (12-byte GTP-U) ---");
-    ogs_info("Payload Length: %zu", json_payload_len);
-    ogs_info("IP Header Size: %zu (Expected 20)", ip_hdr_len);
-    ogs_info("UDP Header Size: %zu (Expected 8)", udp_hdr_len);
-    ogs_info("GTP-U Header Size: %zu (Confirmed 12)", gtpu_hdr_len);
-    ogs_info("Inner Packet Length (IP+UDP+Data): %zu", inner_packet_len);
-    ogs_info("GTP-U Length Field Value: %zu (H.B.)", gtpu_length_field);
-    ogs_info("Total Packet Length (GTP-U+Inner): %zu", total_len);
+    // ogs_info("--- Packet Build Debug Start (12-byte GTP-U) ---");
+    // ogs_info("Payload Length: %zu", json_payload_len);
+    // ogs_info("IP Header Size: %zu (Expected 20)", ip_hdr_len);
+    // ogs_info("UDP Header Size: %zu (Expected 8)", udp_hdr_len);
+    // ogs_info("GTP-U Header Size: %zu (Confirmed 12)", gtpu_hdr_len);
+    // ogs_info("Inner Packet Length (IP+UDP+Data): %zu", inner_packet_len);
+    // ogs_info("GTP-U Length Field Value: %zu (H.B.)", gtpu_length_field);
+    // ogs_info("Total Packet Length (GTP-U+Inner): %zu", total_len);
     
     ogs_pkbuf_t *buf = ogs_pkbuf_alloc(pool, total_len + OGS_TLV_MAX_HEADROOM);
     if (!buf) {
@@ -470,11 +470,11 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     // to manually add the QFI byte after this 12-byte struct.
     gtp_h->ext_hdr_type = 0; 
 
-    ogs_info("GTP-U Header Constructed (12B):");
-    ogs_info("  - Flags (E=1): 0x%02x", *((uint8_t *)gtp_h));
-    ogs_info("  - Length: %u (H.B.)", (unsigned int)gtpu_length_field);
-    ogs_info("  - TEID: 0x%08x (N.B.)", teid);
-    ogs_info("  - Ext Type (Final): %u", gtp_h->ext_hdr_type);
+    // ogs_info("GTP-U Header Constructed (12B):");
+    // ogs_info("  - Flags (E=1): 0x%02x", *((uint8_t *)gtp_h));
+    // ogs_info("  - Length: %u (H.B.)", (unsigned int)gtpu_length_field);
+    // ogs_info("  - TEID: 0x%08x (N.B.)", teid);
+    // ogs_info("  - Ext Type (Final): %u", gtp_h->ext_hdr_type);
 
     // Advance pointer by the confirmed 12 bytes
     current_ptr += gtpu_hdr_len; 
@@ -500,11 +500,11 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     ip_h->ip_sum = 0; 
     ip_h->ip_sum = ogs_checksum((uint16_t *)ip_h, ip_hdr_len);
 
-    ogs_info("IPv4 Header Constructed:");
-    ogs_info("  - Version/IHL (0x45): 0x%02x", *((uint8_t *)ip_h));
-    ogs_info("  - Total Length: %zu (H.B.)", inner_packet_len);
-    ogs_info("  - Protocol: %u (UDP=17)", ip_h->ip_p);
-    ogs_info("  - Checksum: 0x%04x", ip_h->ip_sum);
+    // ogs_info("IPv4 Header Constructed:");
+    // ogs_info("  - Version/IHL (0x45): 0x%02x", *((uint8_t *)ip_h));
+    // ogs_info("  - Total Length: %zu (H.B.)", inner_packet_len);
+    // ogs_info("  - Protocol: %u (UDP=17)", ip_h->ip_p);
+    // ogs_info("  - Checksum: 0x%04x", ip_h->ip_sum);
 
     current_ptr += ip_hdr_len;
 
@@ -519,19 +519,19 @@ ogs_pkbuf_t *ogs_gtpu_form_json_udp_packet(ogs_pkbuf_pool_t *pool,
     udp_h->uh_ulen = htons(udp_total_len);
     udp_h->uh_sum = 0; // Checksum set to 0 (optional for IPv4)
 
-    ogs_info("UDP Header Constructed:");
-    ogs_info("  - Src Port: %u (H.B.)", src_port);
-    ogs_info("  - Dst Port: %u (H.B.)", dst_port);
-    ogs_info("  - Length: %u (H.B.)", udp_total_len);
-    ogs_info("  - Checksum: 0x%04x (Set to 0)", udp_h->uh_sum);
+    // ogs_info("UDP Header Constructed:");
+    // ogs_info("  - Src Port: %u (H.B.)", src_port);
+    // ogs_info("  - Dst Port: %u (H.B.)", dst_port);
+    // ogs_info("  - Length: %u (H.B.)", udp_total_len);
+    // ogs_info("  - Checksum: 0x%04x (Set to 0)", udp_h->uh_sum);
     
     current_ptr += udp_hdr_len;
 
     /* ---------------- 5. Payload ---------------- */
     memcpy(current_ptr, json_payload, json_payload_len);
 
-    ogs_info("Payload Copied: %s", json_payload);
-    ogs_info("--- Packet Build Debug End ---");
+    // ogs_info("Payload Copied: %s", json_payload);
+    // ogs_info("--- Packet Build Debug End ---");
 
     return buf;
 }  
