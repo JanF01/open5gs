@@ -2104,25 +2104,23 @@ uint8_t smf_n4_handle_blockchain_node_id(
 
     // 🔍 Find the session corresponding to this blockchain node ID
     target_sess = smf_sess_find_by_blockchain_node_id(req_blockchain_id);
+    uint32_t ipv4_addr = 0; // Default to 0.0.0.0 (0 as uint32_t)
+
     if (!target_sess) {
-        ogs_info("No session found for Blockchain Node ID [%s]", req_blockchain_id);
-        return OGS_PFCP_CAUSE_SESSION_CONTEXT_NOT_FOUND;
-    }
-
-    // 🧩 Extract UE IPv4 address from the found session
-    uint32_t ipv4_addr = 0;
-    if (target_sess->ipv4) {
-       ipv4_addr = target_sess->ipv4->addr[0];
+        ogs_info("No session found for Blockchain Node ID [%s]. Responding with 0.0.0.0.", req_blockchain_id);
     } else {
-        ogs_info("No valid UE IP found for Blockchain Node ID [%s]", req_blockchain_id);
-        return OGS_PFCP_CAUSE_SESSION_CONTEXT_NOT_FOUND;
+        if (target_sess->ipv4) {
+           ipv4_addr = target_sess->ipv4->addr[0];
+        } else {
+            ogs_info("No valid UE IPv4 found for Blockchain Node ID [%s] in session. Responding with 0.0.0.0.", req_blockchain_id);
+        }
     }
 
-    // Convert to dotted string for logging
+    // Convert to dotted string for logging (will be "0.0.0.0" if ipv4_addr is 0)
     char ipv4_str[OGS_ADDRSTRLEN];
     inet_ntop(AF_INET, &ipv4_addr, ipv4_str, sizeof(ipv4_str));
 
-    ogs_info("Matched Blockchain Node ID [%s] -> UE IPv4 [%s]", req_blockchain_id, ipv4_str);
+    ogs_info("Final UE IPv4 address for Blockchain Node ID [%s] is [%s]", req_blockchain_id, ipv4_str);
 
     ogs_pfcp_blockchain_node_id_response_t pfcp_rsp;
     memset(&pfcp_rsp, 0, sizeof(pfcp_rsp));
@@ -2136,7 +2134,7 @@ uint8_t smf_n4_handle_blockchain_node_id(
 
     pfcp_rsp.ue_ip_address.presence = 1;
     pfcp_rsp.ue_ip_address.data = &ipv4_addr;
-    pfcp_rsp.ue_ip_address.len = strlen(ipv4_str);
+    pfcp_rsp.ue_ip_address.len = sizeof(uint32_t); // IPv4 address is 4 bytes
 
     smf_pfcp_send_blockchain_node_id_response(pfcp_xact, sess, &pfcp_rsp);
 
