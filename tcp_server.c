@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <pthread.h> // Include pthread library
+#include <sys/stat.h> // For mkdir
+#include <errno.h>
+#include <pthread.h>
 
 #define SERVER_IP "10.45.0.1"
 #define SERVER_PORT 9500
@@ -27,34 +29,89 @@ typedef struct {
     struct sockaddr_in client_addr;
 } client_data_t;
 
-// Thread function to handle the client
+void ensure_directory(const char *path) {
+    char tmp[256];
+    char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp), "%s", path);
+    len = strlen(tmp);
+    if (tmp[len - 1] == '/')
+        tmp[len - 1] = 0;
+
+    for (p = tmp + 1; *p; p++) {
+        if (*p == '/') {
+            *p = 0;
+            mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+    }
+    if (mkdir(tmp, S_IRWXU) < 0 && errno != EEXIST) {
+        perror("Failed to create directory");
+        exit(EXIT_FAILURE);
+    }
+}
+
+// --- Function to generate RSA Keys (Private & Public) ---
+void generate_rsa_keys() {
+    const char *dir_path = "./install/etc/open5gs/ssl";
+    const char *priv_key_path = "./install/etc/open5gs/ssl/server_rsa_priv.pem";
+    const char *pub_key_path  = "./install/etc/open5gs/ssl/server_rsa_pub.pem";
+    
+    // 1. Create directory
+    ensure_directory(dir_path);
+
+    // 2. Generate Private Key
+    if (access(priv_key_path, F_OK) != 0) {
+        printf("Generating RSA Private Key...\n");
+        // 'genpkey' creates the private key
+        int status = system("openssl genpkey -algorithm RSA "
+                            "-out ./install/etc/open5gs/ssl/server_rsa_priv.pem "
+                            "-pkeyopt rsa_keygen_bits:2048 2> /dev/null");
+        if (status != 0) {
+            fprintf(stderr, "Error: Failed to generate Private Key.\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Created: %s\n", priv_key_path);
+    }
+
+    // 3. Generate Public Key
+    if (access(pub_key_path, F_OK) != 0) {
+        printf("Extracting RSA Public Key...\n");
+        // 'rsa -pubout' derives the public key from the private key
+        int status = system("openssl rsa "
+                            "-in ./install/etc/open5gs/ssl/server_rsa_priv.pem "
+                            "-pubout "
+                            "-out ./install/etc/open5gs/ssl/server_rsa_pub.pem 2> /dev/null");
+        if (status != 0) {
+            fprintf(stderr, "Error: Failed to generate Public Key.\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Created: %s\n", pub_key_path);
+    }
+}
+
 void *handle_client(void *arg) {
     client_data_t *data = (client_data_t *)arg;
     int newfd = data->client_fd;
     char buffer[BUFFER_SIZE];
 
-    // Optional: Only enable detailed logging for debugging, otherwise it slows down fast I/O
-    // char client_ip[INET_ADDRSTRLEN];
-    // inet_ntop(AF_INET, &data->client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
-
-    // Read client request (Blocking, but only blocks THIS thread, not the server)
+    // Read request (consumes data but ignores content for speed)
     int n = read(newfd, buffer, BUFFER_SIZE - 1);
     
-    // Check if read was successful (we don't strictly need to parse the content for this dummy server)
     if (n >= 0) {
-        // Send HTTP 200 OK response
-        // Using MSG_NOSIGNAL prevents crash if client disconnects prematurely
         send(newfd, HTTP_RESPONSE, HTTP_RESPONSE_LEN, MSG_NOSIGNAL);
     }
 
-    // Clean up
     close(newfd);
-    free(data); // Free the memory allocated in main loop
+    free(data);
     return NULL;
 }
 
 int main()
 {
+    // --- STEP 0: Generate Keys before starting server ---
+    generate_rsa_keys();
     int sockfd, newfd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t addr_len = sizeof(client_addr);
