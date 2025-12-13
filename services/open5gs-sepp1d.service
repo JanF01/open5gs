@@ -1,0 +1,16 @@
+[Unit]
+Description=Open5GS SEPP1
+After=network.target
+
+[Service]
+Type=simple
+User=open5gs
+Group=open5gs
+Restart=always
+ExecStart=/home/$USER/open5gs/open5gs/install/bin/open5gs-seppd -c /home/jan/open5gs/open5gs/install/etc/open5gs/sepp1.yaml
+RestartSec=2
+RestartPreventExitStatus=1
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
