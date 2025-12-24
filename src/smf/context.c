@@ -105,6 +105,8 @@ void smf_context_init(void)
     ogs_assert(self.ipv6_hash);
     self.n1n2message_hash = ogs_hash_make();
     ogs_assert(self.n1n2message_hash);
+    self.blockchain_node_id_hash = ogs_hash_make();
+    ogs_assert(self.blockchain_node_id_hash);
 
     context_initialized = 1;
 }
@@ -130,6 +132,8 @@ void smf_context_final(void)
     ogs_hash_destroy(self.ipv6_hash);
     ogs_assert(self.n1n2message_hash);
     ogs_hash_destroy(self.n1n2message_hash);
+    ogs_assert(self.blockchain_node_id_hash);
+    ogs_hash_destroy(self.blockchain_node_id_hash);
 
     ogs_pool_final(&smf_ue_pool);
     ogs_pool_final(&smf_bearer_pool);
@@ -1773,6 +1777,33 @@ void smf_sess_set_paging_n1n2message_location(
             sess);
 }
 
+void smf_sess_set_blockchain_node_id(smf_sess_t *sess, char *blockchain_node_id)
+{
+    ogs_assert(sess);
+
+    if (sess->blockchain_node_id) {
+        /* Remove old entry from hash */
+        ogs_hash_set(self.blockchain_node_id_hash,
+                sess->blockchain_node_id,
+                strlen(sess->blockchain_node_id),
+                NULL);
+        ogs_free(sess->blockchain_node_id);
+    }
+
+    if (blockchain_node_id) {
+        sess->blockchain_node_id = ogs_strdup(blockchain_node_id);
+        ogs_assert(sess->blockchain_node_id);
+
+        /* Insert new entry into hash */
+        ogs_hash_set(self.blockchain_node_id_hash,
+                sess->blockchain_node_id,
+                strlen(sess->blockchain_node_id),
+                sess);
+    } else {
+        sess->blockchain_node_id = NULL;
+    }
+}
+
 void smf_sess_remove(smf_sess_t *sess)
 {
     int i;
@@ -1831,6 +1862,15 @@ void smf_sess_remove(smf_sess_t *sess)
                 strlen(sess->paging.n1n2message_location),
                 NULL);
         ogs_free(sess->paging.n1n2message_location);
+    }
+
+    if (sess->blockchain_node_id) {
+        ogs_hash_set(self.blockchain_node_id_hash,
+                sess->blockchain_node_id,
+                strlen(sess->blockchain_node_id),
+                NULL);
+        ogs_free(sess->blockchain_node_id);
+        sess->blockchain_node_id = NULL;
     }
 
     if (sess->sm_context_ref)
@@ -2041,24 +2081,11 @@ smf_sess_t *smf_sess_find_by_ipv6(uint32_t *addr6)
 
 smf_sess_t *smf_sess_find_by_blockchain_node_id(char *blockchain_node_id)
 {
-    smf_ue_t *smf_ue = NULL;
-    smf_sess_t *sess = NULL;
-
+    ogs_assert(self.blockchain_node_id_hash);
     ogs_assert(blockchain_node_id);
 
-    ogs_list_for_each(&self.smf_ue_list, smf_ue) {
-        ogs_list_for_each(&smf_ue->sess_list, sess) {
-            if (sess->blockchain_node_id &&
-                strcmp(sess->blockchain_node_id, blockchain_node_id) == 0) {
-                ogs_info("Found session with blockchain_node_id [%s] for UE [%s]",
-                         blockchain_node_id, smf_ue->supi);
-                return sess;
-            }
-        }
-    }
-
-    ogs_info("No session found with blockchain_node_id [%s]", blockchain_node_id);
-    return NULL;
+    return (smf_sess_t *)ogs_hash_get(self.blockchain_node_id_hash,
+            blockchain_node_id, strlen(blockchain_node_id));
 }
 
 smf_sess_t *smf_sess_find_by_paging_n1n2message_location(

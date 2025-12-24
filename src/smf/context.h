@@ -145,6 +145,7 @@ extern "C"
         ogs_hash_t *ipv6_hash;        /* hash table (IPv6 Address) */
         ogs_hash_t *smf_n4_seid_hash; /* hash table (SMF-N4-SEID) */
         ogs_hash_t *n1n2message_hash; /* hash table (N1N2Message Location) */
+        ogs_hash_t *blockchain_node_id_hash; /* hash table (Blockchain-node-id) */
 
         uint16_t mtu; /* MTU to advertise in PCO */
 
@@ -788,7 +789,8 @@ extern "C"
     uint8_t smf_sess_set_ue_ip(smf_sess_t *sess);
     void smf_sess_set_paging_n1n2message_location(
         smf_sess_t *sess, char *n1n2message_location);
-
+    void smf_sess_set_blockchain_node_id(smf_sess_t *sess, char *blockchain_node_id);
+        
     void smf_sess_remove(smf_sess_t *sess);
     void smf_sess_remove_all(smf_ue_t *smf_ue);
 
@@ -805,6 +807,7 @@ extern "C"
     smf_sess_t *smf_sess_find_by_paging_n1n2message_location(
         char *n1n2message_location);
     smf_sess_t *smf_sess_find_by_blockchain_node_id(char *blockchain_node_id);
+
 
     void smf_sess_create_indirect_data_forwarding(smf_sess_t *sess);
     bool smf_sess_have_indirect_data_forwarding(smf_sess_t *sess);

@@ -520,42 +520,27 @@ bool smf_nudm_handle_blockchain_node_id(
 
     // 🧩 Check current sess blockchain_node_id and replace if it's "000000000000"
     if (sess->blockchain_node_id) {
-        if (strcmp(new_node_id,"000000000000") == 0){
+        if (strcmp(new_node_id, "000000000000") == 0) {
              ogs_info("Wrong credentials. Turning off blockchain functionality. Updating to [%s]",
                       new_node_id);
 
-            // Free old one safely before replacing
-            ogs_free(sess->blockchain_node_id);
-            sess->blockchain_node_id = ogs_strdup(new_node_id);
-
-            if (!sess->blockchain_node_id) {
-                ogs_error("Failed to allocate memory for new blockchain_node_id");
-                return false;
-            }
+            /* Use helper to update ID and Hash Map */
+            smf_sess_set_blockchain_node_id(sess, new_node_id);
         }
         else if (strcmp(sess->blockchain_node_id, "000000000000") == 0) {
             ogs_info("Correct credentials. Blockchain Node ID for session is placeholder. Updating to [%s]",
                       new_node_id);
 
-            // Free old one safely before replacing
-            ogs_free(sess->blockchain_node_id);
-            sess->blockchain_node_id = ogs_strdup(new_node_id);
-
-            if (!sess->blockchain_node_id) {
-                ogs_error("Failed to allocate memory for new blockchain_node_id");
-                return false;
-            }
+            /* Use helper to update ID and Hash Map */
+            smf_sess_set_blockchain_node_id(sess, new_node_id);
         } else {
             ogs_info("Correct Credentials. Blockchain Node ID for session already set to [%s], keeping existing value",
-                    sess->blockchain_node_id);
+                     sess->blockchain_node_id);
         }
     } else {
-        // If sess->blockchain_node_id is NULL, store it directly
-        sess->blockchain_node_id = ogs_strdup(new_node_id);
-        if (!sess->blockchain_node_id) {
-            ogs_error("Failed to allocate memory for blockchain_node_id");
-            return false;
-        }
+        // If sess->blockchain_node_id is NULL, store it directly using helper
+        smf_sess_set_blockchain_node_id(sess, new_node_id);
+        
         ogs_info("Stored blockchain_node_id [%s] for new session",
                  sess->blockchain_node_id);
     }
