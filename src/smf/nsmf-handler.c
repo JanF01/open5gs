@@ -284,20 +284,12 @@ bool smf_nsmf_handle_create_sm_context(
     sess->request_type = SmContextCreateData->request_type;
 
     if (SmContextCreateData->blockchain_node_id &&
-    SmContextCreateData->blockchain_node_id->blockchain_node_id) {
+        SmContextCreateData->blockchain_node_id->blockchain_node_id) {
 
-        const char *new_id = SmContextCreateData->blockchain_node_id->blockchain_node_id;
+        char *new_id = SmContextCreateData->blockchain_node_id->blockchain_node_id;
         ogs_info("Received Blockchain Node ID [%s] for session", new_id);
 
-        if (sess->blockchain_node_id) {
-            ogs_free(sess->blockchain_node_id);
-            sess->blockchain_node_id = NULL;
-        }
-
-        sess->blockchain_node_id = ogs_strdup(new_id);
-        if (!sess->blockchain_node_id) {
-            ogs_error("Failed to allocate memory for Blockchain Node ID in SMF");
-        }
+        smf_sess_set_blockchain_node_id(sess, new_id);
     }
 
     ogs_sbi_parse_plmn_id_nid(&sess->serving_plmn_id, servingNetwork);
