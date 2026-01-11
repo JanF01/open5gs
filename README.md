@@ -4,6 +4,32 @@
 
 Please follow the [documentation](https://open5gs.org/open5gs/docs/) at [open5gs.org](https://open5gs.org/)!
 
+## Fork Modifications: Blockchain Integration
+
+This fork extends the standard Open5GS architecture to introduce blockchain signaling, Deep Packet Inspection (DPI) for blockchain-related packets, and specific application server handling. These changes were developed in the context of the accompanying engineering thesis.
+
+### Core Network Functions
+Modifications have been made to the following source directories to accommodate blockchain signaling handling:
+* `/src/amf` (Access and Mobility Management Function)
+* `/src/smf` (Session Management Function)
+* `/src/upf` (User Plane Function)
+* `/src/udm` (Unified Data Management)
+* `/src/udr` (Unified Data Repository)
+
+### Libraries & Protocols
+* **PFCP (`/lib/pfcp`):** Modified to introduce blockchain-related handling in the PFCP protocol.
+    * **DPI & Packet Construction:** Specifically, `/lib/pfcp/rule-match.c` includes functions for Deep Packet Inspection and building blockchain-related packets for transmission back to the User Equipment (UE).
+* **SBI (`/lib/sbi`):** New blockchain-related services have been introduced here.
+    * **Models (`/lib/sbi/openapi/model`):** Custom models (e.g., `sdm_blockchain...`) have been created to support the new signaling data structures.
+* **DBI (`/lib/dbi`):** Modifications in `subscription.c` and `subscription.h` to support blockchain subscription data.
+
+### Application & Services
+* **Blockchain Application Server:** The implementation is provided via the `tcp_server` file.
+* **Thesis Services:** Additional services described in the engineering thesis are located in the `/services` directory.
+
+### Configuration
+* **`configs/open5gs/`:** Modified configuration files to enable and tune the new blockchain features.
+
 ## Sponsors
 
 If you find Open5GS useful for work, please consider supporting this Open Source project by [Becoming a sponsor](https://github.com/sponsors/acetcom). To manage the funding transactions transparently, you can donate through [OpenCollective](https://opencollective.com/open5gs).
