@@ -28,7 +28,7 @@ Modifications have been made to the following source directories to accommodate 
 * **Thesis Services:** Additional services described in the engineering thesis are located in the `/services` directory.
 
 ### Configuration
-* **`configs/open5gs/`:** Modified configuration files to enable and tune the new blockchain features.
+* **`configs/open5gs/`:** Modified configuration files with the testing environment in mind.
 
 ## Sponsors
 
